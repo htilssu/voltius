@@ -1,5 +1,16 @@
 {
   "terminal": {
+    "passwordSuggestions": {
+      "add": "Ajouter un mot de passe pour sudo",
+      "addDescription": "Ajoutez et stockez vos identités en toute sécurité dans Voltius pour vous connecter plus rapidement.",
+      "username": "Nom d’utilisateur",
+      "password": "Mot de passe",
+      "title": "Mots de passe enregistrés",
+      "dismiss": "Fermer les suggestions",
+      "hint": "Choisissez pour remplir, puis appuyez sur Entrée pour envoyer.",
+      "empty": "Aucun identifiant enregistré.",
+      "unavailable": "Mot de passe indisponible. Vérifiez les identifiants ou déverrouillez le coffre."
+    },
     "shared": {
       "copied": "Copié",
       "insert": "Insérer",

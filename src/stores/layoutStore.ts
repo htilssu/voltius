@@ -10,6 +10,7 @@ export type PaneNode = LeafNode | SplitNode;
 export interface LeafNode {
   type: "leaf";
   id: string;
+  /** Empty string reserves a pane for the connection picker; never a session. */
   sessionId: string;
 }
 
@@ -24,7 +25,7 @@ export interface SplitNode {
 
 export interface SplitTab {
   id: string;
-  /** User-given tab name. Unset keeps deriving the label from the active pane. */
+  /** User-given tab name. Unset uses the Workspace label. */
   name?: string;
   root: PaneNode;
   activePaneId: string | null;
@@ -46,12 +47,14 @@ interface LayoutStore {
   setSplitTabActive(active: boolean): void;
   activateSplitTab(tabId: string): void;
   closeSplitTab(tabId: string): void;
-  /** Name a split tab. A blank name clears it, so the label derives again. */
+  /** Name a split tab. A blank name clears it, so the label returns to Workspace. */
   renameSplitTab(tabId: string, name: string | null): void;
   syncTitlebarOrder(visibleKeys: string[], groupOf?: (key: string) => string | undefined): void;
   placeTitlebarItem(itemKey: string, targetKey: string | null, placement: "before" | "after"): void;
   reorderTitlebarItem(sourceKeys: string | string[], targetKey: string | null, placement: "before" | "after"): void;
   createSplitTab(targetSessionId: string, incomingSessionId: string, position: SplitPosition): void;
+  splitWithPicker(sessionId: string, position: SplitPosition): void;
+  fillPicker(paneId: string, sessionId: string): void;
   splitPane(targetPaneId: string, sessionId: string, position: SplitPosition): void;
   movePane(sourcePaneId: string, targetPaneId: string, position: SplitPosition): void;
   detachPane(paneId: string): string | null;
@@ -82,7 +85,7 @@ export function getPaneLeaves(root: PaneNode | null): LeafNode[] {
 }
 
 export function getPaneSessionIds(root: PaneNode | null): string[] {
-  return getPaneLeaves(root).map((leaf) => leaf.sessionId);
+  return getPaneLeaves(root).map((leaf) => leaf.sessionId).filter(Boolean);
 }
 
 /**
@@ -333,6 +336,26 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
     return { titlebarOrder: placeTitlebarBlock(state.titlebarOrder, keys, targetKey, placement) };
   }),
 
+  splitWithPicker: (sessionId, position) => set((state) => {
+    const existing = findSessionPane(state.splitTabs, sessionId);
+    const tab = existing ? state.splitTabs.find((t) => t.id === existing.tabId) : undefined;
+    const source = tab ? findLeaf(tab.root, existing!.paneId) : { type: "leaf" as const, id: newPaneId(), sessionId };
+    if (!source) return {};
+    const picker: LeafNode = { type: "leaf", id: newPaneId(), sessionId: "" };
+    const replacement = splitLeaf(picker, source, position);
+    const next = tab
+      ? { ...tab, root: replaceLeaf(tab.root, source.id, replacement), activePaneId: picker.id, maximizedPaneId: null }
+      : createSplitTabState(replacement, picker.id);
+    return { splitTabs: tab ? state.splitTabs.map((t) => t.id === tab.id ? next : t) : [...state.splitTabs, next], ...fieldsFromTab(next) };
+  }),
+
+  fillPicker: (paneId, sessionId) => set((state) => {
+    const tab = state.splitTabs.find((t) => findLeaf(t.root, paneId)?.sessionId === "");
+    if (!tab || findSessionPane(state.splitTabs, sessionId)) return {};
+    const next = { ...tab, root: replaceLeaf(tab.root, paneId, { type: "leaf", id: paneId, sessionId }), activePaneId: paneId };
+    return { splitTabs: state.splitTabs.map((t) => t.id === tab.id ? next : t), ...fieldsFromTab(next) };
+  }),
+
   createSplitTab: (targetSessionId, incomingSessionId, position) => {
     set((state) => {
       if (targetSessionId === incomingSessionId) return {};
@@ -358,11 +381,11 @@ export const useLayoutStore = create<LayoutStore>((set) => ({
       const target = findLeaf(state.root, targetPaneId);
       if (!target) return {};
       const leaf: LeafNode = { type: "leaf", id: newPaneId(), sessionId };
-      const root = replaceLeaf(state.root, targetPaneId, splitLeaf(target, leaf, position));
+      const root = replaceLeaf(state.root, targetPaneId, target.sessionId ? splitLeaf(target, leaf, position) : { ...leaf, id: target.id });
       return {
-        ...updateActiveSplitTab(state, { root, activePaneId: leaf.id, maximizedPaneId: null }),
+        ...updateActiveSplitTab(state, { root, activePaneId: target.sessionId ? leaf.id : target.id, maximizedPaneId: null }),
         root,
-        activePaneId: leaf.id,
+        activePaneId: target.sessionId ? leaf.id : target.id,
         maximizedPaneId: null,
         splitTabActive: true,
       };

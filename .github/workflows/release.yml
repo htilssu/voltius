@@ -25,6 +25,49 @@ permissions:
   contents: write
 
 jobs:
+  release-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+      android-enabled: ${{ steps.targets.outputs.android-enabled }}
+    steps:
+      - name: Select configured release targets
+        id: targets
+        env:
+          MACOS_SIGNING_CERTIFICATE: ${{ secrets.MACOS_SIGNING_CERTIFICATE }}
+          MACOS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const include = [
+            { platform: 'ubuntu-24.04', target: 'x86_64-unknown-linux-gnu', args: '' },
+            { platform: 'ubuntu-24.04-arm', target: 'aarch64-unknown-linux-gnu', args: '' },
+            { platform: 'windows-latest', target: 'x86_64-pc-windows-msvc', args: '' },
+            { platform: 'windows-latest', target: 'aarch64-pc-windows-msvc', args: '--target aarch64-pc-windows-msvc' },
+          ];
+          if (process.env.MACOS_SIGNING_CERTIFICATE && process.env.MACOS_SIGNING_CERTIFICATE_PASSWORD) {
+            include.push(
+              { platform: 'macos-latest', target: 'x86_64-apple-darwin', args: '--target x86_64-apple-darwin' },
+              { platform: 'macos-latest', target: 'aarch64-apple-darwin', args: '--target aarch64-apple-darwin' },
+            );
+          } else {
+            console.log('::notice::macOS signing secrets are not fully configured; skipping macOS release builds.');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({ include })}\n`);
+          const androidEnabled = [
+            'ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD',
+            'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD',
+          ].every(name => Boolean(process.env[name]));
+          if (!androidEnabled) {
+            console.log('::notice::Android signing secrets are not fully configured; skipping APK release build.');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `android-enabled=${androidEnabled}\n`);
+          JS
+
   changelog:
     runs-on: ubuntu-latest
     outputs:
@@ -110,7 +153,7 @@ jobs:
           echo "id=$id" >> "$GITHUB_OUTPUT"
 
   publish-tauri:
-    needs: [changelog, create-release]
+    needs: [changelog, create-release, release-targets]
     permissions:
       contents: write
     strategy:
@@ -120,31 +163,7 @@ jobs:
       # latest.json. Per-platform installers + .sig files have unique names and
       # never collide. The updater-manifest job assembles latest.json once, after
       # all builds — single writer, no race.
-      matrix:
-        include:
-          - platform: 'ubuntu-24.04'
-            target: 'x86_64-unknown-linux-gnu'
-            args: ''
-
-          - platform: 'ubuntu-24.04-arm'
-            target: 'aarch64-unknown-linux-gnu'
-            args: ''
-
-          - platform: 'windows-latest'
-            target: 'x86_64-pc-windows-msvc'
-            args: ''
-
-          - platform: 'windows-latest'
-            target: 'aarch64-pc-windows-msvc'
-            args: '--target aarch64-pc-windows-msvc'
-
-          - platform: 'macos-latest'
-            target: 'x86_64-apple-darwin'
-            args: '--target x86_64-apple-darwin'
-
-          - platform: 'macos-latest'
-            target: 'aarch64-apple-darwin'
-            args: '--target aarch64-apple-darwin'
+      matrix: ${{ fromJSON(needs.release-targets.outputs.matrix) }}
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -239,7 +258,8 @@ jobs:
     # Only needs the draft to exist to upload into, which create-release now
     # guarantees — it used to wait on the whole publish-tauri matrix purely so
     # that some job had created the draft first.
-    needs: create-release
+    needs: [create-release, release-targets]
+    if: needs.release-targets.outputs.android-enabled == 'true'
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -419,7 +439,7 @@ jobs:
     secrets: inherit
 
   # The emitted plugins.json fragment is attached to the app release for the
-  # record — merging it into voltiusApp/marketplace's plugins.json is a manual
+  # record — merging it into htilssu/marketplace's plugins.json is a manual
   # follow-up this workflow cannot do (separate repo).
   attach-plugin-catalog:
     needs: publish-plugins
@@ -459,6 +479,13 @@ jobs:
     # and 0.22.0 lost plugin-catalog.json to `HTTP 422: Cannot upload assets to
     # an immutable release`.
     needs: [publish-tauri, publish-android, attach-plugin-catalog]
+    # Android is optional when signing secrets are missing. A configured APK
+    # build that fails must still block publishing an incomplete release.
+    if: >-
+      ${{ !cancelled() &&
+          needs.publish-tauri.result == 'success' &&
+          needs.attach-plugin-catalog.result == 'success' &&
+          (needs.publish-android.result == 'success' || needs.publish-android.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

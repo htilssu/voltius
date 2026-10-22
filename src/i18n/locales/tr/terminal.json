@@ -1,5 +1,16 @@
 {
   "terminal": {
+    "passwordSuggestions": {
+      "add": "sudo için parola ekle",
+      "addDescription": "Kimliklerinizi Voltius içinde güvenle saklayın ve daha hızlı bağlantılar için kullanın.",
+      "username": "Kullanıcı adı",
+      "password": "Parola",
+      "title": "Kayıtlı parolalar",
+      "dismiss": "Parola önerilerini kapat",
+      "hint": "Doldurmak için seçin. Göndermek için Enter tuşuna basın.",
+      "empty": "Kayıtlı kimlik bilgisi yok.",
+      "unavailable": "Parola kullanılamıyor. Kimlik bilgilerini kontrol edin veya kasanın kilidini açın."
+    },
     "shared": {
       "copied": "Kopyalandı",
       "insert": "Ekle",

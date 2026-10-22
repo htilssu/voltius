@@ -7,6 +7,9 @@ import {
   type TerminalClipboardOptions,
 } from "@/components/terminal/terminalClipboard";
 import { claimWebglRenderer } from "@/utils/webglAddon";
+import { attachTerminalMouseScale } from "@/components/terminal/terminalMouseScale";
+import { useUIStore } from "@/stores/uiStore";
+import { useThemeStore } from "@/stores/themeStore";
 
 /** A terminal that outlives the views it is mounted in. */
 export interface CachedTerminal {
@@ -56,8 +59,19 @@ export function activateTerminal(entry: CachedTerminal): void {
 
 function bindTerminalContainer(entry: CachedTerminal, container: HTMLDivElement, clipOptions?: TerminalClipboardOptions): () => void {
   const { terminal } = entry;
+  const detachMouseScale = attachTerminalMouseScale(terminal);
   const clip = attachTerminalClipboard(terminal, container, clipOptions);
   entry.clip = clip;
+
+  // Capture before xterm turns wheel events into scrolling or application input.
+  const handleWheel = (event: WheelEvent) => {
+    if (!event.ctrlKey || event.deltaY === 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const size = useThemeStore.getState().getActiveTheme().terminalFontSize;
+    useUIStore.getState().setTerminalFontSize(size + (event.deltaY < 0 ? 1 : -1));
+  };
+  container.addEventListener("wheel", handleWheel, { capture: true, passive: false });
 
   const handleWindowResize = () => fitIfVisible(entry);
   window.addEventListener("resize", handleWindowResize);
@@ -70,6 +84,8 @@ function bindTerminalContainer(entry: CachedTerminal, container: HTMLDivElement,
   resizeObserver.observe(container);
 
   return () => {
+    container.removeEventListener("wheel", handleWheel, true);
+    detachMouseScale();
     clip.dispose();
     if (entry.clip === clip) entry.clip = null;
     window.removeEventListener("resize", handleWindowResize);
@@ -97,7 +113,18 @@ export function useTerminalMount(
     // React passes null on unmount and when this callback changes, as on a live pane switching session.
     if (!container) return detach();
     if (unbindRef.current) return;
-    unbindRef.current = bindTerminalContainer(mount(container), container, clipOptions);
+    // Cancel the app's transform only for the terminal. xterm's canvas must
+    // reach the screen at its native pixel density, and the user's terminal
+    // font size must stay independent of the surrounding UI scale. Keep the
+    // outer container in normal layout; fit xterm to the smaller, unscaled host.
+    const host = document.createElement("div");
+    host.className = "terminal-native-scale";
+    container.appendChild(host);
+    const unbind = bindTerminalContainer(mount(host), host, clipOptions);
+    unbindRef.current = () => {
+      unbind();
+      host.remove();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }

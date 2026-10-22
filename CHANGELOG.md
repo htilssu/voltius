@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-23
+
+### Added
+
+- Password suggestions appear beside terminal password prompts, using the current connection and saved Keychain identities. Choose with the keyboard or mouse; Enter submits the selected password immediately. Add opens the existing identity form.
+
+### Changed
+
+- Split tabs use a stable **Workspace** label unless renamed. Split panes have consistent 8 px spacing, with a smaller 4 px inset beneath the title bar.
+
+### Fixed
+
+- Dragging a single terminal tab to split keeps the existing terminal and opens a server picker in the other pane instead of cloning the connection. Selecting a host connects inside that pane; cancelling returns to the original terminal. Ctrl-drag still duplicates explicitly.
+- Tab dragging now responds consistently to pointer events.
+
+
+## [0.60.5] - 2026-10-22
+
+### Changed
+
+- Side panels (Theme & Tools and the pinned session list) are 5% larger, including plugin sections shown inside them. Text and icons stay sharp at the new size.
+- The Docker plugin uses larger text throughout its panel (Docker plugin 1.5.3).
+- Plugins and community snippets are now listed from the `htilssu/marketplace` catalogue, and first-party plugins download from `htilssu/voltius` releases.
+
+### Fixed
+
+- Opening a side panel no longer narrows the terminal status bar. The bar now spans the full window width, so its clock, CPU, memory and network readings stay in place.
+
+## [0.60.4] - 2026-10-22
+
+### Fixed
+
+- Text no longer looks blurry when UI Scale is below 100% on desktop. UI Scale now uses the webview's own zoom, so text is drawn at the new size instead of being shrunk after drawing. The terminal font size stays the same as UI Scale changes. Android still uses the previous scaling method.
+
+## [0.60.3] - 2026-10-21
+
+### Added
+
+- Hold Ctrl and scroll over an open terminal to increase or decrease its font size, from 8 to 32 px. The size is saved in terminal settings and applied to all open terminals, including multiplayer sessions.
+
+## [0.60.1] - 2026-10-21
+
+### Fixed
+
+- Terminal text selection now follows the pointer when UI Scale differs from 100%. Mouse coordinates also stay aligned for terminal links and applications with mouse tracking, including after changing UI Scale while a session is open.
+
 ## [0.60.0] - 2026-10-19
 
 ### Added
