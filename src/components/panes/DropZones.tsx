@@ -39,6 +39,9 @@ export function DropZones({ target }: { target: DropZoneTarget }) {
       onMouseMove={updateDropTarget}
       onMouseEnter={updateDropTarget}
       onMouseLeave={() => setDropTarget(null)}
+      onPointerMove={updateDropTarget}
+      onPointerEnter={updateDropTarget}
+      onPointerLeave={() => setDropTarget(null)}
     >
       {zones.map((zone) => {
         const active = dropTarget?.type === target.type &&

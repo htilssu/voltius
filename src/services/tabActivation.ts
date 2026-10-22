@@ -19,6 +19,6 @@ export function activateSplitTabPane(tabId: string, paneId?: string): void {
   }
   const layout = useLayoutStore.getState();
   const leaf = findLeaf(layout.root, layout.activePaneId) ?? firstLeaf(layout.root);
-  if (leaf) useSessionStore.getState().setActive(leaf.sessionId);
+  if (leaf?.sessionId) useSessionStore.getState().setActive(leaf.sessionId);
   useUIStore.getState().setActiveNav("terminal");
 }

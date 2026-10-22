@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-23
+
+### Added
+
+- Password suggestions appear beside terminal password prompts, using the current connection and saved Keychain identities. Choose with the keyboard or mouse; Enter submits the selected password immediately. Add opens the existing identity form.
+
+### Changed
+
+- Split tabs use a stable **Workspace** label unless renamed. Split panes have consistent 8 px spacing, with a smaller 4 px inset beneath the title bar.
+
+### Fixed
+
+- Dragging a single terminal tab to split keeps the existing terminal and opens a server picker in the other pane instead of cloning the connection. Selecting a host connects inside that pane; cancelling returns to the original terminal. Ctrl-drag still duplicates explicitly.
+- Tab dragging now responds consistently to pointer events.
+
+
 ## [0.60.5] - 2026-10-22
 
 ### Changed

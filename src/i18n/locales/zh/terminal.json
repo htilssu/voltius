@@ -1,5 +1,16 @@
 {
   "terminal": {
+    "passwordSuggestions": {
+      "add": "为 sudo 添加密码",
+      "addDescription": "在 Voltius 中安全地添加和保存身份凭据，以便更快地连接。",
+      "username": "用户名",
+      "password": "密码",
+      "title": "已保存的密码",
+      "dismiss": "关闭密码建议",
+      "hint": "选择以填入密码，按 Enter 键发送。",
+      "empty": "没有已保存的凭据。",
+      "unavailable": "密码不可用。请检查凭据或解锁保险库。"
+    },
     "shared": {
       "copied": "已复制",
       "insert": "插入",

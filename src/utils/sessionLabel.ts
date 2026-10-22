@@ -27,14 +27,7 @@ export function sessionMatchesQuery(session: Pick<TerminalSession, "connectionNa
   return searchMatcher(query)(session.title, session.connectionName);
 }
 
-/**
- * A split tab's label. Its own name wins; without one it keeps deriving from
- * the active pane, so the label follows the user around the split.
- */
-export function splitTabLabel(
-  tab: Pick<SplitTab, "name">,
-  activeSession: Pick<TerminalSession, "connectionName" | "title"> | undefined,
-  fallback: string,
-): string {
-  return tab.name ?? (activeSession ? sessionLabel(activeSession) : fallback);
+/** Split tabs keep a stable workspace label unless explicitly renamed. */
+export function splitTabLabel(tab: Pick<SplitTab, "name">): string {
+  return tab.name ?? "Workspace";
 }

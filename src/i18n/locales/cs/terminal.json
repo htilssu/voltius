@@ -1,5 +1,16 @@
 {
   "terminal": {
+    "passwordSuggestions": {
+      "add": "Přidat heslo pro sudo",
+      "addDescription": "Bezpečně ukládejte své identity do Voltius a používejte je pro rychlejší připojení.",
+      "username": "Uživatelské jméno",
+      "password": "Heslo",
+      "title": "Uložená hesla",
+      "dismiss": "Zavřít návrhy hesel",
+      "hint": "Vyberte heslo k vyplnění. Odešlete jej klávesou Enter.",
+      "empty": "Žádné uložené přihlašovací údaje.",
+      "unavailable": "Heslo není dostupné. Zkontrolujte údaje nebo odemkněte trezor."
+    },
     "shared": {
       "copied": "Zkopírováno",
       "insert": "Vložit",

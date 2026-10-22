@@ -6,13 +6,15 @@ import { matchesSearch, compareConnections } from "@/utils/connectionFilter";
 import { hostPickerRows, uniqueVaults, vaultIdOf } from "@/utils/hostPickerTree";
 import { RECENT_HOSTS_CAP, recentlyUsed } from "@/utils/recentHosts";
 import type { SortMode } from "@/components/shared/ToolbarViewControls";
+import { isFileOnlyProtocol } from "@/utils/connectionType";
 
 const NONE: ReadonlySet<string> = new Set();
 
-export function useHostPicker({ query, sortMode, sshOnly, vaultId, excludeId }: {
+export function useHostPicker({ query, sortMode, sshOnly, terminalOnly, vaultId, excludeId }: {
   query: string;
   sortMode?: SortMode;
   sshOnly?: boolean;
+  terminalOnly?: boolean;
   vaultId?: string;
   excludeId?: string;
 }) {
@@ -26,8 +28,9 @@ export function useHostPicker({ query, sortMode, sshOnly, vaultId, excludeId }: 
     () => connections.filter((c) =>
       (!vaultId || vaultIdOf(c) === vaultId)
       && (!sshOnly || (c.connection_type !== "serial" && !c.serial_port))
+      && (!terminalOnly || !isFileOnlyProtocol(c))
       && c.id !== excludeId),
-    [connections, vaultId, sshOnly, excludeId],
+    [connections, vaultId, sshOnly, terminalOnly, excludeId],
   );
 
   const vaults = useMemo(

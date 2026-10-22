@@ -40,6 +40,8 @@ import { getPlatform } from "@/utils/platform";
 import { createOutputDecoder, encodeTerminalInput, type OutputDecoder } from "@/utils/terminalEncoding";
 import i18n from "@/i18n";
 import { pasteClipboardImage } from "@/services/terminalImagePaste";
+import { observePasswordPrompt, type PasswordPromptPosition } from "@/components/terminal/passwordPrompt";
+import { useAppLockStore } from "@/stores/appLockStore";
 
 interface UseTerminalOptions {
   sessionId: string;
@@ -486,6 +488,20 @@ export function sessionAcceptsInput(sessionId: string): boolean {
   if (!entry) return false;
   if (entry.inputGateRef.current && !entry.inputGateRef.current()) return false;
   return entry.connectedRef.current;
+}
+
+export function watchSessionPasswordPrompt(sessionId: string, changed: (prompt: PasswordPromptPosition | null) => void) {
+  const entry = terminalCache.get(sessionId);
+  return entry ? observePasswordPrompt(entry.terminal, changed) : undefined;
+}
+
+/** Submit a secret plus one Enter, bypassing command history and split-pane broadcast. */
+export async function insertSessionPassword(sessionId: string, password: string): Promise<void> {
+  const entry = terminalCache.get(sessionId);
+  if (!entry || !sessionAcceptsInput(sessionId) || useAppLockStore.getState().kind) throw new Error("Session does not accept input");
+  if (/[\x00-\x1f\x7f]/.test(password)) throw new Error("Password contains terminal control characters");
+  await sendSessionInputRaw(sessionId, entry.sessionType, encodeTerminalInput(password + "\r", entry.encoding));
+  entry.terminal.focus();
 }
 
 export function writeToSession(sessionId: string, data: string): void {
