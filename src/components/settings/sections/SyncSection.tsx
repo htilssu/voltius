@@ -154,7 +154,7 @@ function SyncToggleRow({ domain, label, sub, ariaLabel, checked, onChange }: {
 }) {
   const { t } = useTranslation();
   return (
-    <div data-sync-domain={domain} className="flex items-center justify-between gap-3 px-4 py-3">
+    <div data-sync-domain={domain} data-setting-row data-ripple className="relative flex items-center justify-between gap-3 px-4 py-3">
       <div>
         <p className="text-sm font-medium text-(--t-text-primary)">{label}</p>
         <p className="text-xs mt-0.5 text-(--t-text-dim)">{sub}</p>

@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "Фильтр…"
     },
-    "remoteSessions": {
-      "title": "Активны на других устройствах"
-    },
     "snippets": {
       "searchPlaceholder": "Поиск сниппетов",
       "noMatches": "Нет совпадений",
@@ -118,7 +115,18 @@
       "newTitle": "Новый сниппет",
       "namePlaceholder": "Название сниппета",
       "contentPlaceholder": "echo hello",
-      "delete": "Удалить сниппет"
+      "delete": "Удалить сниппет",
+      "nameLabel": "Название",
+      "contentLabel": "Скрипт"
+    },
+    "editForm": {
+      "required": "Обязательное поле",
+      "incompleteTitle": "Выйти без сохранения?",
+      "incompleteBody": "Обязательное поле не заполнено, поэтому последние изменения пока нельзя сохранить.",
+      "unsavedTitle": "Отменить изменения?",
+      "unsavedBody": "Изменения этого сниппета не сохранены.",
+      "keepEditing": "Продолжить редактирование",
+      "discard": "Отменить"
     },
     "snippetsScreen": {
       "newSnippetLabel": "Новый сниппет"
@@ -163,12 +171,20 @@
       "batchDeleteTitle_other": "Удалить {{count}} элементов?",
       "newFileOption": "Новый файл",
       "folderNamePlaceholder": "Название папки",
-      "fileNamePlaceholder": "Название файла"
+      "fileNamePlaceholder": "Название файла",
+      "selectAll": "Выбрать все",
+      "onePane": "Одна панель",
+      "twoPanes": "Две панели",
+      "moreActions": "Другие действия",
+      "itemActions": "Действия для {{name}}"
     },
     "folders": {
       "home": "Домой"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "Нет хостов"
+      },
       "shared": {
         "moveToVault": "Переместить в хранилище",
         "copyToVault": "Копировать в хранилище",
@@ -241,6 +257,55 @@
       "vaultSwitcher": {
         "newVault": "Новое хранилище",
         "namePlaceholder": "Название хранилища"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "Этот хост больше не существует. Его ярлык удалён."
+    },
+    "share": {
+      "action": "Поделиться",
+      "publicKey": "Поделиться открытым ключом",
+      "failed": "Не удалось открыть меню «Поделиться»",
+      "downloadFailed": "Не удалось скачать файл для отправки",
+      "largeTitle": "Отправить {{size}}?",
+      "largeBody": "Файлы сначала скачиваются на этот телефон, затем передаются выбранному приложению.",
+      "tooLong": "Слишком длинный текст для отправки"
+    },
+    "vaultSettings": {
+      "title": "Настройки хранилища",
+      "gone": "Этого хранилища больше нет на устройстве.",
+      "openFor": "Настройки «{{name}}»",
+      "nameRequired": "У хранилища должно быть имя.",
+      "nameReadOnly": "Переименовать его могут только управляющие хранилищем.",
+      "kindTeam": "Командное хранилище",
+      "kindPrivate": "Личное хранилище",
+      "sections": {
+        "general": "Общие",
+        "people": "Люди",
+        "danger": "Опасная зона"
+      },
+      "rows": {
+        "name": "Название",
+        "share": "Поделиться и пригласить",
+        "members": "Участники",
+        "roles": "Роли",
+        "security": "Политика безопасности",
+        "makePrivate": "Сделать личным",
+        "delete": "Удалить хранилище",
+        "leave": "Покинуть хранилище"
+      },
+      "summaries": {
+        "share": "Приглашайте людей и управляйте ссылками",
+        "members_one": "{{count}} участник",
+        "members_few": "{{count}} участника",
+        "members_many": "{{count}} участников",
+        "members_other": "{{count}} участника",
+        "roles": "Что может каждая роль",
+        "security": "Правила блокировки и сеансов для участников",
+        "makePrivate": "Удалить всех остальных и оставить личную копию",
+        "delete": "Удаляет хранилище и всё его содержимое",
+        "deleteTeam": "Удаляет его для всех участников",
+        "leave": "Отказаться от доступа к этому хранилищу"
       }
     }
   }

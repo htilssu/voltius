@@ -59,6 +59,7 @@ export default function AboutSection() {
           {t("settings.about.versionTitle")}
         </h3>
         <div
+          data-settings-card
           className="rounded-lg px-4 py-3 flex items-center gap-3 bg-(--t-bg-elevated) border border-(--t-border)"
         >
           <LogoBadge size={10} />
@@ -195,12 +196,14 @@ export default function AboutSection() {
         <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-text-dim)">
           {t("settings.about.linksTitle")}
         </h3>
-        <div className="space-y-2">
+        <div className={isAndroid ? undefined : "space-y-2"}>
           {LINKS.map(({ icon, key, sub, href }) => (
             <button
               key={href}
               type="button"
               onClick={() => void openUrl(href)}
+              data-settings-card
+              data-about-link={key}
               className="w-full text-left rounded-lg px-4 py-3 flex items-center gap-3 bg-(--t-bg-elevated) border border-(--t-border) transition-colors hover:border-(--t-border-hover)"
             >
               <Icon icon={icon} width={20} className="text-(--t-text-primary) shrink-0" />
@@ -214,6 +217,7 @@ export default function AboutSection() {
           <button
             type="button"
             onClick={() => useUIStore.getState().openSettings("diagnostics")}
+            data-settings-card
             className="w-full text-left rounded-lg px-4 py-3 flex items-center gap-3 bg-(--t-bg-elevated) border border-(--t-border) transition-colors hover:border-(--t-border-hover)"
           >
             <Icon icon="lucide:bug" width={20} className="text-(--t-text-primary) shrink-0" />

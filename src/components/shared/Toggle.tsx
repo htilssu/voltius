@@ -1,3 +1,5 @@
+import { haptic, toggleHaptic } from "@/lib/haptics";
+
 interface ToggleProps {
   checked: boolean;
   onChange: (value: boolean) => void;
@@ -13,7 +15,8 @@ export function Toggle({ checked, onChange, disabled, "aria-label": ariaLabel }:
       aria-checked={checked}
       aria-label={ariaLabel}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      data-row-control
+      onClick={() => { haptic(toggleHaptic(!checked)); onChange(!checked); }}
       className="relative shrink-0 rounded-full transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
       style={{
         width: "2.4rem",

@@ -12,6 +12,8 @@ import { copyingRulesOf } from "@/services/ruleSetIntent";
 import { useAllSnippetFolders } from "@/hooks/useAllSnippetFolders";
 import { buildMoveTargets } from "@/components/mobile/folders/mobileFolderCore";
 import { compareStrings } from "@/utils/localeFormat";
+import { canShare, shareText, snippetShareText, MAX_SHARE_TEXT } from "@/services/share";
+import { appToast } from "@/services/appToast";
 import MoveToFolderSheet from "./MoveToFolderSheet";
 import { SheetActionRow, type SheetAction } from "./SheetActionRow";
 
@@ -38,10 +40,11 @@ export default function MobileSnippetActionsSheet({ snippetId }: { snippetId: st
   if (!snippet) return null;
   const currentVaultId = snippet.vault_id ?? "personal";
   const canEdit = can("EDIT_SNIPPETS", currentVaultId, snippet.id);
+  const shareable = canShare() ? snippetShareText(snippet) : null;
 
   if (mode === "confirm-delete") {
     return (
-      <BottomSheet title={t("mobile.sheets.snippetActions.deleteTitle")} onClose={closeSheet} registerBack={false}>
+      <BottomSheet title={t("mobile.sheets.snippetActions.deleteTitle")} onClose={closeSheet}>
         <div className="px-3 pt-1 pb-2 text-sm text-(--t-text-dim)">
           {t("mobile.sheets.shared.confirmDeleteBody", { name: snippet.name })}
         </div>
@@ -65,7 +68,7 @@ export default function MobileSnippetActionsSheet({ snippetId }: { snippetId: st
   if (mode === "move" || mode === "copy") {
     const copy = mode === "copy";
     return (
-      <BottomSheet title={copy ? t("mobile.sheets.shared.copyToVault") : t("mobile.sheets.shared.moveToVault")} onClose={closeSheet} registerBack={false}>
+      <BottomSheet title={copy ? t("mobile.sheets.shared.copyToVault") : t("mobile.sheets.shared.moveToVault")} onClose={closeSheet}>
         {vaultTargets.map((v) => (
           <Row key={v.id} it={{ icon: "lucide:vault", label: v.name, onTap: () => {
             if (copy) void createSnippet(copyingRulesOf({ ...snippetToForm(snippet), name: `${snippet.name} (copy)`, vault_id: v.id, favorite: false }, snippet.id));
@@ -86,6 +89,10 @@ export default function MobileSnippetActionsSheet({ snippetId }: { snippetId: st
           closeSheet();
         } },
     ] : []),
+    ...(shareable ? [{ icon: "lucide:share-2", label: t("mobile.share.action"), slug: "share", onTap: () => {
+      closeSheet();
+      if (!shareText(shareable, snippet.name)) appToast("error", t(shareable.length > MAX_SHARE_TEXT ? "mobile.share.tooLong" : "mobile.share.failed"));
+    } }] : []),
     { icon: pinned ? "lucide:pin-off" : "lucide:pin", label: pinned ? t("mobile.sheets.shared.unpin") : t("mobile.sheets.shared.pin"), slug: pinned ? "unpin" : "pin", onTap: () => { void pinSnippet(snippetId, !pinned); closeSheet(); } },
     ...(canEdit && vaultTargets.length > 0 ? [{ icon: "lucide:folder-input", label: t("mobile.sheets.shared.moveToVault"), slug: "move-to-vault", onTap: () => setMode("move") }] : []),
     ...(vaultTargets.length > 0 ? [{ icon: "lucide:copy-plus", label: t("mobile.sheets.shared.copyToVault"), slug: "copy-to-vault", onTap: () => setMode("copy") }] : []),
@@ -96,7 +103,7 @@ export default function MobileSnippetActionsSheet({ snippetId }: { snippetId: st
   ];
 
   return (
-    <BottomSheet title={snippet.name} onClose={closeSheet} registerBack={false}>
+    <BottomSheet title={snippet.name} onClose={closeSheet}>
       {items.map((it) => <Row key={it.slug ?? it.label} it={it} />)}
     </BottomSheet>
   );

@@ -17,6 +17,7 @@ import { useConnectivitySettingsStore } from "@/stores/connectivitySettingsStore
 import { KEEPALIVE_PRESETS, DEFAULT_KEEPALIVE_PRESET } from "@/utils/keepalive";
 import { useThemeStore } from "@/stores/themeStore";
 import { BUILT_IN_THEMES, DEFAULT_THEME_ID, DEFAULT_LIGHT_THEME_ID } from "@/themes/presets";
+import { DYNAMIC_THEME_ID } from "@/themes/dynamic";
 import { useLocaleStore, SUPPORTED_LOCALES } from "@/stores/localeStore";
 import { useSecurityStore, type LockAction } from "@/stores/securityStore";
 import { useUpdaterPrefStore } from "@/stores/updaterPrefStore";
@@ -128,6 +129,7 @@ function shortcutDefs(): SettingDef[] {
 function themeIds(): string[] {
   return [
     ...BUILT_IN_THEMES.map((t) => t.id),
+    DYNAMIC_THEME_ID,
     ...useThemeStore.getState().customThemes.map((t) => t.id),
   ];
 }

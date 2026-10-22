@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "Filtrer…"
     },
-    "remoteSessions": {
-      "title": "En direct sur d'autres appareils"
-    },
     "snippets": {
       "searchPlaceholder": "Rechercher des snippets",
       "noMatches": "Aucun résultat",
@@ -118,7 +115,18 @@
       "newTitle": "Nouveau snippet",
       "namePlaceholder": "Nom du snippet",
       "contentPlaceholder": "echo hello",
-      "delete": "Supprimer le snippet"
+      "delete": "Supprimer le snippet",
+      "nameLabel": "Nom",
+      "contentLabel": "Script"
+    },
+    "editForm": {
+      "required": "Obligatoire",
+      "incompleteTitle": "Quitter sans enregistrer ?",
+      "incompleteBody": "Un champ obligatoire est vide : vos dernières modifications ne peuvent pas encore être enregistrées.",
+      "unsavedTitle": "Abandonner les modifications ?",
+      "unsavedBody": "Les modifications de ce snippet n'ont pas été enregistrées.",
+      "keepEditing": "Continuer l'édition",
+      "discard": "Abandonner"
     },
     "snippetsScreen": {
       "newSnippetLabel": "Nouveau snippet"
@@ -162,12 +170,20 @@
       "batchDeleteTitle_other": "Supprimer {{count}} éléments ?",
       "newFileOption": "Nouveau fichier",
       "folderNamePlaceholder": "Nom du dossier",
-      "fileNamePlaceholder": "Nom du fichier"
+      "fileNamePlaceholder": "Nom du fichier",
+      "selectAll": "Tout sélectionner",
+      "onePane": "Un seul panneau",
+      "twoPanes": "Deux panneaux",
+      "moreActions": "Plus d'actions",
+      "itemActions": "Actions pour {{name}}"
     },
     "folders": {
       "home": "Accueil"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "Aucun hôte"
+      },
       "shared": {
         "moveToVault": "Déplacer vers le coffre",
         "copyToVault": "Copier vers le coffre",
@@ -238,6 +254,54 @@
       "vaultSwitcher": {
         "newVault": "Nouveau coffre",
         "namePlaceholder": "Nom du coffre"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "Cet hôte n'existe plus. Son raccourci a été supprimé."
+    },
+    "share": {
+      "action": "Partager",
+      "publicKey": "Partager la clé publique",
+      "failed": "Impossible d’ouvrir le menu de partage",
+      "downloadFailed": "Impossible de télécharger le fichier à partager",
+      "largeTitle": "Partager {{size}} ?",
+      "largeBody": "Les fichiers sont d’abord téléchargés sur ce téléphone, puis transmis à l’application choisie.",
+      "tooLong": "Trop long pour être partagé en texte"
+    },
+    "vaultSettings": {
+      "title": "Paramètres du coffre",
+      "gone": "Ce coffre n'existe plus sur cet appareil.",
+      "openFor": "Paramètres de {{name}}",
+      "nameRequired": "Un coffre doit avoir un nom.",
+      "nameReadOnly": "Seuls les gestionnaires du coffre peuvent le renommer.",
+      "kindTeam": "Coffre d'équipe",
+      "kindPrivate": "Coffre privé",
+      "sections": {
+        "general": "Général",
+        "people": "Personnes",
+        "danger": "Zone de danger"
+      },
+      "rows": {
+        "name": "Nom",
+        "share": "Partager et inviter",
+        "members": "Membres",
+        "roles": "Rôles",
+        "security": "Politique de sécurité",
+        "makePrivate": "Rendre privé",
+        "delete": "Supprimer le coffre",
+        "leave": "Quitter le coffre"
+      },
+      "summaries": {
+        "share": "Inviter des personnes et gérer les liens d'accès",
+        "members_one": "{{count}} membre",
+        "members_many": "{{count}} membres",
+        "members_other": "{{count}} membres",
+        "roles": "Ce que chaque rôle peut faire",
+        "security": "Règles de verrouillage et de session des membres",
+        "makePrivate": "Retirer tous les autres et garder une copie privée",
+        "delete": "Supprime le coffre et tout son contenu",
+        "deleteTeam": "Le supprime pour tous les membres",
+        "leave": "Retirer votre accès à ce coffre"
       }
     }
   }

@@ -57,6 +57,7 @@
       }
     },
     "appearance": {
+      "themeActions": "Theme actions",
       "interface": "Interface",
       "language": {
         "title": "Language"
@@ -74,7 +75,9 @@
       "editTheme": "Edit theme",
       "deleteTheme": "Delete theme",
       "newCustomTheme": "New Custom Theme",
+      "dynamicThemeHint": "From your wallpaper",
       "uiScale": {
+        "clickHintMobile": "Tap to enter a value",
         "title": "UI Scale",
         "desc": "Zoom or dezoom the entire interface.",
         "clickHint": "Click to enter a value",
@@ -84,6 +87,7 @@
         "reset": "Reset"
       },
       "terminalFontSize": {
+        "clickHintMobile": "Tap to enter a value",
         "title": "Terminal Font Size",
         "desc": "Size the terminal text on its own, without scaling the rest of the interface.",
         "clickHint": "Click to enter a value",
@@ -114,6 +118,7 @@
     },
     "nav": {
       "appearance": {
+        "mobileSub": "Theme, scale, language",
         "label": "Appearance",
         "keywords": [
           "theme",
@@ -123,6 +128,7 @@
         ]
       },
       "account": {
+        "mobileSub": "Account mode, app lock",
         "label": "Account",
         "keywords": [
           "profile",
@@ -131,6 +137,7 @@
         ]
       },
       "sync": {
+        "mobileSub": "Cloud sync and what gets synced",
         "label": "Sync",
         "keywords": [
           "backup",
@@ -141,6 +148,7 @@
         ]
       },
       "plugins": {
+        "mobileSub": "Installed plugins and the catalog",
         "label": "Plugins",
         "keywords": [
           "extensions",
@@ -149,6 +157,7 @@
         ]
       },
       "integrations": {
+        "mobileSub": "MCP server for AI agents",
         "label": "Integrations",
         "keywords": [
           "mcp",
@@ -160,6 +169,7 @@
         ]
       },
       "terminal": {
+        "mobileSub": "Cursor, scrollback, paste",
         "label": "Terminal",
         "keywords": [
           "scrollback",
@@ -172,6 +182,7 @@
         ]
       },
       "sftp": {
+        "mobileSub": "Downloads, transfers, editor",
         "label": "SFTP",
         "keywords": [
           "file",
@@ -181,6 +192,7 @@
         ]
       },
       "portForwarding": {
+        "mobileSub": "Automatic forwarding",
         "label": "Port Forwarding",
         "keywords": [
           "tunnel",
@@ -191,6 +203,7 @@
         ]
       },
       "hosts": {
+        "mobileSub": "Reachability, keepalive, proxy",
         "label": "Hosts",
         "keywords": [
           "ping",
@@ -210,6 +223,7 @@
         ]
       },
       "diagnostics": {
+        "mobileSub": "Logs and bug reports",
         "label": "Diagnostics",
         "keywords": [
           "diagnostics",
@@ -221,6 +235,7 @@
         ]
       },
       "about": {
+        "mobileSub": "Version and links",
         "label": "About",
         "keywords": [
           "version",
@@ -239,6 +254,14 @@
       "collapsePluginGroup": "Collapse plugin settings"
     },
     "shared": {
+      "reset": "Reset",
+      "rowActions": "Setting actions",
+      "sync": {
+        "label": "Sync this setting",
+        "on": "Synced across your devices",
+        "off": "Kept on this device",
+        "deviceDefault": "Kept on this device by default"
+      },
       "cancel": "Cancel",
       "resetToDefault": "Reset to default",
       "modifiedFromDefault": "Modified from default"

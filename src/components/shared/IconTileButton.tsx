@@ -12,6 +12,7 @@ export function IconTileButton({ icon, base, title, ariaLabel, onClick }: {
     <button
       type="button"
       onClick={onClick}
+      data-icon-tile
       className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0 transition-all hover:brightness-110"
       style={glossyTileStyle(base ?? "var(--t-bg-card-avatar)")}
       title={title}

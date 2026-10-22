@@ -6,7 +6,8 @@ import { systemAuthAvailable } from "@/services/appLock";
 import { systemAuthMethodKey } from "@/hooks/useSystemAuthPrompt";
 import { useSecurityStore, type LockAction } from "@/stores/securityStore";
 import { canLockApp, canLockVault } from "@/utils/accountMode";
-import { usePlatform } from "@/utils/platform";
+import { useIsAndroid, usePlatform } from "@/utils/platform";
+import { SettingRow } from "./shared";
 import { IMMEDIATELY, sessionTimeoutLabel, sessionTimeoutOptions, sessionTimeoutValue } from "@/utils/sessionTimeout";
 import { useEffectiveLockSettings } from "@/hooks/useEffectiveLockSettings";
 import { policyTeamNames, timeoutAllowed } from "@/services/lockPolicy";
@@ -19,6 +20,7 @@ import { BindPasswordDialog } from "./BindPasswordDialog";
 export function SessionSecuritySettings({ mode }: { mode: string | null }) {
   const { t } = useTranslation();
   const platform = usePlatform();
+  const isAndroid = useIsAndroid();
   const { sessionTimeoutMinutes, lockAction, policy } = useEffectiveLockSettings();
   const teams = useTeamStore((s) => s.teams);
   const setSessionTimeoutMinutes = useSecurityStore((s) => s.setSessionTimeoutMinutes);
@@ -63,9 +65,10 @@ export function SessionSecuritySettings({ mode }: { mode: string | null }) {
   const who = (list: string[]) => (list.length ? list.join(", ") : t("settings.account.sessionSecurity.policy.yourTeam"));
 
   return (
-    <div className="rounded-lg px-4 py-3 space-y-3 bg-(--t-bg-elevated) border border-(--t-border)">
+    <div data-settings-card className="rounded-lg px-4 py-3 space-y-3 bg-(--t-bg-elevated) border border-(--t-border)">
       <div className="space-y-1.5">
-        <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.autoLockLabel")}</p>
+        {(() => {
+          const select = (
         <FormSelect
           value={sessionTimeoutValue(sessionTimeoutMinutes)}
           options={timeoutOptions}
@@ -76,7 +79,20 @@ export function SessionSecuritySettings({ mode }: { mode: string | null }) {
             setSessionTimeoutMinutes(Number.isFinite(next) ? next : null);
           }}
         />
-        <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.autoLockDesc")}</p>
+          );
+          // Android: an M3 row with the value trailing (the picker opens as a sheet).
+          return isAndroid ? (
+            <SettingRow title={t("settings.account.sessionSecurity.autoLockLabel")} desc={t("settings.account.sessionSecurity.autoLockDesc")} dimmed={!lockable}>
+              {select}
+            </SettingRow>
+          ) : (
+            <>
+              <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.autoLockLabel")}</p>
+              {select}
+              <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.autoLockDesc")}</p>
+            </>
+          );
+        })()}
         {policy && names && (
           <p className="text-xs text-(--t-text-muted)">
             {policy.maxMinutes === IMMEDIATELY
@@ -90,19 +106,31 @@ export function SessionSecuritySettings({ mode }: { mode: string | null }) {
       </div>
 
       <div className="space-y-1.5">
-        <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.lockAction.label")}</p>
-        <FormSelect
-          value={effectiveAction}
-          options={actionOptions}
-          ariaLabel={t("settings.account.sessionSecurity.lockAction.label")}
-          disabled={!lockable}
-          onChange={(value) => setLockAction(value as LockAction)}
-        />
-        <p className="text-xs text-(--t-text-dim)">
-          {t(effectiveAction === "screen"
+        {(() => {
+          const select = (
+            <FormSelect
+              value={effectiveAction}
+              options={actionOptions}
+              ariaLabel={t("settings.account.sessionSecurity.lockAction.label")}
+              disabled={!lockable}
+              onChange={(value) => setLockAction(value as LockAction)}
+            />
+          );
+          const desc = t(effectiveAction === "screen"
             ? "settings.account.sessionSecurity.lockAction.screenDesc"
-            : "settings.account.sessionSecurity.lockAction.vaultDesc")}
-        </p>
+            : "settings.account.sessionSecurity.lockAction.vaultDesc");
+          return isAndroid ? (
+            <SettingRow title={t("settings.account.sessionSecurity.lockAction.label")} desc={desc} dimmed={!lockable}>
+              {select}
+            </SettingRow>
+          ) : (
+            <>
+              <p className="text-xs text-(--t-text-dim)">{t("settings.account.sessionSecurity.lockAction.label")}</p>
+              {select}
+              <p className="text-xs text-(--t-text-dim)">{desc}</p>
+            </>
+          );
+        })()}
         {policy?.forceVault && names && (
           <p className="text-xs text-(--t-text-muted)">
             {t("settings.account.sessionSecurity.policy.vault", { teams: who(names.vault) })}
@@ -115,7 +143,7 @@ export function SessionSecuritySettings({ mode }: { mode: string | null }) {
         )}
       </div>
 
-      <div className="flex items-start justify-between gap-4">
+      <div data-setting-row className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-(--t-text-primary)">{t("settings.account.sessionSecurity.systemAuth.toggle")}</p>
           <p className="text-xs mt-0.5 text-(--t-text-dim)">

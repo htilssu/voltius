@@ -133,7 +133,7 @@ describe("NotesEditor", () => {
 
   test.each([
     [false, "w-6"],
-    [true, "size-[36px]"],
+    [true, "size-[48px]"],
   ])("android=%s sizes every toolbar button %s", (android, size) => {
     h.android = android;
     renderEditor({ value: "x" });

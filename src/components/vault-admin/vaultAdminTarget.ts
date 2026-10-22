@@ -8,6 +8,33 @@ export interface VaultAdminTarget {
   name: string;
 }
 
+/** A vault row of this device (carrying its team id once it is shared). */
+export function localVaultTarget(v: { id: string; name: string; teamId?: string | null }): VaultAdminTarget {
+  return { kind: "local", vaultId: v.id, teamId: v.teamId ?? null, name: v.name };
+}
+
+/** A standalone team vault: a member's team with no local row behind it. */
+export function cloudVaultTarget(team: { id: string; name: string }): VaultAdminTarget {
+  return { kind: "cloud", vaultId: null, teamId: team.id, name: team.name };
+}
+
+/**
+ * The target behind a vault entry id, named the way the vault lists name it: a local
+ * vault id, else the id of a team with no local row. Null for an id neither resolves
+ * (an orphan this device knows nothing about).
+ */
+export function resolveVaultAdminTarget(
+  id: string | null | undefined,
+  vaults: { id: string; name: string; teamId?: string | null }[],
+  teams: { id: string; name: string }[],
+): VaultAdminTarget | null {
+  if (!id) return null;
+  const vault = vaults.find((v) => v.id === id);
+  if (vault) return localVaultTarget(vault);
+  const team = teams.find((t) => t.id === id);
+  return team ? cloudVaultTarget(team) : null;
+}
+
 export interface VaultAdminCapabilities {
   isTeam: boolean;
   isOwner: boolean;

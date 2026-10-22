@@ -57,6 +57,7 @@
       }
     },
     "appearance": {
+      "themeActions": "主题操作",
       "interface": "界面",
       "language": { "title": "语言" },
       "groupTabsByHost": {
@@ -72,7 +73,9 @@
       "editTheme": "编辑主题",
       "deleteTheme": "删除主题",
       "newCustomTheme": "新建自定义主题",
+      "dynamicThemeHint": "取自壁纸",
       "uiScale": {
+        "clickHintMobile": "轻触以输入数值",
         "title": "UI 缩放",
         "desc": "放大或缩小整个界面。",
         "clickHint": "点击输入值",
@@ -82,6 +85,7 @@
         "reset": "重置"
       },
       "terminalFontSize": {
+        "clickHintMobile": "轻触以输入数值",
         "title": "终端字体大小",
         "desc": "单独设置终端文字大小，不缩放其余界面。",
         "clickHint": "点击输入值",
@@ -111,18 +115,18 @@
       }
     },
     "nav": {
-      "appearance":     { "label": "外观",      "keywords": ["主题", "颜色", "字体", "ui"] },
-      "account":        { "label": "账户",         "keywords": ["个人资料", "登录", "认证"] },
-      "sync":           { "label": "同步",            "keywords": ["备份", "云", "gist", "同步", "pro"] },
-      "plugins":        { "label": "插件",         "keywords": ["扩展", "附加组件", "市场"] },
-      "integrations":   { "label": "集成",         "keywords": ["mcp", "claude", "claude code", "服务器", "socket", "代理"] },
-      "terminal":       { "label": "终端",        "keywords": ["光标", "回滚", "粘贴", "括号", "复制", "小地图", "缓冲区"] },
-      "sftp":           { "label": "SFTP",            "keywords": ["文件", "传输", "ftp", "文件"] },
-      "portForwarding": { "label": "端口转发", "keywords": ["隧道", "转发", "端口", "ssh", "自动"] },
-      "hosts":          { "label": "主机",           "keywords": ["ping", "可达性", "连接性", "状态"] },
+      "appearance":     { "mobileSub": "主题、缩放、语言", "label": "外观",      "keywords": ["主题", "颜色", "字体", "ui"] },
+      "account":        { "mobileSub": "账户模式、应用锁", "label": "账户",         "keywords": ["个人资料", "登录", "认证"] },
+      "sync":           { "mobileSub": "云同步及同步内容", "label": "同步",            "keywords": ["备份", "云", "gist", "同步", "pro"] },
+      "plugins":        { "mobileSub": "已安装插件和插件目录", "label": "插件",         "keywords": ["扩展", "附加组件", "市场"] },
+      "integrations":   { "mobileSub": "供 AI 代理使用的 MCP 服务器", "label": "集成",         "keywords": ["mcp", "claude", "claude code", "服务器", "socket", "代理"] },
+      "terminal":       { "mobileSub": "光标、回滚、粘贴", "label": "终端",        "keywords": ["光标", "回滚", "粘贴", "括号", "复制", "小地图", "缓冲区"] },
+      "sftp":           { "mobileSub": "下载、传输、编辑器", "label": "SFTP",            "keywords": ["文件", "传输", "ftp", "文件"] },
+      "portForwarding": { "mobileSub": "自动端口转发", "label": "端口转发", "keywords": ["隧道", "转发", "端口", "ssh", "自动"] },
+      "hosts":          { "mobileSub": "可达性、保活、代理", "label": "主机",           "keywords": ["ping", "可达性", "连接性", "状态"] },
       "shortcuts":      { "label": "快捷键",       "keywords": ["快捷键", "热键", "快捷键", "重绑定", "键盘"] },
-      "diagnostics":    { "label": "诊断",     "keywords": ["诊断", "问题", "报告", "日志", "调试", "问题"] },
-      "about":          { "label": "关于",           "keywords": ["版本", "更新", "发布", "更新日志"] }
+      "diagnostics":    { "mobileSub": "日志和错误报告", "label": "诊断",     "keywords": ["诊断", "问题", "报告", "日志", "调试", "问题"] },
+      "about":          { "mobileSub": "版本和链接", "label": "关于",           "keywords": ["版本", "更新", "发布", "更新日志"] }
     },
     "chrome": {
       "title": "设置",
@@ -133,6 +137,14 @@
       "collapsePluginGroup": "折叠插件设置"
     },
     "shared": {
+      "reset": "重置",
+      "rowActions": "设置操作",
+      "sync": {
+        "label": "同步此设置",
+        "on": "在你的设备间同步",
+        "off": "仅保留在此设备上",
+        "deviceDefault": "默认仅保留在此设备上"
+      },
       "cancel": "取消",
       "resetToDefault": "重置为默认",
       "modifiedFromDefault": "已从默认值修改"

@@ -7,20 +7,9 @@ import { useUIStore } from "@/stores/uiStore";
 import type { BannerEntry, HistoryEntry, InboxEntry } from "@/stores/notificationStore";
 import { formatRelative } from "@/utils/localeFormat";
 import { useAnchoredPopover } from "@/hooks/useAnchoredPopover";
-
-const SEVERITY_ICONS: Record<string, string> = {
-  info: "lucide:info",
-  success: "lucide:circle-check-big",
-  warning: "lucide:triangle-alert",
-  error: "lucide:circle-x",
-};
-
-const SEVERITY_COLORS: Record<string, string> = {
-  info: "var(--t-accent)",
-  success: "var(--t-status-connected)",
-  warning: "var(--t-status-warning)",
-  error: "var(--t-status-error)",
-};
+import { isMobileShell } from "@/utils/platform";
+import { MobileNotificationBell } from "@/components/mobile/MobileNotificationBell";
+import { SEVERITY_COLORS, SEVERITY_ICONS } from "./severity";
 
 // Which bell is on screen changes when bells mount and unmount: the mobile
 // shell swaps the foreground tab's bell while the SFTP tab's stays mounted
@@ -158,7 +147,15 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
   );
 }
 
+/**
+ * The bell. On Android (the mobile shell) it is a 48 dp icon button that opens the
+ * notifications bottom sheet MobileShell renders; desktop keeps the anchored popover.
+ */
 export function NotificationBell() {
+  return isMobileShell() ? <MobileNotificationBell /> : <DesktopNotificationBell />;
+}
+
+function DesktopNotificationBell() {
   const { t } = useTranslation();
   const banners = useNotificationStore((s) => s.banners);
   const history = useNotificationStore((s) => s.history);

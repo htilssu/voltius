@@ -1,19 +1,13 @@
 import { invoke } from "@/lib/invoke";
 import { saveSystemDialog as save } from "@/services/systemDialog";
 import i18n from "@/i18n";
-import { APP_SOURCE, useNotificationStore } from "@/stores/notificationStore";
+import { appToast } from "@/services/appToast";
 import { isMobileShell } from "@/utils/platform";
 
 const MIME: Record<string, string> = { json: "application/json", csv: "text/csv" };
 
 export function notify(severity: "success" | "error", message: string) {
-  useNotificationStore.getState().addToast({
-    source: APP_SOURCE,
-    type: "toast",
-    message,
-    severity,
-    duration: severity === "error" ? 8000 : 4000,
-  });
+  appToast(severity, message);
 }
 
 function blobDownload(filename: string, content: string, ext: string) {

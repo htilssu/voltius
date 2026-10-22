@@ -1,9 +1,20 @@
 import { Icon } from "@iconify/react";
-import type { ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useSyncPrefsStore } from "@/stores/syncPrefsStore";
 import { domainOf, isDeviceScopedDefault } from "@/services/user-data/settingKeys";
 import { setKeySync } from "@/services/user-data/syncChoice";
+import { useIsAndroid } from "@/utils/platform";
+import { ListRowContext } from "@/components/shared/listRowContext";
+import { Toggle } from "@/components/shared/Toggle";
+import BottomSheet from "@/components/mobile/sheets/BottomSheet";
+import { SheetActionRow } from "@/components/mobile/sheets/SheetActionRow";
+import RowActionsButton from "@/components/mobile/RowActionsButton";
+import { useLongPress } from "@/components/mobile/useLongPress";
+import { ROW_ATTR, ROW_CONTROL_ATTR } from "@/components/settings/settingsMobileCore";
+
+/** Android: rows inside a SettingsGroup already sit in a full-bleed list. */
+const InSettingsGroup = createContext(false);
 
 /** A titled block of settings rows: the uppercase heading plus the row container. */
 export function SettingsGroup({ title, divided, className, children }: {
@@ -13,6 +24,18 @@ export function SettingsGroup({ title, divided, className, children }: {
   className?: string;
   children: ReactNode;
 }) {
+  const isAndroid = useIsAndroid();
+  if (isAndroid) {
+    // M3 list: section header + flat rows edge to edge (the page keeps 16 px gutters).
+    return (
+      <div className={className}>
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-text-dim)">{title}</h3>
+        <div data-settings-list className="-mx-4">
+          <InSettingsGroup.Provider value={true}>{children}</InSettingsGroup.Provider>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={className}>
       <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-text-dim)">
@@ -49,6 +72,14 @@ export function SettingRow({ title, desc, dirty, onReset, dimmed, truncateDesc, 
   className?: string;
   children: ReactNode;
 }) {
+  const isAndroid = useIsAndroid();
+  if (isAndroid) {
+    return (
+      <MobileSettingRow title={title} desc={desc} dirty={dirty} onReset={onReset} dimmed={dimmed} truncateDesc={truncateDesc} syncKey={syncKey}>
+        {children}
+      </MobileSettingRow>
+    );
+  }
   const card = variant === "card";
   const base = card
     ? "group rounded-xl bg-(--t-bg-card) border border-(--t-border) p-4 flex items-center justify-between gap-4"
@@ -89,6 +120,25 @@ export function ActionItem({ icon, label, sub, danger, disabled, onClick }: {
   onClick: () => void;
 }) {
   const color = disabled ? "var(--t-text-dim)" : danger ? "var(--t-text-muted)" : "var(--t-text-primary)";
+  const isAndroid = useIsAndroid();
+
+  if (isAndroid) {
+    // M3 list row: leading icon, title + supporting text, full bleed.
+    return (
+      <button
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
+        data-settings-action
+        className="-mx-4 w-[calc(100%+2rem)] flex items-center gap-4 px-4 py-3 min-h-14 text-left disabled:opacity-50"
+      >
+        <Icon icon={icon} width={22} className="shrink-0" style={{ color: danger ? "var(--t-status-error)" : "var(--t-accent)" }} />
+        <span className="flex-1 min-w-0">
+          <span className="block text-base" style={{ color: danger && !disabled ? "var(--t-status-error)" : color }}>{label}</span>
+          <span className="block text-sm mt-0.5 text-(--t-text-dim)">{sub}</span>
+        </span>
+      </button>
+    );
+  }
 
   return (
     <button
@@ -158,6 +208,21 @@ export function DirtyDot() {
 
 export function ResetButton({ onReset }: { onReset: () => void }) {
   const { t } = useTranslation();
+  const isAndroid = useIsAndroid();
+  if (isAndroid) {
+    // Touch has no hover: a visible M3 text button, shown only while the value is off its default.
+    return (
+      <button
+        type="button"
+        data-setting-reset
+        onClick={onReset}
+        aria-label={t("settings.shared.resetToDefault")}
+        className="shrink-0 h-10 px-3 rounded-full text-sm font-medium text-(--t-accent)"
+      >
+        {t("settings.shared.reset")}
+      </button>
+    );
+  }
   return (
     <button
       onClick={onReset}
@@ -171,11 +236,18 @@ export function ResetButton({ onReset }: { onReset: () => void }) {
   );
 }
 
-export function SyncKeyButton({ path }: { path: string }) {
-  const { t } = useTranslation();
+/** Per-setting cloud sync state, shared by the desktop cloud button and the Android row sheet. */
+function useKeySync(path: string) {
   const domainSynced = useSyncPrefsStore((s) => s.isDomainSynced(domainOf(path)));
   const synced = useSyncPrefsStore((s) => s.isSettingSynced(path));
   const deviceDefault = useSyncPrefsStore((s) => isDeviceScopedDefault(path, s.settingSyncOverrides ?? {}));
+  return { domainSynced, synced, deviceDefault };
+}
+
+export function SyncKeyButton({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const isAndroid = useIsAndroid();
+  const { domainSynced, synced, deviceDefault } = useKeySync(path);
 
   const title = !domainSynced
     ? t("settings.sync.keyButton.domainOff")
@@ -197,13 +269,133 @@ export function SyncKeyButton({ path }: { path: string }) {
       onClick={() => setKeySync(path, !synced)}
       title={title}
       aria-label={title}
-      className={`p-1 rounded-sm transition-opacity text-(--t-text-muted)${synced ? " opacity-0 group-hover:opacity-100 focus-visible:opacity-100" : ""}`}
+      className={isAndroid
+        // Touch: always visible, with a 40 dp target.
+        ? "p-2.5 -m-1.5 rounded-full text-(--t-text-muted)"
+        : `p-1 rounded-sm transition-opacity text-(--t-text-muted)${synced ? " opacity-0 group-hover:opacity-100 focus-visible:opacity-100" : ""}`}
       style={{ color: accented ? "var(--t-accent)" : undefined }}
       onMouseEnter={(e) => { if (domainSynced) e.currentTarget.style.color = "var(--t-text-bright)"; }}
       onMouseLeave={(e) => { e.currentTarget.style.color = accented ? "var(--t-accent)" : ""; }}
     >
-      <Icon icon={synced ? "lucide:cloud" : "lucide:cloud-off"} width={11} />
+      <Icon icon={synced ? "lucide:cloud" : "lucide:cloud-off"} width={isAndroid ? 16 : 11} />
     </button>
+  );
+}
+
+/**
+ * Android settings row (M3 list item): title + supporting text, the control trailing,
+ * 56 dp min (72 with two lines). A tap on the text runs the control (MobileSettings
+ * forwards it, see rowTapControl). Reset is a visible text button while the value is
+ * off its default; a long-press opens the row's actions (reset, per-setting sync).
+ */
+function MobileSettingRow({ title, desc, dirty, onReset, dimmed, truncateDesc, syncKey, children }: {
+  title: ReactNode;
+  desc?: ReactNode;
+  dirty?: boolean;
+  onReset?: () => void;
+  dimmed?: boolean;
+  truncateDesc?: boolean;
+  syncKey?: string;
+  children: ReactNode;
+}) {
+  const { t } = useTranslation();
+  const inGroup = useContext(InSettingsGroup);
+  const [sheet, setSheet] = useState(false);
+  const canReset = !!(dirty && onReset);
+  const hasActions = canReset || !!syncKey;
+  const { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, onContextMenu, onClick } = useLongPress(() => setSheet(true));
+  const ref = useRef<HTMLDivElement>(null);
+  // Rows whose tap does something get the B5 ripple; a row holding only a text field doesn't.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (el.querySelector(`[${ROW_CONTROL_ATTR}]`)) el.setAttribute("data-ripple", "");
+    else el.removeAttribute("data-ripple");
+  });
+  const style = dimmed ? { opacity: 0.45 } : undefined;
+  const name = typeof title === "string" ? title : undefined;
+  const press = hasActions ? { onTouchStart, onTouchMove, onTouchEnd, onTouchCancel, onContextMenu, onClick } : {};
+
+  return (
+    <>
+    <div
+      ref={ref}
+      {...{ [ROW_ATTR]: "" }}
+      className={`relative flex items-center gap-4 min-h-14 py-3 px-4${inGroup ? "" : " -mx-4"}`}
+      {...press}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 text-base text-(--t-text-primary)" style={style}>
+          <span className="min-w-0">{title}</span>
+          {dirty && <DirtyDot />}
+          {syncKey && <HeldBackMark path={syncKey} />}
+        </div>
+        {desc !== undefined && (
+          <div className={`text-sm mt-0.5 text-(--t-text-dim)${truncateDesc ? " truncate" : ""}`} style={style}>
+            {desc}
+          </div>
+        )}
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        <ListRowContext.Provider value={true}>
+          {canReset && <ResetButton onReset={onReset!} />}
+          {children}
+        </ListRowContext.Provider>
+      </div>
+      {hasActions && (
+        <RowActionsButton
+          attr="data-setting-actions"
+          value={syncKey ?? name ?? ""}
+          label={t("settings.shared.rowActions")}
+          name={name ?? ""}
+          onTap={() => setSheet(true)}
+        />
+      )}
+    </div>
+    {/* Outside the row: touches in the sheet must not reach the row's long-press. */}
+    {sheet && (
+        <BottomSheet title={name} onClose={() => setSheet(false)}>
+          {canReset && (
+            <SheetActionRow
+              attr="setting-action"
+              it={{ icon: "lucide:rotate-ccw", label: t("settings.shared.resetToDefault"), slug: "reset", onTap: () => { onReset!(); setSheet(false); } }}
+            />
+          )}
+          {syncKey && <SyncSheetRow path={syncKey} />}
+        </BottomSheet>
+    )}
+    </>
+  );
+}
+
+/** Status only, not a button: the setting is held back from cloud sync. */
+function HeldBackMark({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const { domainSynced, synced } = useKeySync(path);
+  if (synced || !domainSynced) return null;
+  return <Icon icon="lucide:cloud-off" width={14} className="shrink-0 text-(--t-text-dim)" aria-label={t("settings.shared.sync.off")} />;
+}
+
+/** "Sync this setting" switch inside the Android row actions sheet. */
+function SyncSheetRow({ path }: { path: string }) {
+  const { t } = useTranslation();
+  const { domainSynced, synced, deviceDefault } = useKeySync(path);
+  const sub = !domainSynced
+    ? t("settings.sync.keyButton.domainOff")
+    : synced
+      ? t("settings.shared.sync.on")
+      : deviceDefault
+        ? t("settings.shared.sync.deviceDefault")
+        : t("settings.shared.sync.off");
+  return (
+    <div {...{ [ROW_ATTR]: "" }} data-ripple data-setting-sync={path} className="relative flex items-center gap-3 px-3 py-3 rounded-xl">
+      <Icon icon={synced ? "lucide:cloud" : "lucide:cloud-off"} width={18} className="shrink-0 text-(--t-text-primary)" />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-(--t-text-primary)">{t("settings.shared.sync.label")}</p>
+        <p className="text-xs mt-0.5 text-(--t-text-dim)">{sub}</p>
+      </div>
+      <Toggle checked={synced} disabled={!domainSynced} onChange={(v) => setKeySync(path, v)} aria-label={t("settings.shared.sync.label")} />
+    </div>
   );
 }
 

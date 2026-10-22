@@ -1,49 +1,45 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import MobileEditHeader from "../MobileEditHeader";
+import MobileEditScreen, { useAutosaveExit } from "../MobileEditScreen";
+import KeychainItemActionsSheet from "../sheets/KeychainItemActionsSheet";
 import { KeyForm } from "@/components/keychain/KeyForm";
 import { useAllKeys } from "@/hooks/useAllKeys";
 import { useVaultScope } from "@/hooks/useVaultScope";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
-import { useCloseWhenGone } from "@/hooks/useCloseWhenGone";
+import { useEditedItem } from "@/hooks/useEditedItem";
 import { saveKeyFromForm } from "@/services/keychainForm";
 
+/** New / edit SSH key. Autosaves like the host screen: no Save button, ⋮ once it exists. */
 export default function MobileKeyEditScreen({ keyId, mode }: { keyId?: string; mode?: "import" | "generate" }) {
   const { t } = useTranslation();
   const pop = useMobileNavStore((s) => s.pop);
-  const keys = useAllKeys();
   const { createVaultId } = useVaultScope();
-  // A new key's first autosave CREATES it; switch to editing so later passes update
-  // that key rather than minting a second one (mirrors MobileHostEditScreen).
-  const [editingId, setEditingId] = useState<string | undefined>(keyId);
-  const editing = editingId ? keys.find((k) => k.id === editingId) ?? null : null;
-  useCloseWhenGone(editingId, editing !== null, pop);
+  const { editing, gone, onCreated } = useEditedItem(useAllKeys(), keyId, pop);
   const flushRef = useRef<(() => void) | null>(null);
-
-  const flushAndPop = () => {
-    flushRef.current?.();
-    pop();
-  };
+  const [actions, setActions] = useState(false);
+  const exit = useAutosaveExit();
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)">
-      <MobileEditHeader
-        title={editing ? t("keychain.keyForm.titleEdit") : t("keychain.toolbar.newKey")}
-        onBack={flushAndPop}
-        onSave={flushAndPop}
-        saveAttr="mobile-key-save"
+    <MobileEditScreen
+      form="key"
+      title={editing ? t("keychain.keyForm.titleEdit") : t("keychain.toolbar.newKey")}
+      onLeave={() => { flushRef.current?.(); pop(); }}
+      onDiscard={pop}
+      onOverflow={editing ? () => setActions(true) : undefined}
+      overlay={actions && editing && <KeychainItemActionsSheet kind="key" item={editing} fromEditor onClose={() => setActions(false)} />}
+      {...exit.screenProps}
+    >
+      <KeyForm
+        hideChrome
+        {...exit.formProps}
+        initial={editing ?? undefined}
+        initialMode={mode}
+        flushRef={flushRef}
+        onSubmit={(data, privateKey, publicKey, passphrase) => (gone
+          ? undefined
+          : saveKeyFromForm(editing, data, privateKey, publicKey, passphrase, createVaultId, onCreated))}
+        onClose={pop}
       />
-      <div className="flex-1 overflow-y-auto relative">
-        <KeyForm
-          hideChrome
-          initial={editing ?? undefined}
-          initialMode={mode}
-          flushRef={flushRef}
-          onSubmit={(data, privateKey, publicKey, passphrase) =>
-            saveKeyFromForm(editing, data, privateKey, publicKey, passphrase, createVaultId, (created) => setEditingId(created.id))}
-          onClose={pop}
-        />
-      </div>
-    </div>
+    </MobileEditScreen>
   );
 }

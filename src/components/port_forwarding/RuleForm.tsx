@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAutosave } from "@/hooks/useAutosave";
+import { FieldError, useReportBlocked, useRequiredField, type MobileEditFormProps } from "@/components/shared/fieldValidation";
 import {
   PanelShell, PanelHeader, FormSection,
   formInputClass, formInputStyle, formLabelClass, formLabelStyle,
@@ -16,12 +17,14 @@ import { describeRoute } from "@/utils/tunnelRoute";
 import { EndpointFields, HopArrow, HopCard, ListenerFields, RouteSummary } from "./RuleRoute";
 import { RuleHosts } from "./RuleHosts";
 
-interface Props {
+interface Props extends MobileEditFormProps {
   rule?: PortForwardingRule | null;
   initialTunnelType?: TunnelType;
   onSave: (data: PortForwardingRuleFormData) => void | Promise<void>;
   onClose: () => void;
   isDirtyRef?: React.MutableRefObject<boolean>;
+  /** Mobile edit screen: it owns the header (no PanelHeader / VaultPicker). */
+  hideChrome?: boolean;
 }
 
 function buildTunnelTypes(t: (key: string) => string): { value: TunnelType; label: string; summary: string }[] {
@@ -34,7 +37,7 @@ function buildTunnelTypes(t: (key: string) => string): { value: TunnelType; labe
 
 export const RuleForm = withEditAccess("port_forwarding_rule", (p: Props) => p.rule ?? undefined, RuleFormEditor);
 
-function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, readOnly }: Props & EditAccessProps) {
+function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, hideChrome, revealErrors, onBlockedChange, readOnly }: Props & EditAccessProps) {
   const { t } = useTranslation();
   const TUNNEL_TYPES = useMemo(() => buildTunnelTypes(t), [t]);
   const userEditedRef = useRef(false);
@@ -111,10 +114,11 @@ function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, 
     return !!name.trim() && !isNaN(lp) && (tunnelType === "dynamic" || !isNaN(rp));
   }, [localPort, name, remotePort, tunnelType]);
 
-  const { schedule, markDirty: markAutosaveDirty, flushAndClose, saveState } = useAutosave({
+  const { schedule, markDirty: markAutosaveDirty, flushAndClose, saveState, blocked } = useAutosave({
     onSave: () => onSave(buildSaveData()) ?? undefined,
     canSave,
     readOnly,
+    flushOnUnmount: hideChrome,
   });
 
   function markDirty() {
@@ -125,6 +129,9 @@ function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, 
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => schedule(), [name, tunnelType, localPort, remotePort, remoteHost, bindHost, targetHost, description, vaultId, isGlobal, connectionIds]);
+
+  useReportBlocked(blocked, onBlockedChange);
+  const nameField = useRequiredField(name, { enabled: !!hideChrome, reveal: revealErrors });
 
   const handleClose = () => flushAndClose(onClose);
 
@@ -155,13 +162,13 @@ function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, 
 
   return (
     <PanelShell>
-      <PanelHeader
+      {!hideChrome && <PanelHeader
         title={rule ? t("portForwarding.ruleForm.editRule") : t("portForwarding.ruleForm.newRule")}
         icon="lucide:network"
         subtitle={<VaultPicker vaultId={vaultId} onChange={(v) => { vaultPickerTouched.current = true; markDirty(); setVaultId(v); }} disabled={readOnly} />}
         onClose={handleClose}
         saveState={saveState}
-      />
+      />}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <ReadOnlyFields readOnly={readOnly} className="space-y-4">
         <FormSection label={t("portForwarding.ruleForm.general")}>
@@ -174,7 +181,9 @@ function RuleFormEditor({ rule, initialTunnelType, onSave, onClose, isDirtyRef, 
               value={name}
               onChange={(e) => { markDirty(); setName(e.target.value); }}
               required
+              {...nameField.fieldProps}
             />
+            <FieldError show={nameField.invalid} />
           </div>
           <div>
             <label className={formLabelClass} style={formLabelStyle}>{t("portForwarding.ruleForm.description")}</label>

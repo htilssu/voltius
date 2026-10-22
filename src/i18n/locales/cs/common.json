@@ -1,6 +1,7 @@
 {
   "common": {
     "action": {
+      "retry": "Zkusit znovu",
       "dismiss": "Zavřít",
       "cancel": "Zrušit",
       "save": "Uložit",
@@ -135,9 +136,9 @@
       "failedToAddMember": "Člena se nepodařilo přidat: {{status}}",
       "failedToRemoveMember": "Člena se nepodařilo odebrat: {{status}}",
       "failedToAssignRole": "Roli se nepodařilo přiřadit: {{status}}",
-      "billingTransferNeedsPlan": "Potřebuje vlastní předplatné Teams nebo Business alespoň na úrovni tohoto týmu, s místem pro každého člena svých týmů i tohoto",
+      "billingTransferNeedsPlan": "Potřebuje vlastní tarif Teams nebo Business alespoň na úrovni tohoto týmu a dostatek míst pro všechny členy svých týmů včetně tohoto týmu",
       "billingTransferNeedsOwner": "Nejprve ho nastavte jako vlastníka",
-      "billingTransferForbidden": "Předat to může jen hlavní vlastník",
+      "billingTransferForbidden": "Předání může provést pouze hlavní vlastník",
       "failedToTransferBilling": "Hlavního vlastníka se nepodařilo změnit: {{status}}",
       "failedToRemoveRole": "Roli se nepodařilo odebrat: {{status}}",
       "insufficientPermissionSetMemberPermissions": "Nemáte oprávnění měnit oprávnění tohoto člena",

@@ -57,6 +57,7 @@
       }
     },
     "appearance": {
+      "themeActions": "Actions du thème",
       "interface": "Interface",
       "language": {
         "title": "Langue"
@@ -74,7 +75,9 @@
       "editTheme": "Modifier le thème",
       "deleteTheme": "Supprimer le thème",
       "newCustomTheme": "Nouveau thème personnalisé",
+      "dynamicThemeHint": "Couleurs du fond d'écran",
       "uiScale": {
+        "clickHintMobile": "Touchez pour saisir une valeur",
         "title": "Échelle de l'interface",
         "desc": "Agrandir ou réduire l'interface entière.",
         "clickHint": "Cliquer pour saisir une valeur",
@@ -84,6 +87,7 @@
         "reset": "Réinitialiser"
       },
       "terminalFontSize": {
+        "clickHintMobile": "Touchez pour saisir une valeur",
         "title": "Taille de police du terminal",
         "desc": "Régler la taille du texte du terminal seule, sans agrandir le reste de l'interface.",
         "clickHint": "Cliquer pour saisir une valeur",
@@ -114,6 +118,7 @@
     },
     "nav": {
       "appearance": {
+        "mobileSub": "Thème, échelle, langue",
         "label": "Apparence",
         "keywords": [
           "thème",
@@ -123,6 +128,7 @@
         ]
       },
       "account": {
+        "mobileSub": "Mode du compte, verrouillage",
         "label": "Compte",
         "keywords": [
           "profil",
@@ -131,6 +137,7 @@
         ]
       },
       "sync": {
+        "mobileSub": "Synchronisation cloud et contenu synchronisé",
         "label": "Synchronisation",
         "keywords": [
           "sauvegarde",
@@ -141,6 +148,7 @@
         ]
       },
       "plugins": {
+        "mobileSub": "Extensions installées et catalogue",
         "label": "Extensions",
         "keywords": [
           "extensions",
@@ -149,6 +157,7 @@
         ]
       },
       "integrations": {
+        "mobileSub": "Serveur MCP pour les agents IA",
         "label": "Intégrations",
         "keywords": [
           "mcp",
@@ -160,6 +169,7 @@
         ]
       },
       "terminal": {
+        "mobileSub": "Curseur, historique, collage",
         "label": "Terminal",
         "keywords": [
           "historique",
@@ -172,6 +182,7 @@
         ]
       },
       "sftp": {
+        "mobileSub": "Téléchargements, transferts, éditeur",
         "label": "SFTP",
         "keywords": [
           "fichier",
@@ -181,6 +192,7 @@
         ]
       },
       "portForwarding": {
+        "mobileSub": "Redirection automatique",
         "label": "Transfert de ports",
         "keywords": [
           "tunnel",
@@ -191,6 +203,7 @@
         ]
       },
       "hosts": {
+        "mobileSub": "Joignabilité, keepalive, proxy",
         "label": "Hôtes",
         "keywords": [
           "ping",
@@ -210,6 +223,7 @@
         ]
       },
       "diagnostics": {
+        "mobileSub": "Journaux et rapports de bug",
         "label": "Diagnostics",
         "keywords": [
           "diagnostics",
@@ -221,6 +235,7 @@
         ]
       },
       "about": {
+        "mobileSub": "Version et liens",
         "label": "À propos",
         "keywords": [
           "version",
@@ -239,6 +254,14 @@
       "collapsePluginGroup": "Réduire les extensions"
     },
     "shared": {
+      "reset": "Réinitialiser",
+      "rowActions": "Actions du réglage",
+      "sync": {
+        "label": "Synchroniser ce réglage",
+        "on": "Synchronisé sur vos appareils",
+        "off": "Gardé sur cet appareil",
+        "deviceDefault": "Gardé sur cet appareil par défaut"
+      },
       "cancel": "Annuler",
       "resetToDefault": "Réinitialiser par défaut",
       "modifiedFromDefault": "Modifié par rapport à la valeur par défaut"

@@ -1,51 +1,45 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import MobileEditHeader from "../MobileEditHeader";
+import MobileEditScreen, { useAutosaveExit } from "../MobileEditScreen";
 import ConnectionForm, { type ConnectionFormHandle } from "@/components/connections/ConnectionForm";
 import { useAllConnections } from "@/hooks/useAllConnections";
 import { useVaultScope } from "@/hooks/useVaultScope";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
-import { useCloseWhenGone } from "@/hooks/useCloseWhenGone";
+import { useEditedItem } from "@/hooks/useEditedItem";
 import { saveHostFromForm } from "@/services/hostForm";
 
+/**
+ * New / edit host. Autosaves (create included: the first valid pass creates the host),
+ * so there is no Save button; ⋮ opens the host's actions once it exists.
+ */
 export default function MobileHostEditScreen({ hostId }: { hostId?: string }) {
   const { t } = useTranslation();
   const pop = useMobileNavStore((s) => s.pop);
-  const connections = useAllConnections();
+  const openSheet = useMobileNavStore((s) => s.openSheet);
   const { createVaultId } = useVaultScope();
-  // Track the edited host id locally: a new host's first autosave CREATES a connection,
-  // and we must switch to editing it so later debounce fires UPDATE rather than create
-  // duplicates (mirrors desktop HostsPage.handleSubmit).
-  const [editingId, setEditingId] = useState<string | undefined>(hostId);
-  const editing = editingId ? connections.find((c) => c.id === editingId) ?? null : null;
-  useCloseWhenGone(editingId, editing !== null, pop);
+  const { editing, gone, onCreated } = useEditedItem(useAllConnections(), hostId, pop);
   const formRef = useRef<ConnectionFormHandle>(null);
-
-  // Both exits flush any pending autosave debounce before leaving so a last-keystroke
-  // edit is never lost; pop() unmounts the screen, so no re-entrancy guard is needed.
-  const flushAndPop = () => {
-    formRef.current?.flush();
-    pop();
-  };
+  const exit = useAutosaveExit();
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)">
-      <MobileEditHeader
-        title={editing ? t("mobile.host.editTitle") : t("mobile.host.newTitle")}
-        onBack={flushAndPop}
-        onSave={flushAndPop}
-        saveAttr="mobile-host-save"
+    <MobileEditScreen
+      form="host"
+      title={editing ? t("mobile.host.editTitle") : t("mobile.host.newTitle")}
+      // Flush any pending autosave debounce so a last-keystroke edit is never lost.
+      onLeave={() => { formRef.current?.flush(); pop(); }}
+      onDiscard={pop}
+      onOverflow={editing ? () => openSheet({ kind: "host-actions", hostId: editing.id, fromEditor: true }) : undefined}
+      {...exit.screenProps}
+    >
+      <ConnectionForm
+        ref={formRef}
+        hideChrome
+        {...exit.formProps}
+        initial={editing ?? undefined}
+        onSubmit={(data, secrets) => (gone ? undefined : saveHostFromForm(editing, data, secrets, createVaultId, onCreated))}
+        onClose={pop}
+        vaults={[]}
       />
-      <div className="flex-1 overflow-y-auto relative">
-        <ConnectionForm
-          ref={formRef}
-          hideChrome
-          initial={editing ?? undefined}
-          onSubmit={(data, secrets) => saveHostFromForm(editing, data, secrets, createVaultId, (created) => setEditingId(created.id))}
-          onClose={pop}
-          vaults={[]}
-        />
-      </div>
-    </div>
+    </MobileEditScreen>
   );
 }

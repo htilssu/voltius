@@ -123,11 +123,11 @@
       "viaJump": "přes {{hosts}}",
       "teamKeysWarning": "Tyto soukromé klíče budou sdíleny se všemi členy týmu {{team}}.",
       "notice": {
-        "pattern": "Vzor: použije se na odpovídající hostitele, sám se neimportuje",
+        "pattern": "Vzor: použije se pro odpovídající hosty, sám se neimportuje",
         "match": "Blok Match: nepodporováno, ignorováno",
         "include": "Include nelze načíst",
         "includeOutside": "Include mimo ~/.ssh: nenačteno",
-        "key": "Cesta IdentityFile obsahuje tokeny, které nelze přeložit",
+        "key": "Cesta IdentityFile používá tokeny, které nelze vyhodnotit",
         "proxyCommand": "ProxyCommand zatím není podporován"
       }
     },
@@ -212,10 +212,10 @@
       },
       "openssh": {
         "sub": "~/.ssh/config",
-        "hint": "Načte ~/.ssh/config, jeho soubory Include a klíče uvedené v IdentityFile. Konfiguraci můžete také vložit nebo otevřít ze souboru.",
+        "hint": "Načte ~/.ssh/config, soubory z direktiv Include a klíče uvedené v IdentityFile. Konfiguraci můžete také vložit nebo otevřít ze souboru.",
         "hintMobile": "Vložte svůj ~/.ssh/config nebo otevřete soubor. Klíče se přiřadí podle názvu souboru ke klíčům, které už jsou v trezoru.",
         "placeholder": "Host my-server\n  HostName 10.0.0.5\n  User alex\n  IdentityFile ~/.ssh/id_ed25519",
-        "notFound": "Na tomto počítači nebyl nalezen žádný ~/.ssh/config.",
+        "notFound": "Na tomto počítači nebyl nalezen soubor ~/.ssh/config.",
         "unreadable": "Soubor ~/.ssh/config nelze přečíst ({{reason}})."
       },
       "mobaxterm": {

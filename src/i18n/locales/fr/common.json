@@ -1,6 +1,7 @@
 {
   "common": {
     "action": {
+      "retry": "Réessayer",
       "dismiss": "Ignorer",
       "cancel": "Annuler",
       "save": "Enregistrer",

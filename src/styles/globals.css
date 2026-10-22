@@ -98,6 +98,62 @@
   }
 }
 
+/* Motion tokens (Material 3): the one set of easings and durations mobile animations use.
+   Mirrored in src/lib/motion.ts for JS (WAAPI) animations; motion.test.ts keeps them in sync.
+   Use transition(..) / easeVar / durVar from there, or these vars directly. */
+:root {
+  --vt-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --vt-ease-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+  --vt-ease-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --vt-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --vt-ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --vt-ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --vt-ease-linear: linear;
+  --vt-dur-short1: 50ms;
+  --vt-dur-short2: 100ms;
+  --vt-dur-short3: 150ms;
+  --vt-dur-short4: 200ms;
+  --vt-dur-medium1: 250ms;
+  --vt-dur-medium2: 300ms;
+  --vt-dur-medium3: 350ms;
+  --vt-dur-medium4: 400ms;
+  --vt-dur-long1: 450ms;
+  --vt-dur-long2: 500ms;
+  --vt-dur-long3: 550ms;
+  --vt-dur-long4: 600ms;
+}
+
+/* Motion tokens, reduced: every token-driven animation becomes instant. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --vt-dur-short1: 0ms;
+    --vt-dur-short2: 0ms;
+    --vt-dur-short3: 0ms;
+    --vt-dur-short4: 0ms;
+    --vt-dur-medium1: 0ms;
+    --vt-dur-medium2: 0ms;
+    --vt-dur-medium3: 0ms;
+    --vt-dur-medium4: 0ms;
+    --vt-dur-long1: 0ms;
+    --vt-dur-long2: 0ms;
+    --vt-dur-long3: 0ms;
+    --vt-dur-long4: 0ms;
+  }
+}
+
+/*
+  Safe-area insets. On Android the native shell (SystemInsets.kt) pushes the real
+  system-bar + cutout insets as --vt-sa{t,b,l,r} (CSS px) because WebView often reports
+  env(safe-area-inset-*) = 0; --vt-ime is the soft-keyboard height. Use these --vt-safe-*
+  tokens instead of env() directly. Elsewhere --vt-sa* are unset, so they resolve to env().
+*/
+:root {
+  --vt-safe-top: max(var(--vt-sat, 0px), env(safe-area-inset-top, 0px));
+  --vt-safe-bottom: max(var(--vt-sab, 0px), env(safe-area-inset-bottom, 0px));
+  --vt-safe-left: max(var(--vt-sal, 0px), env(safe-area-inset-left, 0px));
+  --vt-safe-right: max(var(--vt-sar, 0px), env(safe-area-inset-right, 0px));
+}
+
 /*
   Derived UI surfaces — computed from the runtime `--t-*` theme vars so they
   adapt to every built-in and custom theme without per-theme edits.
@@ -728,4 +784,274 @@ fieldset:disabled :is(input, textarea, button) { cursor: default; }
   .checkbox-box[data-mixed]::after { content: ""; width: 0.5rem; height: 2px; border-radius: 1px; background: var(--t-on-accent); }
   input[type="checkbox"]:disabled { cursor: default; opacity: 0.6; }
   input[type="checkbox"]:focus-visible { outline: 2px solid var(--t-accent); outline-offset: 1px; }
+}
+
+/* ── Android shell: stop looking like a web page (A7) ─────────────────────────────
+   `html[data-android]` is set by the native shell (NativeFeel.kt) before first paint,
+   with `--vt-font-scale` = the system font scale, capped 0.85–1.3 (WebView textZoom is
+   pinned to 100 so the system setting can't break the layout on its own). Unlayered
+   on purpose so it wins over Tailwind's layers. Desktop never gets the attribute. */
+html[data-android] {
+  --vt-fs: var(--vt-font-scale, 1);
+  --text-xs: calc(0.867rem * var(--vt-fs));
+  --text-xs--line-height: calc(1.333rem * var(--vt-fs));
+  --text-sm: calc(1rem * var(--vt-fs));
+  --text-sm--line-height: calc(1.467rem * var(--vt-fs));
+  --text-base: calc(1.133rem * var(--vt-fs));
+  --text-base--line-height: calc(1.6rem * var(--vt-fs));
+  --text-lg: calc(1.267rem * var(--vt-fs));
+  --text-lg--line-height: calc(1.867rem * var(--vt-fs));
+  --text-xl: calc(1.4rem * var(--vt-fs));
+  --text-xl--line-height: calc(2rem * var(--vt-fs));
+  --text-2xl: calc(1.5rem * var(--vt-fs));
+  --text-3xl: calc(1.875rem * var(--vt-fs));
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation; /* no double-tap zoom; JS gestures set their own touch-action */
+}
+
+html[data-android],
+html[data-android] body {
+  overscroll-behavior: none; /* no page-level bounce; inner scrollers keep their own */
+}
+
+/* Chrome isn't text: no accidental selection or callout on long-press. */
+html[data-android] body {
+  font-size: calc(1rem * var(--vt-fs));
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* …except what the user types into or may want to copy (mark content with `select-text`). */
+html[data-android] :is(input, textarea, [contenteditable]:not([contenteditable="false"]), .select-text) {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Hover-revealed controls (`opacity-0 group-hover:opacity-…`) are invisible on touch,
+   where there's no hover: show them. */
+@media (hover: none) {
+  html[data-android] .opacity-0[class*="group-hover"][class*=":opacity-"] {
+    opacity: 1;
+  }
+}
+
+/* ── Settings pages as M3 lists (C4, MobileSettings) ─────────────────────────────────
+   Section bodies keep 16 px gutters; SettingsGroup / SettingRow / ActionItem bleed to the
+   edges themselves. Section headers become M3 list subheaders, and the hand-built cards
+   (`data-settings-card`) lose their box so they read as part of the same flat list. */
+html[data-android] [data-settings-page] > div {
+  padding: 0.25rem 1rem 1.5rem;
+}
+html[data-android] [data-settings-page] h3 {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--t-accent);
+}
+html[data-android] [data-settings-card] {
+  margin-inline: -1rem;
+  padding-inline: 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-android] [data-settings-card] > [data-setting-row] {
+  margin-block: 0;
+}
+
+/* ── Edit forms as M3 (C5, MobileEditScreen) ─────────────────────────────────────────
+   The shared desktop form parts (FormSection, form-input, PickerTrigger, SettingRow…)
+   restyled inside a mobile edit screen: titled sections without cards, 56 dp outlined
+   fields with 16 px text, accent focus, error outline from aria-invalid (and :invalid
+   once the screen asked to leave, `data-reveal-errors`), settings-style 56 dp rows. */
+html[data-android] [data-mobile-edit-form] [data-panel-shell] {
+  box-shadow: none !important; /* beats the inline ring / panel shadow */
+}
+html[data-android] [data-mobile-edit-form] [data-form-section] {
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none !important; /* beats the inline ring / panel shadow */
+}
+html[data-android] [data-mobile-edit-form] [data-form-section] + [data-form-section] {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--t-border);
+}
+html[data-android] [data-mobile-edit-form] [data-form-section-title] {
+  padding: 1rem 0 0.25rem;
+  border: 0;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--t-accent);
+}
+html[data-android] [data-mobile-edit-form] [data-form-section-body] {
+  padding: 0.5rem 0 0.5rem;
+}
+html[data-android] [data-mobile-edit-form] label {
+  margin-bottom: 0.375rem;
+  font-size: var(--text-xs);
+}
+html[data-android] [data-mobile-edit-form] :is(input.form-input, [data-picker-trigger], [data-form-select], [data-chip-input]) {
+  min-height: 3.5rem;
+  padding-inline: 1rem;
+  border-radius: 0.5rem;
+  font-size: var(--text-sm);
+}
+html[data-android] [data-mobile-edit-form] :is([data-picker-trigger], [data-form-select], [data-chip-input]) :is(span, input) {
+  font-size: var(--text-sm);
+}
+html[data-android] [data-mobile-edit-form] textarea.form-input {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+}
+html[data-android] [data-mobile-edit-form] :is(input.form-input, textarea.form-input, [data-picker-trigger], [data-form-select], [data-chip-input]) {
+  /* M3 outline: the theme border tokens are near-invisible on the page background. */
+  border-color: color-mix(in srgb, var(--t-text-primary) 30%, transparent) !important;
+  transition: border-color var(--vt-dur-short3) var(--vt-ease-standard), box-shadow var(--vt-dur-short3) var(--vt-ease-standard);
+}
+html[data-android] [data-mobile-edit-form] :is(input.form-input, textarea.form-input):focus,
+html[data-android] [data-mobile-edit-form] [data-chip-input]:focus-within {
+  border-color: var(--t-accent) !important;
+  box-shadow: inset 0 0 0 1px var(--t-accent);
+}
+html[data-android] [data-mobile-edit-form] :is(input, textarea)[aria-invalid="true"],
+html[data-android] [data-mobile-edit-form][data-reveal-errors] :is(input, textarea):invalid {
+  border-color: var(--t-status-error) !important;
+  box-shadow: inset 0 0 0 1px var(--t-status-error);
+}
+/* 40 px tile beside a 56 px field (host label row). */
+html[data-android] [data-mobile-edit-form] [data-icon-tile] {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+/* Password reveal: a 48 dp target inside the field. */
+html[data-android] [data-mobile-edit-form] input.form-input + button.absolute {
+  right: 0.25rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html[data-android] [data-mobile-edit-form] input.form-input + button.absolute svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+/* SettingRow / DrillInRow / Advanced: M3 list rows (label left, control trailing). */
+html[data-android] [data-mobile-edit-form] :is([data-form-setting-row], [data-form-drill-row], [data-advanced-toggle]) {
+  min-height: 3.5rem;
+  gap: 1rem;
+  padding-block: 0;
+  font-size: var(--text-sm);
+  color: var(--t-text-primary);
+}
+html[data-android] [data-mobile-edit-form] :is([data-form-setting-row], [data-form-drill-row]) > svg:first-child {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--t-text-dim);
+}
+html[data-android] [data-mobile-edit-form] [data-advanced-toggle] {
+  color: var(--t-accent);
+  font-weight: 500;
+}
+html[data-android] [data-mobile-edit-form] [data-advanced-toggle] svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ── Ripples + pressed state layer (B5, lib/ripple.ts) ───────────────────────────────
+   Spans appended to the pressed control on touch-down: the state layer (::before, 10 %
+   of currentColor while held) and the ripple circle (child span, grown by WAAPI). */
+html[data-android] .vt-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+html[data-android] .vt-ripple::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--vt-dur-short2) var(--vt-ease-linear);
+}
+html[data-android] .vt-ripple[data-pressed]::before {
+  opacity: 0.1;
+}
+html[data-android] .vt-ripple > span {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.12;
+  transform: scale(0);
+}
+
+/* ── Tap targets (C7) ─────────────────────────────────────────────────────────────────
+   Every control on Android takes taps over at least 48 × 48 dp (CSS px = dp in the WebView).
+   1. The root font size is 15 px, so Tailwind's rem spacing made every "48 dp" `h-12`
+      45 px. On Android the spacing unit is 4 px (the M3 grid): h-12 = 48, p-4 = 16.
+   2. `.vt-icon-btn`: an M3 icon button, 48 × 48 container, icon centred.
+   3. `.vt-hit`: keeps the visual size and extends the hit area to ≥ 48 × 48 with an invisible
+      ::after centred on the control (taps on a pseudo-element hit its element). Needs room:
+      an `overflow` ancestor clips it, and a neighbour closer than the overlap takes the taps
+      in between (later in the DOM wins), so space or size neighbours accordingly.
+      `[data-vt-hit-scope]` applies it to every button of a desktop layout shown on a phone.
+   Audit: scripts/android-tap-target-audit.js (elementFromPoint probes around each control). */
+html[data-android] {
+  --spacing: 4px;
+}
+@layer base {
+  /* Zero specificity and layered, so any positioning utility on the control wins. */
+  :where(html[data-android] :is(.vt-hit, [data-vt-hit-scope] :is(button, [role="button"]))) {
+    position: relative;
+  }
+}
+html[data-android] :is(.vt-hit, [data-vt-hit-scope] :is(button, [role="button"]))::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 48px);
+  height: max(100%, 48px);
+  transform: translate(-50%, -50%);
+}
+html[data-android] .vt-icon-btn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+/* Wrapped chip rows: 12 px between lines, so stacked 48 px hit areas don't overlap. */
+html[data-android] [data-chip-group] {
+  row-gap: 12px;
+}
+/* Full-width rows of a bottom sheet (menus, pickers) are at least one M3 list line. */
+html[data-android] [data-mobile-sheet-body] button.w-full {
+  min-height: 48px;
+}
+/* Text / number fields trailing a settings row, and the tag field of the edit forms. */
+html[data-android] [data-setting-row] input:is([type="number"], [type="text"], :not([type])) {
+  min-height: 48px;
+}
+html[data-android] [data-mobile-edit-form] [data-chip-input] {
+  padding-block: 0.25rem;
+}
+html[data-android] [data-mobile-edit-form] [data-chip-input] input {
+  min-height: 48px;
 }

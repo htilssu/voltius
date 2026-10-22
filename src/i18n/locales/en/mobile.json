@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "Filter…"
     },
-    "remoteSessions": {
-      "title": "Live on other devices"
-    },
     "snippets": {
       "searchPlaceholder": "Search snippets",
       "noMatches": "No matches",
@@ -118,7 +115,18 @@
       "newTitle": "New snippet",
       "namePlaceholder": "Snippet name",
       "contentPlaceholder": "echo hello",
-      "delete": "Delete snippet"
+      "delete": "Delete snippet",
+      "nameLabel": "Name",
+      "contentLabel": "Script"
+    },
+    "editForm": {
+      "required": "Required",
+      "incompleteTitle": "Leave without saving?",
+      "incompleteBody": "A required field is empty, so your latest changes can't be saved yet.",
+      "unsavedTitle": "Discard changes?",
+      "unsavedBody": "Your changes to this snippet haven't been saved.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
     },
     "snippetsScreen": {
       "newSnippetLabel": "New snippet"
@@ -161,12 +169,20 @@
       "batchDeleteTitle_other": "Delete {{count}} items?",
       "newFileOption": "New file",
       "folderNamePlaceholder": "Folder name",
-      "fileNamePlaceholder": "File name"
+      "fileNamePlaceholder": "File name",
+      "selectAll": "Select all",
+      "onePane": "One pane",
+      "twoPanes": "Two panes",
+      "moreActions": "More actions",
+      "itemActions": "Actions for {{name}}"
     },
     "folders": {
       "home": "Home"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "No hosts"
+      },
       "shared": {
         "moveToVault": "Move to vault",
         "copyToVault": "Copy to vault",
@@ -235,6 +251,53 @@
       "vaultSwitcher": {
         "newVault": "New vault",
         "namePlaceholder": "Vault name"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "That host no longer exists. Its shortcut was removed."
+    },
+    "share": {
+      "action": "Share",
+      "publicKey": "Share public key",
+      "failed": "Couldn’t open the share sheet",
+      "downloadFailed": "Couldn’t download the file to share",
+      "largeTitle": "Share {{size}}?",
+      "largeBody": "The files are downloaded to this phone first, then handed to the app you pick.",
+      "tooLong": "Too long to share as text"
+    },
+    "vaultSettings": {
+      "title": "Vault settings",
+      "gone": "This vault no longer exists on this device.",
+      "openFor": "Settings for {{name}}",
+      "nameRequired": "A vault needs a name.",
+      "nameReadOnly": "Only the vault's managers can rename it.",
+      "kindTeam": "Team vault",
+      "kindPrivate": "Private vault",
+      "sections": {
+        "general": "General",
+        "people": "People",
+        "danger": "Danger zone"
+      },
+      "rows": {
+        "name": "Name",
+        "share": "Share & invite",
+        "members": "Members",
+        "roles": "Roles",
+        "security": "Security policy",
+        "makePrivate": "Make private",
+        "delete": "Delete vault",
+        "leave": "Leave vault"
+      },
+      "summaries": {
+        "share": "Invite people and manage join links",
+        "members_one": "{{count}} member",
+        "members_other": "{{count}} members",
+        "roles": "What each role can do",
+        "security": "Lock and session rules for members",
+        "makePrivate": "Remove everyone else and keep a private copy",
+        "delete": "Deletes the vault and everything in it",
+        "deleteTeam": "Deletes it for every member",
+        "leave": "Remove your access to this vault"
       }
     }
   }

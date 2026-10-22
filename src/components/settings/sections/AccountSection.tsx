@@ -229,6 +229,7 @@ export default function AccountSection() {
           {t("settings.account.modeTitle")}
         </h3>
         <div
+          data-settings-card
           className="rounded-lg px-4 py-3 bg-(--t-bg-elevated) border border-(--t-border)"
         >
           <p className="text-xs mb-1 text-(--t-text-dim)">{t("settings.account.currentMode")}</p>
@@ -244,7 +245,7 @@ export default function AccountSection() {
           <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-text-dim)">
             {t("settings.account.handle.title")}
           </h3>
-          <div className="rounded-lg px-4 py-3 space-y-2 bg-(--t-bg-elevated) border border-(--t-border)">
+          <div data-settings-card className="rounded-lg px-4 py-3 space-y-2 bg-(--t-bg-elevated) border border-(--t-border)">
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-medium text-(--t-text-primary)">
                 {handle ? `@${handle}` : "—"}
@@ -308,7 +309,7 @@ export default function AccountSection() {
             )}
           </div>
 
-          <div className="mt-2 rounded-lg px-4 py-3 flex items-center justify-between gap-4 bg-(--t-bg-elevated) border border-(--t-border)">
+          <div data-settings-card data-setting-row className="mt-2 rounded-lg px-4 py-3 flex items-center justify-between gap-4 bg-(--t-bg-elevated) border border-(--t-border)">
             <div>
               <p className="text-sm font-medium text-(--t-text-primary)">{t("settings.account.strangerInvites.label")}</p>
               <p className="text-xs mt-0.5 text-(--t-text-dim)">{t("settings.account.strangerInvites.desc")}</p>
@@ -519,7 +520,7 @@ function PlansSection() {
         {t("settings.account.plan.title")}
       </h3>
 
-      <div className="rounded-lg px-4 py-3 bg-(--t-bg-elevated) border border-(--t-border) space-y-3">
+      <div data-settings-card className="rounded-lg px-4 py-3 bg-(--t-bg-elevated) border border-(--t-border) space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon

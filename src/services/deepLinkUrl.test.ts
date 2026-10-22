@@ -318,3 +318,24 @@ test("a vault-join link carries no account id", () => {
   const params = new URLSearchParams(url.slice(url.indexOf("?") + 1));
   expect([...params.keys()].sort()).toEqual(["g", "k"]);
 });
+
+const HOST = "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b";
+
+test("connect carries a host id and is an unprompted route", () => {
+  const intent = parseDeepLink(`voltius://connect?host=${HOST}`);
+  expect(intent).toEqual({ route: "connect", hostId: HOST });
+  expect(isAttenuatedIntent(intent!)).toBe(true);
+  expect(isUnpromptedIntent(intent!)).toBe(true);
+  expect(buildDeepLink({ route: "connect", hostId: HOST }, "scheme")).toBe(`voltius://connect?host=${HOST}`);
+});
+
+test("connect rejects a missing or malformed host id", () => {
+  expect(parseDeepLink("voltius://connect")).toBeNull();
+  expect(parseDeepLink("voltius://connect?host=")).toBeNull();
+  expect(parseDeepLink("voltius://connect?host=../etc")).toBeNull();
+  expect(parseDeepLink(`voltius://connect?host=${"a".repeat(65)}`)).toBeNull();
+});
+
+test("connect is scheme-only: the https App Link form never carries it", () => {
+  expect(parseDeepLink(`https://voltius.app/open#connect?host=${HOST}`)).toBeNull();
+});

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { useAutosave } from "@/hooks/useAutosave";
+import { FieldError, useReportBlocked, useRequiredField, type MobileEditFormProps } from "@/components/shared/fieldValidation";
 import { auditContextForVaultId } from "@/services/auditContextResolver";
 import { reportAuditClientEvent } from "@/services/auditReporter";
 import { useKeyStore } from "@/stores/keyStore";
@@ -111,7 +112,7 @@ function KeySelector({
 // IdentityForm (side panel)
 // ─────────────────────────────────────────────────────────────────
 
-export interface IdentityFormProps {
+export interface IdentityFormProps extends MobileEditFormProps {
   initial?: Identity;
   onSubmit: (
     data: IdentityFormData,
@@ -130,7 +131,7 @@ export interface IdentityFormProps {
 
 export const IdentityForm = withEditAccess("identity", (p: IdentityFormProps) => p.initial, IdentityFormEditor);
 
-function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, isDirtyRef, vaults, onMoveToVault, onCopyToVault, hideChrome, readOnly }: IdentityFormProps & EditAccessProps) {
+function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, isDirtyRef, vaults, onMoveToVault, onCopyToVault, hideChrome, revealErrors, onBlockedChange, readOnly }: IdentityFormProps & EditAccessProps) {
   const { t } = useTranslation();
   const { loadKeys } = useKeyStore();
   const { connections, loadConnections, updateConnection } = useConnectionStore();
@@ -177,7 +178,7 @@ function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, is
     },
   );
 
-  const { schedule, markDirty: _markDirty, flushAndClose, flush, saveState } = useAutosave({
+  const { schedule, markDirty: _markDirty, flushAndClose, flush, saveState, blocked } = useAutosave({
     onSave: () => {
       const keyMaterial = isInline
         ? { label: inlineKeyLabel || undefined, privateKey: inlinePrivKey, publicKey: inlinePublicKey }
@@ -194,6 +195,7 @@ function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, is
       !!username.trim()
       && (!isInline || (!!inlinePrivKey.trim() && !isPublicKeyInvalid(inlinePublicKey))),
     readOnly,
+    flushOnUnmount: hideChrome,
   });
   const markDirty = useCallback(() => {
     if (isDirtyRef) isDirtyRef.current = true;
@@ -201,6 +203,9 @@ function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, is
   }, [_markDirty, isDirtyRef]);
 
   if (flushRef) flushRef.current = flush;
+  useReportBlocked(blocked, onBlockedChange);
+  const usernameField = useRequiredField(username, { enabled: !!hideChrome, reveal: revealErrors });
+  const inlineKeyField = useRequiredField(inlinePrivKey, { enabled: !!hideChrome && isInline, reveal: revealErrors });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => schedule(), [name, tags, username, password, keyId, folderId, vaultId, inlineKeyLabel, inlinePrivKey, inlinePublicKey]);
@@ -291,7 +296,9 @@ function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, is
               onChange={(e) => { markDirty(); setUsername(e.target.value); }}
               placeholder="root"
               {...formIdentifierProps}
+              {...usernameField.fieldProps}
             />
+            <FieldError show={usernameField.invalid} />
           </div>
 
           {storedSecrets !== "forbidden" && (
@@ -339,7 +346,10 @@ function IdentityFormEditor({ initial, onSubmit, onClose, onDelete, flushRef, is
                 value={inlinePrivKey}
                 onChange={(e) => { markDirty(); setInlinePrivKey(e.target.value); }}
                 placeholder="-----BEGIN OPENSSH PRIVATE KEY-----&#10;..."
+                {...formIdentifierProps}
+                {...inlineKeyField.fieldProps}
               />
+              <FieldError show={inlineKeyField.invalid} />
             </div>
             <PublicKeyField
               value={inlinePublicKey}

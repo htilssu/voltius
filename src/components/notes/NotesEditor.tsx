@@ -205,7 +205,7 @@ export function NotesEditor({
     view.focus();
   };
 
-  const toolbarButton = `${touch ? "size-[36px]" : "w-6 h-6"} shrink-0 flex items-center justify-center ${NOTES_ICON_BUTTON}`;
+  const toolbarButton = `${touch ? "size-[48px]" : "w-6 h-6"} shrink-0 flex items-center justify-center ${NOTES_ICON_BUTTON}`;
   const isEmpty = !value.trim();
 
   return (

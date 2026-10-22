@@ -52,7 +52,7 @@ export default function MobileLogsScreen() {
             <button
               data-logs-export-open
               onClick={() => setExportOpen(true)}
-              className="p-2 text-(--t-text-primary)"
+              className="vt-icon-btn text-(--t-text-primary)"
             >
               <Icon icon="lucide:download" width={20} />
             </button>
@@ -70,7 +70,7 @@ export default function MobileLogsScreen() {
               <span className="text-sm text-(--t-text-dim)">{error}</span>
               <button
                 onClick={() => { if (context && canFetchAudit) fetchLogs(context); }}
-                className="text-sm px-3 py-1.5 rounded-lg"
+                className="vt-hit text-sm px-3 py-1.5 rounded-lg"
                 style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
               >
                 {t("mobile.logsScreen.retry")}
@@ -81,19 +81,22 @@ export default function MobileLogsScreen() {
               <Icon icon="lucide:loader-circle" width={24} className="animate-spin text-(--t-text-dim)" />
             </div>
           ) : (
-            <AuditTimeline logs={visibleLogs} />
+            // select-text: log entries stay copyable under the Android no-select chrome rule.
+            <div className="select-text">
+              <AuditTimeline logs={visibleLogs} />
+            </div>
           )}
         </div>
 
         {!error && totalPages > 1 && (
           <div
             className="shrink-0 flex items-center justify-center gap-3 px-4 pt-3 border-t border-(--t-border)"
-            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
+            style={{ paddingBottom: "calc(var(--vt-safe-bottom) + 16px)" }}
           >
             <button
               onClick={() => setFilter("page", page - 1)}
               disabled={page <= 1}
-              className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity"
+              className="vt-hit flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity duration-(--vt-dur-short3) ease-(--vt-ease-standard)"
               style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
             >
               <Icon icon="lucide:chevron-left" width={14} />
@@ -105,7 +108,7 @@ export default function MobileLogsScreen() {
             <button
               onClick={() => setFilter("page", page + 1)}
               disabled={page >= totalPages}
-              className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity"
+              className="vt-hit flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity duration-(--vt-dur-short3) ease-(--vt-ease-standard)"
               style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
             >
               {t("mobile.logsScreen.next")}

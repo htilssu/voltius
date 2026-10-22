@@ -12,6 +12,7 @@ function assertEqual<T>(actual: T, expected: T, msg: string): void {
 // shortcuts is hidden on mobile
 {
   assertEqual(MOBILE_HIDDEN_SECTIONS.has("shortcuts"), true, "shortcuts hidden");
+  assertEqual(MOBILE_HIDDEN_SECTIONS.has("integrations"), true, "integrations (MCP) hidden");
   assertEqual(MOBILE_HIDDEN_SECTIONS.has("appearance"), false, "appearance not hidden");
 }
 
@@ -20,10 +21,11 @@ function assertEqual<T>(actual: T, expected: T, msg: string): void {
   const nav = [
     { id: "appearance" as const, label: "Appearance", icon: "x" },
     { id: "shortcuts" as const, label: "Shortcuts", icon: "y" },
+    { id: "integrations" as const, label: "Integrations", icon: "w" },
     { id: "about" as const, label: "About", icon: "z" },
   ];
   const out = mobileSettingsNav(nav);
-  assertEqual(out.map((n) => n.id), ["appearance", "about"], "nav drops shortcuts");
+  assertEqual(out.map((n) => n.id), ["appearance", "about"], "nav drops shortcuts + integrations");
 }
 
 // visiblePlugins: on desktop keep everything (incl. desktopOnly)

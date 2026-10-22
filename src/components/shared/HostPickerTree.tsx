@@ -17,7 +17,7 @@ const DENSITY = {
   },
   touch: {
     heading: "px-3 text-[11px]",
-    folder: "gap-2 px-3 py-2.5 rounded-xl text-(--t-text-primary) active:bg-(--t-bg-card)",
+    folder: "gap-2 px-3 py-2.5 min-h-12 rounded-xl text-(--t-text-primary) active:bg-(--t-bg-card)",
     name: "text-sm",
     chevron: 16,
     glyph: 16,

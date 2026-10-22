@@ -14,10 +14,15 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : TauriActivity() {
+  // Back is routed to the page by NativeBack, never to WebView history.
+  override val handleBackNavigation: Boolean = false
+
   private lateinit var dirPicker: ActivityResultLauncher<Uri?>
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    intent?.let(::withLinkType)
+    intent?.let { withLinkType(LauncherShortcuts.gate(it)) }
+    // Before super.onCreate: swaps Theme.voltius.Starting for Theme.voltius once released.
+    SplashGate.install(this)
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     // super.onCreate loaded the Rust lib; hand the keychain store the app Context + VM.
@@ -44,6 +49,7 @@ class MainActivity : TauriActivity() {
     }
     instance = this
     VoltiusBiometric.applyWindowFlags(this)
+    SystemBars.install(this)
   }
 
   override fun onPause() {
@@ -56,10 +62,21 @@ class MainActivity : TauriActivity() {
     VoltiusBiometric.setForeground(this, true)
   }
 
-  // Wry has just built the RustWebView: install the native terminal-keyboard overlay (#34).
+  // Wry has just built the RustWebView: install the native terminal-keyboard overlay (#34),
+  // the window-insets -> CSS-variables bridge (SystemInsets.kt) and native Back (NativeBack.kt).
   override fun onWebViewCreate(webView: WebView) {
     super.onWebViewCreate(webView)
+    // App dark bg instead of the default white between the splash and the first web paint.
+    webView.setBackgroundColor(getColor(R.color.voltius_bg))
+    SplashGate.watch(webView)
     TerminalKeyboard.install(this, webView)
+    SystemInsets.install(webView)
+    NativeBack.install(this, webView)
+    NativeFeel.install(this, webView)
+    SystemColors.install(this, webView)
+    Haptics.install(webView)
+    LauncherShortcuts.install(this, webView)
+    ShareSheet.install(this, webView)
   }
 
   override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -71,7 +88,18 @@ class MainActivity : TauriActivity() {
     TerminalKeyboard.onVolumeKey(event) || super.dispatchKeyEvent(event)
 
   override fun onNewIntent(intent: Intent) {
-    super.onNewIntent(withLinkType(intent))
+    super.onNewIntent(withLinkType(LauncherShortcuts.gate(intent)))
+  }
+
+  // Root Back of a task the launcher icon didn't start (deep link, notification tap, `am start`)
+  // makes the system finish the activity instead of moving the task back. Wry then drops the
+  // WebView and tao exits the process, taking every SSH session with it, and Tauri can't attach
+  // a recreated activity to the running app. So never finish at the task root: background the
+  // task the way a launcher-started one is. The system's back-to-home preview still plays.
+  // Quitting goes through app.exit / force_quit (process exit), not finish().
+  override fun finish() {
+    if (isTaskRoot && !isChangingConfigurations && moveTaskToBack(true)) return
+    super.finish()
   }
 
   override fun onDestroy() {

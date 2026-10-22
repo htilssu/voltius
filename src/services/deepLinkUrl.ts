@@ -14,6 +14,8 @@ export type PluginInstallIntent = { route: "plugin-install"; pluginId: string; s
 /** Carries a grant id and its secret only — never key material, never
  *  `account_id`, which is the KDF salt for the user's password. */
 export type VaultJoinIntent = { route: "vault-join"; grantId: string; secret: string };
+/** Android launcher shortcut (LauncherShortcuts.kt): the id of a saved host, nothing else. */
+export type ConnectIntent = { route: "connect"; hostId: string };
 export type DeepLinkIntent =
   | JoinIntent
   | InviteIntent
@@ -24,7 +26,8 @@ export type DeepLinkIntent =
   | PortForwardingIntent
   | SnippetInstallIntent
   | PluginInstallIntent
-  | VaultJoinIntent;
+  | VaultJoinIntent
+  | ConnectIntent;
 
 type TrustClass = "confirm" | "attenuated" | "silent" | "navigate";
 type Route = DeepLinkIntent["route"];
@@ -94,6 +97,13 @@ const TRUST = {
   // Membership is a capability even though no key travels in the link, and
   // leaving again is a separate act.
   "vault-join": "confirm",
+  // Opens a session to a host already saved on this device, exactly like tapping it on
+  // Hosts: the link names a host id and carries no credential, so a forged one can only
+  // connect the user to their own server with their own settings. Android also refuses
+  // it from anywhere but the app's own launcher shortcuts (MainActivity drops any other
+  // voltius://connect), it is scheme-only (SCHEME_ONLY), and only the mobile shell acts
+  // on it (deepLinkHandlers).
+  connect: "attenuated",
 } as const satisfies Record<Route, TrustClass>;
 
 type RouteOfClass<C extends TrustClass> = {
@@ -146,6 +156,13 @@ const GRANT_SECRET_RE = /^[A-Za-z0-9_-]{43}$/;
  * nobody anyway.
  */
 const HANDLE_RE = /^[a-z0-9][a-z0-9_-]{1,28}[a-z0-9]$/;
+
+/** A saved host id: an opaque lookup key (UUIDs today), never a path or a URL. */
+const HOST_ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
+
+/** Routes only the custom scheme may carry: the https App Link form reaches the app from
+ *  any web page, while Android lets only the launcher shortcuts deliver these. */
+const SCHEME_ONLY: ReadonlySet<Route> = new Set(["connect"]);
 
 const ROUTES: { [K in Route]: RouteCodec<K> } = {
   join: {
@@ -239,6 +256,14 @@ const ROUTES: { [K in Route]: RouteCodec<K> } = {
     },
     params: ({ grantId, secret }) => ({ g: grantId, k: secret }),
   },
+  connect: {
+    parse: (params) => {
+      const hostId = params.get("host") ?? "";
+      if (!HOST_ID_RE.test(hostId)) return null;
+      return { route: "connect", hostId };
+    },
+    params: ({ hostId }) => ({ host: hostId }),
+  },
 };
 
 export type LinkForm = "https" | "scheme";
@@ -291,7 +316,8 @@ export function parseDeepLink(url: string): DeepLinkIntent | null {
     WEB_HOSTS.has(parsed.hostname) &&
     parsed.pathname.replace(/\/+$/, "") === WEB_PATH
   ) {
-    return parseFragment(parsed.hash);
+    const intent = parseFragment(parsed.hash);
+    return intent && SCHEME_ONLY.has(intent.route) ? null : intent;
   }
 
   return null;

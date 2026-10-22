@@ -3,7 +3,10 @@
     "bell": {
       "title": "Уведомления",
       "clearHistory": "Очистить историю",
-      "noNotifications": "Нет уведомлений"
+      "noNotifications": "Нет уведомлений",
+      "emptyHint": "Новых уведомлений нет",
+      "newSection": "Новые",
+      "earlierSection": "Ранее"
     },
     "emailVerification": {
       "banner": {

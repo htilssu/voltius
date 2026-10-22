@@ -11,6 +11,7 @@ import { runSnippetIntoSessions } from "@/services/snippetRun";
 import { scopeItems } from "@/components/mobile/folders/mobileFolderCore";
 import { folderItemCounter } from "@/utils/folderTree";
 import MobileFolderBreadcrumb from "@/components/mobile/folders/MobileFolderBreadcrumb";
+import MobileFilterBar from "@/components/mobile/MobileFilterBar";
 import MobileFolderRow from "@/components/mobile/folders/MobileFolderRow";
 import FolderBackTrap from "@/components/mobile/folders/FolderBackTrap";
 import FolderFormSheet, { type FolderEdit } from "@/components/mobile/sheets/FolderFormSheet";
@@ -25,7 +26,7 @@ export default function MobileSnippetList({
   const { t } = useTranslation();
   const snippets = useAllSnippets();
   const allSnippetFolders = useAllSnippetFolders();
-  const { inScope, nav, folders: snFolders, folderIds: snFolderIds, targetVaultId, canEditFolder } = useMobileFolderScope(allSnippetFolders, "snippet");
+  const { inScope, nav, axisRef, openPath, folders: snFolders, folderIds: snFolderIds, targetVaultId, canEditFolder } = useMobileFolderScope(allSnippetFolders, "snippet");
   const openSheet = useMobileNavStore((s) => s.openSheet);
   const setTab = useMobileNavStore((s) => s.setTab);
   const closeSheet = useMobileNavStore((s) => s.closeSheet);
@@ -73,16 +74,11 @@ export default function MobileSnippetList({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {foldersEnabled && nav.folderPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
-      <div className="shrink-0 px-3 py-2">
-        <div className="flex items-center gap-2 rounded-xl px-3 h-10" style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}>
-          <Icon icon="lucide:search" width={16} className="text-(--t-text-dim)" />
-          <input data-mobile-snippet-search value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("mobile.snippets.searchPlaceholder")} className="flex-1 bg-transparent text-sm outline-none text-(--t-text-primary)" />
-        </div>
-      </div>
+      {foldersEnabled && openPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
+      <MobileFilterBar value={search} onChange={setSearch} attr="mobile-snippet-search"
+        placeholder={t("mobile.snippets.searchPlaceholder")} clearLabel={t("mobile.hostsScreen.clearSearchAriaLabel")} />
       {foldersEnabled && <MobileFolderBreadcrumb path={nav.folderPath} onNavigate={(i) => (i < 0 ? nav.navigateToRoot() : nav.navigateTo(i))} />}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={axisRef} data-mobile-folder-level className="flex-1 overflow-y-auto">
         {foldersEnabled && !search && subFolders.map((f) => (
           <MobileFolderRow
             key={f.id}
@@ -105,14 +101,14 @@ export default function MobileSnippetList({
               <span className="text-sm font-medium text-(--t-text-primary) truncate">{sn.name}</span>
               <span className="text-xs font-mono text-(--t-text-dim) truncate">{snippetSearchText(sn)}</span>
             </button>
-            <button className="p-2.5 text-(--t-text-secondary)" data-mobile-snippet-insert={sn.id} aria-label={t("mobile.snippets.insertAriaLabel")} onClick={() => onInsert(sn)}>
+            <button className="vt-icon-btn text-(--t-text-secondary)" data-mobile-snippet-insert={sn.id} aria-label={t("mobile.snippets.insertAriaLabel")} onClick={() => onInsert(sn)}>
               <Icon icon="lucide:arrow-down-to-line" width={18} />
             </button>
-            <button className="p-2.5 text-(--t-accent)" data-mobile-snippet-execute={sn.id} aria-label={t("mobile.snippets.executeAriaLabel")} onClick={() => onExecute(sn)}>
+            <button className="vt-icon-btn text-(--t-accent)" data-mobile-snippet-execute={sn.id} aria-label={t("mobile.snippets.executeAriaLabel")} onClick={() => onExecute(sn)}>
               <Icon icon="lucide:play" width={18} />
             </button>
             {!currentSessionId && (
-              <button className="p-2.5 text-(--t-text-dim)" data-mobile-snippet-more={sn.id} aria-label={t("mobile.snippets.moreAriaLabel")}
+              <button className="vt-icon-btn text-(--t-text-dim)" data-mobile-snippet-more={sn.id} aria-label={t("mobile.snippets.moreAriaLabel")}
                 onClick={() => openSheet({ kind: "snippet-actions", snippetId: sn.id })}>
                 <Icon icon="lucide:ellipsis-vertical" width={18} />
               </button>

@@ -3,7 +3,10 @@
     "bell": {
       "title": "Notifications",
       "clearHistory": "Clear history",
-      "noNotifications": "No notifications"
+      "noNotifications": "No notifications",
+      "emptyHint": "You're all caught up",
+      "newSection": "New",
+      "earlierSection": "Earlier"
     },
     "emailVerification": {
       "banner": {

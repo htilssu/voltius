@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "Filtrele…"
     },
-    "remoteSessions": {
-      "title": "Diğer cihazlarda canlı"
-    },
     "snippets": {
       "searchPlaceholder": "Kod parçacıklarında ara",
       "noMatches": "Eşleşme yok",
@@ -118,7 +115,18 @@
       "newTitle": "Yeni kod parçacığı",
       "namePlaceholder": "Kod parçacığı adı",
       "contentPlaceholder": "echo hello",
-      "delete": "Kod parçacığını sil"
+      "delete": "Kod parçacığını sil",
+      "nameLabel": "Ad",
+      "contentLabel": "Betik"
+    },
+    "editForm": {
+      "required": "Zorunlu",
+      "incompleteTitle": "Kaydetmeden çıkılsın mı?",
+      "incompleteBody": "Zorunlu bir alan boş, bu yüzden son değişiklikleriniz henüz kaydedilemiyor.",
+      "unsavedTitle": "Değişiklikler atılsın mı?",
+      "unsavedBody": "Bu snippet'teki değişiklikler kaydedilmedi.",
+      "keepEditing": "Düzenlemeye devam et",
+      "discard": "At"
     },
     "snippetsScreen": {
       "newSnippetLabel": "Yeni kod parçacığı"
@@ -161,12 +169,20 @@
       "batchDeleteTitle_other": "{{count}} öğe silinsin mi?",
       "newFileOption": "Yeni dosya",
       "folderNamePlaceholder": "Klasör adı",
-      "fileNamePlaceholder": "Dosya adı"
+      "fileNamePlaceholder": "Dosya adı",
+      "selectAll": "Tümünü seç",
+      "onePane": "Tek panel",
+      "twoPanes": "İki panel",
+      "moreActions": "Diğer işlemler",
+      "itemActions": "{{name}} için işlemler"
     },
     "folders": {
       "home": "Ana sayfa"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "Sunucu yok"
+      },
       "shared": {
         "moveToVault": "Kasaya taşı",
         "copyToVault": "Kasaya kopyala",
@@ -235,6 +251,53 @@
       "vaultSwitcher": {
         "newVault": "Yeni kasa",
         "namePlaceholder": "Kasa adı"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "Bu sunucu artık yok. Kısayolu kaldırıldı."
+    },
+    "share": {
+      "action": "Paylaş",
+      "publicKey": "Genel anahtarı paylaş",
+      "failed": "Paylaşım menüsü açılamadı",
+      "downloadFailed": "Paylaşılacak dosya indirilemedi",
+      "largeTitle": "{{size}} paylaşılsın mı?",
+      "largeBody": "Dosyalar önce bu telefona indirilir, ardından seçtiğiniz uygulamaya aktarılır.",
+      "tooLong": "Metin olarak paylaşmak için çok uzun"
+    },
+    "vaultSettings": {
+      "title": "Kasa ayarları",
+      "gone": "Bu kasa artık bu cihazda yok.",
+      "openFor": "{{name}} ayarları",
+      "nameRequired": "Kasanın bir adı olmalı.",
+      "nameReadOnly": "Yalnızca kasa yöneticileri yeniden adlandırabilir.",
+      "kindTeam": "Ekip kasası",
+      "kindPrivate": "Özel kasa",
+      "sections": {
+        "general": "Genel",
+        "people": "Kişiler",
+        "danger": "Tehlikeli bölge"
+      },
+      "rows": {
+        "name": "Ad",
+        "share": "Paylaş ve davet et",
+        "members": "Üyeler",
+        "roles": "Roller",
+        "security": "Güvenlik politikası",
+        "makePrivate": "Özel yap",
+        "delete": "Kasayı sil",
+        "leave": "Kasadan ayrıl"
+      },
+      "summaries": {
+        "share": "Kişileri davet edin ve katılma bağlantılarını yönetin",
+        "members_one": "{{count}} üye",
+        "members_other": "{{count}} üye",
+        "roles": "Her rolün neler yapabileceği",
+        "security": "Üyeler için kilit ve oturum kuralları",
+        "makePrivate": "Diğer herkesi çıkarın ve özel bir kopya tutun",
+        "delete": "Kasayı ve içindeki her şeyi siler",
+        "deleteTeam": "Tüm üyeler için siler",
+        "leave": "Bu kasaya erişiminizi kaldırın"
       }
     }
   }

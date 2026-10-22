@@ -51,6 +51,7 @@ export function ChipInput({
   return (
     <div
       ref={boxRef}
+      data-chip-input
       className="flex flex-wrap items-center gap-1.5 px-2.5 py-2 rounded-lg cursor-text min-h-[38px]"
       style={{ background: "var(--t-bg-base)", border: "1px solid var(--t-border)", transition: "border-color 150ms" }}
       onClick={() => inputRef.current?.focus()}

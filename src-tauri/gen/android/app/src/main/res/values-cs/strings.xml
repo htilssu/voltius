@@ -1,10 +1,25 @@
 <resources>
-    <string name="tunnel_channel_name">Přesměrování portů</string>
+    <string name="tunnel_channel_name">Připojení na pozadí</string>
     <string name="tunnel_notification_text">Klepnutím spravujete přesměrování portů</string>
     <plurals name="tunnel_notification_title">
         <item quantity="one">Přesměrován %d port</item>
         <item quantity="few">Přesměrovány %d porty</item>
         <item quantity="many">Přesměrováno %d portu</item>
         <item quantity="other">Přesměrováno %d portů</item>
+    </plurals>
+    <string name="session_notification_text">Klepnutím se vrátíte do Voltius</string>
+    <plurals name="session_notification_title">
+        <item quantity="one">Připojena %d relace SSH</item>
+        <item quantity="few">Připojeny %d relace SSH</item>
+        <item quantity="many">Připojeno %d relace SSH</item>
+        <item quantity="other">Připojeno %d relací SSH</item>
+    </plurals>
+    <string name="shortcut_host_removed">Tento hostitel byl smazán</string>
+    <string name="tunnel_action_stop">Zastavit tunely</string>
+    <plurals name="tunnel_notification_more">
+        <item quantity="one">+%d další</item>
+        <item quantity="few">+%d další</item>
+        <item quantity="many">+%d dalšího</item>
+        <item quantity="other">+%d dalších</item>
     </plurals>
 </resources>

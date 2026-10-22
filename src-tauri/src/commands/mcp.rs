@@ -1,4 +1,4 @@
-use crate::mcp::{transport, McpState};
+use crate::mcp::{transport, McpState, SUPPORTED};
 use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
@@ -30,6 +30,12 @@ pub async fn mcp_set_enabled(
     enabled: bool,
 ) -> Result<String, String> {
     let state = state.inner().clone();
+    if refuses_enable(SUPPORTED, enabled) {
+        // A no-op, not an error: the web side reverts the toggle on an error,
+        // and that `false` would sync back and turn the server off on desktop.
+        log::info!("[mcp] server not supported on this platform, ignoring enable");
+        return Ok(String::new());
+    }
     if !enabled {
         state.enabled.store(false, Ordering::SeqCst);
         // Wakes the accept loop and every live connection task, not just the
@@ -71,6 +77,11 @@ pub async fn mcp_set_enabled(
     }
 }
 
+/// An enable on a platform without MCP support (Android) must never bind.
+fn refuses_enable(supported: bool, enabled: bool) -> bool {
+    enabled && !supported
+}
+
 /// The listener never came up: put the state back where a fresh enable can
 /// re-arm it, and stop any connection task that raced in behind it.
 fn disarm(state: &Arc<McpState>, err: String) -> String {
@@ -98,8 +109,27 @@ pub async fn mcp_status(
     // must not fail the whole status call, just report it empty.
     let exe_path = std::env::current_exe().unwrap_or_default();
     Ok(serde_json::json!({
-        "enabled": state.enabled.load(Ordering::SeqCst),
+        "enabled": SUPPORTED && state.enabled.load(Ordering::SeqCst),
+        "supported": SUPPORTED,
         "socketPath": transport::socket_path().to_string_lossy(),
         "exePath": exe_path.to_string_lossy(),
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::refuses_enable;
+
+    #[test]
+    fn unsupported_platform_never_enables() {
+        assert!(refuses_enable(false, true));
+        // Turning it off stays allowed everywhere (it only cleans up).
+        assert!(!refuses_enable(false, false));
+    }
+
+    #[test]
+    fn supported_platform_enables_as_before() {
+        assert!(!refuses_enable(true, true));
+        assert!(!refuses_enable(true, false));
+    }
 }

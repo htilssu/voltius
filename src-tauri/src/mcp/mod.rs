@@ -8,6 +8,11 @@ use tokio::sync::{broadcast, watch};
 
 pub use bridge::{Bridge, BridgeError};
 
+/// The local MCP server only makes sense where an MCP client can run next to
+/// the app. On Android nothing can, and the `mcp-server` toggle is a synced
+/// setting: a desktop that turned it on must not open a socket on the phone.
+pub const SUPPORTED: bool = !cfg!(target_os = "android");
+
 pub struct McpState {
     pub bridge: Bridge,
     /// Off by default: no socket exists until the user turns the server on.

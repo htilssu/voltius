@@ -4,10 +4,37 @@ import type { VaultAdminCapabilities } from "./vaultAdminTarget";
 export type VaultMenuAction =
   | "share" | "members" | "roles" | "security" | "rename" | "makePrivate" | "delete" | "leave";
 
+/** Icon of each vault action, shared by the desktop menu and the mobile vault settings page. */
+export const VAULT_ACTION_ICONS: Record<VaultMenuAction, string> = {
+  share: "lucide:share-2",
+  members: "lucide:users-round",
+  roles: "lucide:shield",
+  security: "lucide:shield-check",
+  rename: "lucide:text-cursor-input",
+  makePrivate: "lucide:lock",
+  delete: "lucide:trash-2",
+  leave: "lucide:log-out",
+};
+
 /**
- * Built from what the vault is, never from disabled rows: a private vault has no
- * members to manage and no team to leave, so those entries simply do not exist.
+ * The actions a vault offers, in menu order. Built from what the vault is, never from
+ * disabled rows: a private vault has no members to manage and no team to leave, so
+ * those entries simply do not exist.
  */
+export function vaultMenuActions({ caps, canShare }: { caps: VaultAdminCapabilities; canShare: boolean }): VaultMenuAction[] {
+  const actions: VaultMenuAction[] = [];
+  if (canShare) actions.push("share");
+  if (caps.isTeam) {
+    actions.push("members", "roles");
+    if (caps.canSetLockPolicy) actions.push("security");
+  }
+  if (caps.canRename) actions.push("rename");
+  if (caps.canMakePrivate) actions.push("makePrivate");
+  if (caps.canDelete) actions.push("delete");
+  if (caps.canLeave) actions.push("leave");
+  return actions;
+}
+
 export function vaultMenuItems({
   caps, memberCount, canShare, t, on,
 }: {
@@ -17,62 +44,17 @@ export function vaultMenuItems({
   t: (key: string) => string;
   on: (action: VaultMenuAction) => void;
 }): ContextMenuItem[] {
-  const items: ContextMenuItem[] = [];
-
-  if (canShare) {
-    items.push({ label: t("layout.vaultMenu.share"), icon: "lucide:share-2", onClick: () => on("share") });
-  }
-
-  if (caps.isTeam) {
-    items.push({
-      label: t("layout.vaultMenu.members"),
-      icon: "lucide:users-round",
-      shortcut: memberCount !== null ? String(memberCount) : undefined,
-      onClick: () => on("members"),
-    });
-    items.push({ label: t("layout.vaultMenu.roles"), icon: "lucide:shield", onClick: () => on("roles") });
-    if (caps.canSetLockPolicy) {
-      items.push({ label: t("layout.vaultMenu.security"), icon: "lucide:shield-check", onClick: () => on("security") });
-    }
-  }
-
-  if (caps.canRename) {
-    items.push({
-      label: t("layout.vaultMenu.rename"),
-      icon: "lucide:text-cursor-input",
-      divider: true,
-      onClick: () => on("rename"),
-    });
-  }
-
-  if (caps.canMakePrivate) {
-    items.push({
-      label: t("layout.vaultMenu.makePrivate"),
-      icon: "lucide:lock",
-      divider: true,
-      onClick: () => on("makePrivate"),
-    });
-  }
-
-  if (caps.canDelete) {
-    items.push({
-      label: t("layout.vaultMenu.delete"),
-      icon: "lucide:trash-2",
-      danger: true,
-      divider: !caps.canMakePrivate,
-      onClick: () => on("delete"),
-    });
-  }
-
-  if (caps.canLeave) {
-    items.push({
-      label: t("layout.vaultMenu.leave"),
-      icon: "lucide:log-out",
-      danger: true,
-      divider: true,
-      onClick: () => on("leave"),
-    });
-  }
-
-  return items;
+  return vaultMenuActions({ caps, canShare }).map((action): ContextMenuItem => {
+    // Rename opens the edit group; make-private, else delete, opens the destructive one.
+    const divider = action === "delete" ? !caps.canMakePrivate
+      : action === "rename" || action === "makePrivate" || action === "leave" ? true : undefined;
+    return {
+      label: t(`layout.vaultMenu.${action}`),
+      icon: VAULT_ACTION_ICONS[action],
+      ...(action === "members" && memberCount !== null && { shortcut: String(memberCount) }),
+      ...((action === "delete" || action === "leave") && { danger: true }),
+      ...(divider !== undefined && { divider }),
+      onClick: () => on(action),
+    };
+  });
 }

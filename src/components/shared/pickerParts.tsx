@@ -31,6 +31,7 @@ export function PickerTrigger({
       ref={buttonRef}
       type="button"
       onClick={onToggle}
+      data-picker-trigger
       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
       style={{
         background: "var(--t-bg-base)",

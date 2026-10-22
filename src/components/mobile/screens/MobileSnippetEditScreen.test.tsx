@@ -68,3 +68,23 @@ test("leaves the screen once the snippet disappears", () => {
   act(() => useSnippetStore.setState({ snippets: [] } as never));
   expect(pop).toHaveBeenCalledTimes(1);
 });
+
+test("Back over unsaved changes asks first, and Discard leaves without saving", () => {
+  grantOnS1(PERM_BITS.VIEW | PERM_BITS.EDIT_SNIPPETS);
+  const { pop } = mount();
+  const back = () => (document.querySelector("[data-mobile-back]") as HTMLButtonElement).click();
+  back();
+  expect(pop).toHaveBeenCalledTimes(1); // nothing changed: plain exit
+
+  pop.mockClear();
+  act(() => {
+    const input = nameInput();
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "Deploy v2");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  act(back);
+  expect(pop).not.toHaveBeenCalled();
+  expect(document.querySelector("[data-mobile-edit-discard]")).not.toBeNull();
+  act(() => (document.querySelector('[data-edit-leave="discard-confirm"]') as HTMLButtonElement).click());
+  expect(pop).toHaveBeenCalledTimes(1);
+});

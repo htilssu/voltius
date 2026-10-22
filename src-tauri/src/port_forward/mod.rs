@@ -1,5 +1,5 @@
 mod bind;
-mod keepalive;
+pub(crate) mod keepalive;
 pub(crate) mod pipe;
 pub mod poller;
 pub mod socks;
@@ -282,6 +282,7 @@ pub struct PortForwardManager {
 
 impl PortForwardManager {
     pub fn new(app: AppHandle) -> Self {
+        keepalive::set_app(&app);
         Self {
             sessions: Arc::new(Mutex::new(HashMap::new())),
             session_keys: Arc::new(Mutex::new(HashMap::new())),
@@ -652,6 +653,32 @@ impl PortForwardManager {
 
         self.emit_state_for_key(&key).await;
         Ok(())
+    }
+
+    /// Close every tunnel of every host, each the way the user closing it would (an auto
+    /// port stays suppressed, so the poller doesn't reopen it). SSH sessions stay up.
+    /// Returns how many closed. Used by the Android notification's "Stop tunnels".
+    #[cfg_attr(not(target_os = "android"), allow(dead_code))]
+    pub(crate) async fn stop_all_tunnels(&self) -> usize {
+        let targets: Vec<(String, String)> = {
+            let sessions = self.sessions.lock().await;
+            sessions
+                .iter()
+                .flat_map(|(key, s)| {
+                    let owner = s.owner_session.clone().unwrap_or_else(|| key.clone());
+                    s.tunnels
+                        .iter()
+                        .map(move |e| (owner.clone(), e.tunnel.id.clone()))
+                })
+                .collect()
+        };
+        let mut closed = 0;
+        for (session_id, tunnel_id) in targets {
+            if self.close_tunnel(&session_id, &tunnel_id).await.is_ok() {
+                closed += 1;
+            }
+        }
+        closed
     }
 
     /// Tear down all port-forward state for a host (its last terminal closed).

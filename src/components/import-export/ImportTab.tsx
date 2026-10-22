@@ -728,7 +728,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
     <div className="flex flex-col gap-4 h-full">
       <div className="flex flex-col gap-2">
         <p className="text-xs font-bold uppercase tracking-widest text-(--t-text-dim)">{t("importExport.import.importFrom")}</p>
-        <div className="flex flex-wrap gap-1.5">
+        <div data-chip-group className="flex flex-wrap gap-1.5">
           {IMPORTERS.map(importer => {
             const active = selectedSource === importer.key;
             return (

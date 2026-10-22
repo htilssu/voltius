@@ -8,14 +8,14 @@
     "ownership": {
       "title": "Vlastnictví",
       "primary": "Hlavní vlastník",
-      "primaryHintBilling": "Platí za tento tým a jako jediný ho může smazat.",
+      "primaryHintBilling": "Hradí tento tým a jako jediný ho může smazat.",
       "primaryHintSelfHosted": "Jediný, kdo může tento tým smazat.",
       "makePrimary": "Nastavit jako hlavního vlastníka",
       "leaveBlocked": "Než tým opustíte, nastavte hlavním vlastníkem jiného vlastníka.",
       "confirmPrimary": {
         "title": "Nastavit {{name}} jako hlavního vlastníka?",
-        "bodyBilling": "Za tento tým bude od teď platit vlastní předplatné Teams nebo Business uživatele {{name}} a jen on ho bude moci smazat. Vaše předplatné zůstává beze změny: snižte počet míst nebo ho zrušte sami.",
-        "bodySelfHosted": "Tento tým bude moci smazat jen {{name}}. Zůstáváte vlastníkem a poté můžete odejít."
+        "bodyBilling": "Od této chvíle bude tento tým hrazen z vlastního předplatného Teams nebo Business uživatele {{name}}. Pouze {{name}} pak bude moci tým smazat. Vaše předplatné zůstane beze změny: snižte počet míst nebo ho sami zrušte.",
+        "bodySelfHosted": "Tento tým bude moci smazat pouze {{name}}. Vlastníkem zůstanete i vy a poté můžete tým opustit."
       },
       "grant": {
         "title": "Nastavit {{name}} jako vlastníka?",

@@ -3,7 +3,10 @@
     "bell": {
       "title": "Notifications",
       "clearHistory": "Effacer l'historique",
-      "noNotifications": "Aucune notification"
+      "noNotifications": "Aucune notification",
+      "emptyHint": "Vous êtes à jour",
+      "newSection": "Nouvelles",
+      "earlierSection": "Plus tôt"
     },
     "emailVerification": {
       "banner": {

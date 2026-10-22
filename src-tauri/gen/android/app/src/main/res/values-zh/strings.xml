@@ -1,7 +1,16 @@
 <resources>
-    <string name="tunnel_channel_name">端口转发</string>
+    <string name="tunnel_channel_name">后台连接</string>
     <string name="tunnel_notification_text">点按以管理端口转发</string>
     <plurals name="tunnel_notification_title">
         <item quantity="other">已转发 %d 个端口</item>
+    </plurals>
+    <string name="session_notification_text">点按返回 Voltius</string>
+    <plurals name="session_notification_title">
+        <item quantity="other">已连接 %d 个 SSH 会话</item>
+    </plurals>
+    <string name="shortcut_host_removed">该主机已删除</string>
+    <string name="tunnel_action_stop">停止隧道</string>
+    <plurals name="tunnel_notification_more">
+        <item quantity="other">另外 %d 个</item>
     </plurals>
 </resources>

@@ -1,6 +1,7 @@
 {
   "common": {
     "action": {
+      "retry": "重试",
       "dismiss": "忽略",
       "cancel": "取消",
       "save": "保存",

@@ -39,7 +39,7 @@
       },
       "pasteImageAsPath": {
         "title": "Vkládat obrázky jako cestu k souboru",
-        "desc": "Když schránka obsahuje obrázek, nahraje se na SSH hostitele (~/.cache/voltius/pastes, jen pro vlastníka, mazáno po 7 dnech) a vloží se jeho cesta. Nástroje na hostiteli jako Claude Code tak mohou přiložit snímek obrazovky. Pokud se odtud připojíte dál přes SSH, cesta ukazuje na tohoto prvního hostitele."
+        "desc": "Když schránka obsahuje obrázek, nahraje se na SSH host (~/.cache/voltius/pastes, jen pro vlastníka, mazáno po 7 dnech) a vloží se jeho cesta. Nástroje na hostu jako Claude Code tak mohou přiložit snímek obrazovky. Pokud se odtud připojíte dál přes SSH, cesta ukazuje na tento první host."
       },
       "volumeDownCtrl": {
         "title": "Tlačítko Snížit hlasitost jako Ctrl",
@@ -57,6 +57,7 @@
       }
     },
     "appearance": {
+      "themeActions": "Akce motivu",
       "interface": "Rozhraní",
       "language": {
         "title": "Jazyk"
@@ -74,7 +75,9 @@
       "editTheme": "Upravit motiv",
       "deleteTheme": "Smazat motiv",
       "newCustomTheme": "Nový vlastní motiv",
+      "dynamicThemeHint": "Z barev tapety",
       "uiScale": {
+        "clickHintMobile": "Klepnutím zadejte hodnotu",
         "title": "Měřítko rozhraní",
         "desc": "Zvětšit nebo zmenšit celé rozhraní.",
         "clickHint": "Kliknutím zadáte hodnotu",
@@ -84,6 +87,7 @@
         "reset": "Obnovit"
       },
       "terminalFontSize": {
+        "clickHintMobile": "Klepnutím zadejte hodnotu",
         "title": "Velikost písma terminálu",
         "desc": "Nastavit velikost textu v terminálu samostatně, bez změny měřítka zbytku rozhraní.",
         "clickHint": "Kliknutím zadáte hodnotu",
@@ -114,6 +118,7 @@
     },
     "nav": {
       "appearance": {
+        "mobileSub": "Motiv, měřítko, jazyk",
         "label": "Vzhled",
         "keywords": [
           "motiv",
@@ -123,6 +128,7 @@
         ]
       },
       "account": {
+        "mobileSub": "Režim účtu, zámek aplikace",
         "label": "Účet",
         "keywords": [
           "profil",
@@ -131,6 +137,7 @@
         ]
       },
       "sync": {
+        "mobileSub": "Cloudová synchronizace a co se synchronizuje",
         "label": "Synchronizace",
         "keywords": [
           "záloha",
@@ -141,6 +148,7 @@
         ]
       },
       "plugins": {
+        "mobileSub": "Nainstalované pluginy a katalog",
         "label": "Pluginy",
         "keywords": [
           "rozšíření",
@@ -149,6 +157,7 @@
         ]
       },
       "integrations": {
+        "mobileSub": "MCP server pro AI agenty",
         "label": "Integrace",
         "keywords": [
           "mcp",
@@ -160,6 +169,7 @@
         ]
       },
       "terminal": {
+        "mobileSub": "Kurzor, historie, vkládání",
         "label": "Terminál",
         "keywords": [
           "historie",
@@ -172,6 +182,7 @@
         ]
       },
       "sftp": {
+        "mobileSub": "Stahování, přenosy, editor",
         "label": "SFTP",
         "keywords": [
           "soubor",
@@ -181,6 +192,7 @@
         ]
       },
       "portForwarding": {
+        "mobileSub": "Automatické přesměrování",
         "label": "Přesměrování portů",
         "keywords": [
           "tunel",
@@ -191,6 +203,7 @@
         ]
       },
       "hosts": {
+        "mobileSub": "Dostupnost, keepalive, proxy",
         "label": "Hosty",
         "keywords": [
           "ping",
@@ -210,6 +223,7 @@
         ]
       },
       "diagnostics": {
+        "mobileSub": "Protokoly a hlášení chyb",
         "label": "Diagnostika",
         "keywords": [
           "diagnostika",
@@ -221,6 +235,7 @@
         ]
       },
       "about": {
+        "mobileSub": "Verze a odkazy",
         "label": "O aplikaci",
         "keywords": [
           "verze",
@@ -239,6 +254,14 @@
       "collapsePluginGroup": "Sbalit nastavení pluginů"
     },
     "shared": {
+      "reset": "Obnovit",
+      "rowActions": "Akce nastavení",
+      "sync": {
+        "label": "Synchronizovat toto nastavení",
+        "on": "Synchronizováno mezi zařízeními",
+        "off": "Ponecháno v tomto zařízení",
+        "deviceDefault": "Ve výchozím stavu ponecháno v tomto zařízení"
+      },
       "cancel": "Zrušit",
       "resetToDefault": "Obnovit výchozí",
       "modifiedFromDefault": "Změněno oproti výchozímu"
@@ -1272,32 +1295,32 @@
       "sshConfig": {
         "switch": {
           "title": "Průběžně synchronizovat z ~/.ssh/config",
-          "desc": "Hostitelé z vaší konfigurace se vytvářejí a udržují aktuální ve Voltiu na všech vašich počítačích. Hodí se, když konfiguraci zapisuje nástroj (gcloud, MDM…)."
+          "desc": "Hosty z vaší konfigurace aplikace Voltius vytváří a udržuje aktuální na všech vašich počítačích. Hodí se, když konfiguraci zapisuje nástroj (gcloud, MDM…)."
         },
         "vault": {
           "title": "Trezor",
-          "desc": "Kde se vytvářejí nově spravovaní hostitelé. Pouze osobní trezory.",
+          "desc": "Kde se vytvářejí nově spravované hosty. Pouze osobní trezory.",
           "personal": "Osobní"
         },
         "status": {
           "title": "Stav",
           "line": "Naposledy načteno {{when}} · {{managed}} spravovaných · {{skipped}} nesynchronizovaných",
           "never": "Zatím nenačteno",
-          "view": "Zobrazit hostitele…",
+          "view": "Zobrazit hosty…",
           "syncNow": "Synchronizovat nyní"
         },
         "off": {
           "title": "Vypnout průběžnou synchronizaci?",
-          "message_one": "Spravovaný hostitel zůstane ve Voltiu a stane se běžným hostitelem: na žádném z vašich počítačů už nebude sledovat ~/.ssh/config.",
-          "message_few": "{{count}} spravovaní hostitelé zůstanou ve Voltiu a stanou se běžnými hostiteli: na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
-          "message_many": "{{count}} spravovaného hostitele zůstane ve Voltiu a stane se běžnými hostiteli: na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
-          "message_other": "{{count}} spravovaných hostitelů zůstane ve Voltiu a stane se běžnými hostiteli: na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
+          "message_one": "Spravovaný host zůstane ve Voltiu a stane se běžným hostem: na žádném z vašich počítačů už nebude sledovat ~/.ssh/config.",
+          "message_few": "Po vypnutí přestane synchronizace spravovat {{count}} hosty. Ve Voltiu zůstanou jako běžní hosté a na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
+          "message_many": "Po vypnutí přestane synchronizace spravovat {{count}} hostů. Ve Voltiu zůstanou jako běžní hosté a na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
+          "message_other": "Po vypnutí přestane synchronizace spravovat {{count}} hostů. Ve Voltiu zůstanou jako běžní hosté a na žádném z vašich počítačů už nebudou sledovat ~/.ssh/config.",
           "confirm": "Vypnout"
         },
         "dialog": {
           "activateTitle": "Zapnout průběžnou synchronizaci",
-          "reviewTitle": "Hostitelé z ~/.ssh/config",
-          "intro": "Propojení hostitelé si ponechají název, složku a nastavení. Soubor budou sledovat jen údaje, které uvádí (adresa, port a případně uživatel, klíč nebo jump hostitelé), na všech vašich počítačích.",
+          "reviewTitle": "Hosty z ~/.ssh/config",
+          "intro": "Propojené hosty si ponechají název, složku a nastavení. Soubor bude na všech vašich počítačích určovat jen údaje, které uvádí (adresu, port a případně uživatele, klíč nebo jump hosty).",
           "turnOn": "Zapnout",
           "cancel": "Zrušit",
           "close": "Zavřít",
@@ -1313,28 +1336,28 @@
             "name": "Bude propojen s „{{name}}“ · stejný název a adresa",
             "address": "Bude propojen s „{{name}}“ · stejná adresa"
           },
-          "ambiguous": "Nejednoznačné (shoduje se: {{names}}) · vytvoří se nový hostitel",
+          "ambiguous": "Nejednoznačné (shoduje se: {{names}}) · vytvoří se nový host",
           "managed": "Spravován · „{{name}}“",
           "detached": "Odpojen · „{{name}}“ už soubor nesleduje",
           "deleted": "Smazán · synchronizace jej znovu nevytvoří",
           "ignored": "Ignorován · nebude se synchronizovat",
           "identityReplaced": "Identita „{{name}}“ bude nahrazena klíčem ze souboru",
           "skipped": {
-            "pattern": "Nesynchronizuje se · vzor, ne hostitel",
+            "pattern": "Nesynchronizuje se · vzor, ne host",
             "match": "Nesynchronizuje se · blok Match",
             "include": "Nesynchronizuje se · Include se nepodařilo načíst",
             "includeOutside": "Nesynchronizuje se · Include mimo ~/.ssh",
             "proxyCommand": "Nesynchronizuje se · ProxyCommand není podporován",
-            "key": "Klíč nelze přečíst · hostitel vytvořen bez klíče",
-            "keyNotCopied": "Klíč nezkopírován · hostitel vytvořen bez klíče",
-            "pending": "Čeká se · hostitel ještě nedorazil z vašeho jiného zařízení"
+            "key": "Klíč nelze přečíst · host vytvořen bez klíče",
+            "keyNotCopied": "Klíč nezkopírován · host vytvořen bez klíče",
+            "pending": "Čeká se · host ještě nedorazil z vašeho jiného zařízení"
           }
         },
         "keys": {
           "title": "Klíče",
           "switch": "Kopírovat soukromé klíče do trezoru",
           "warning": "Zkopírované klíče putují do trezoru {{vault}} a synchronizují se do všech vašich zařízení, včetně telefonu (šifrovaně).",
-          "settingDesc": "Vypnuto: hostitelé použijí klíč, který už v trezoru je (stejný veřejný klíč nebo název), jinak žádný. Zkopírované klíče se synchronizují do všech vašich zařízení.",
+          "settingDesc": "Vypnuto: hosty použijí klíč, který už v trezoru je (stejný veřejný klíč nebo název), jinak žádný. Zkopírované klíče se synchronizují do všech vašich zařízení.",
           "copy": "Bude zkopírován",
           "notCopied": "Nezkopírován",
           "exists": "Už v trezoru",

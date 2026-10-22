@@ -162,3 +162,21 @@ test("a notification link without an id still opens the centre", () => {
   expect(useUIStore.getState().notificationCenterOpen).toBe(true);
   expect(useUIStore.getState().notificationFocusId).toBeNull();
 });
+
+const requestHostConnect = vi.fn();
+vi.mock("@/services/launcherShortcuts", () => ({
+  requestHostConnect: (id: string) => requestHostConnect(id),
+}));
+let mobileShell = false;
+vi.mock("@/utils/platform", () => ({ isMobileShell: () => mobileShell }));
+
+test("connect opens the host on the mobile shell only", async () => {
+  const { handleUnpromptedIntent } = await import("./deepLinkHandlers");
+  requestHostConnect.mockClear();
+  mobileShell = false;
+  handleUnpromptedIntent({ route: "connect", hostId: "h1" });
+  expect(requestHostConnect).not.toHaveBeenCalled();
+  mobileShell = true;
+  handleUnpromptedIntent({ route: "connect", hostId: "h1" });
+  expect(requestHostConnect).toHaveBeenCalledWith("h1");
+});

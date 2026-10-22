@@ -108,3 +108,19 @@ test("the chevron collapses children without pushing anything", () => {
   expect(childButton("AI Agent")).toBeFalsy();
   expect(screen.queryByTestId("builtin-section")).toBeNull();
 });
+
+test("one back pattern: ← on the list closes settings, no ✕ anywhere", () => {
+  render(<MobileSettings />);
+  expect(screen.queryByLabelText("settings.chrome.close")).toBeNull();
+  fireEvent.click(screen.getByLabelText("settings.chrome.back"));
+  expect(useUIStore.getState().settingsOpen).toBe(false);
+});
+
+test("a sub-page has the same ← in its top bar, which returns to the list", () => {
+  render(<MobileSettings />);
+  fireEvent.click(childButton("Plugins") as HTMLElement);
+  expect(screen.queryByLabelText("settings.chrome.close")).toBeNull();
+  fireEvent.click(screen.getByLabelText("settings.chrome.back"));
+  expect(useUIStore.getState().settingsSubPage).toBeNull();
+  expect(useUIStore.getState().settingsOpen).toBe(true);
+});

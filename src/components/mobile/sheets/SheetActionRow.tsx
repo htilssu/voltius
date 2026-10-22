@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react";
+import { haptic } from "@/lib/haptics";
 
 export type SheetAction = {
   icon: string;
@@ -23,7 +24,11 @@ export function SheetActionRow({ attr, it }: { attr: string; it: SheetAction }) 
       disabled={it.disabled}
       className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left active:bg-(--t-bg-card) disabled:opacity-50"
       style={{ color: it.danger ? "var(--t-danger, #e5484d)" : "var(--t-text-primary)" }}
-      onClick={it.onTap}
+      onClick={() => {
+        // The confirming step of a destructive action (slug `delete-confirm`, …).
+        if (it.danger && slug.endsWith("-confirm")) haptic("confirm");
+        it.onTap();
+      }}
     >
       <Icon icon={it.icon} width={18} />
       <span className="text-sm font-medium">{it.label}</span>

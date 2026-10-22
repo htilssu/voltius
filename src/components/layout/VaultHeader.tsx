@@ -16,7 +16,7 @@ import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { VaultShareSheet } from "@/components/vault-share/VaultShareSheet";
 import { useVaultAdmin } from "@/components/vault-admin/useVaultAdmin";
 import { VaultAdminSurface } from "@/components/vault-admin/VaultAdminSurface";
-import type { VaultAdminTarget } from "@/components/vault-admin/vaultAdminTarget";
+import { cloudVaultTarget, localVaultTarget, type VaultAdminTarget } from "@/components/vault-admin/vaultAdminTarget";
 import { chevronRotateStyle } from "@/utils/icons";
 import { formatRelative } from "@/utils/localeFormat";
 import { memberAvatarLabel, memberLabel } from "@/services/memberLabel";
@@ -213,9 +213,9 @@ export default function VaultHeader() {
   }, [team?.id]);
 
   const target: VaultAdminTarget | null = vault
-    ? { kind: "local", vaultId: vault.id, teamId: vault.teamId ?? null, name: vault.name }
+    ? localVaultTarget(vault)
     : standaloneTeam
-      ? { kind: "cloud", vaultId: null, teamId: standaloneTeam.id, name: standaloneTeam.name }
+      ? cloudVaultTarget(standaloneTeam)
       : null;
   const admin = useVaultAdmin(target);
   const triggerRef = useRef<HTMLButtonElement>(null);

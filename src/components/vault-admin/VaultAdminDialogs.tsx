@@ -42,13 +42,15 @@ function LeaveVaultDialog({ teamId, onClose, onDone }: { teamId: string; onClose
 }
 
 export function VaultAdminDialogs({
-  target, dialog, onClose, onRenamed, onDone,
+  target, dialog, onClose, onRenamed, onDone, onConfirmed,
 }: {
   target: VaultAdminTarget;
   dialog: VaultDialog;
   onClose: () => void;
   onRenamed?: (name: string) => void;
   onDone?: () => void;
+  /** The confirm button of a delete / make-private was pressed (the Android page plays a haptic). */
+  onConfirmed?: () => void;
 }) {
   const { t } = useTranslation();
   const { membersByTeam } = useTeamStore();
@@ -113,7 +115,7 @@ export function VaultAdminDialogs({
         confirmLabel={t("settings.vaults.general.deleteVault.confirmBtn")}
         busy={busy}
         busyLabel={t("settings.vaults.general.deleteVault.deleting")}
-        onConfirm={() => void remove()}
+        onConfirm={() => { onConfirmed?.(); void remove(); }}
         onCancel={onClose}
       />
     );
@@ -131,7 +133,7 @@ export function VaultAdminDialogs({
       confirmLabel={t("settings.vaults.general.makePrivate.confirmBtn")}
       busy={busy}
       busyLabel={t("settings.vaults.general.makePrivate.converting")}
-      onConfirm={() => void makePrivate()}
+      onConfirm={() => { onConfirmed?.(); void makePrivate(); }}
       onCancel={onClose}
     />
   );

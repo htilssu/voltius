@@ -9,6 +9,8 @@ import { APP_SOURCE, useNotificationStore } from "@/stores/notificationStore";
 import { parseJwtPayload } from "@/utils/emailVerification";
 import type { ToastSeverity } from "@/plugins/api";
 import { openPortForwardingPage } from "@/services/portForwardingNav";
+import { requestHostConnect } from "@/services/launcherShortcuts";
+import { isMobileShell } from "@/utils/platform";
 
 function toast(
   message: string,
@@ -109,6 +111,10 @@ export function handleUnpromptedIntent(intent: UnpromptedIntent): void {
   switch (intent.route) {
     case "verified":
       void handleVerified(intent);
+      return;
+    case "connect":
+      // Launcher shortcuts exist on Android only; the desktop shell never acts on one.
+      if (isMobileShell()) requestHostConnect(intent.hostId);
       return;
     default: {
       const _exhaustive: never = intent;

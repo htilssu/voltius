@@ -40,7 +40,7 @@ function TagChips({ tags }: { tags: string[] }) {
 export default function MobileKeychainScreen() {
   const { t } = useTranslation();
   const allFolders = useAllFolders();
-  const { inScope, can, nav, folders: kcFolders, folderIds: kcFolderIds, targetVaultId, canCreateFolder, canEditFolder } = useMobileFolderScope(allFolders, "keychain");
+  const { inScope, can, nav, axisRef, openPath, folders: kcFolders, folderIds: kcFolderIds, targetVaultId, canCreateFolder, canEditFolder } = useMobileFolderScope(allFolders, "keychain");
   const allKeys = useAllKeys();
   const allIdentities = useAllIdentities();
   const keys = useMemo(() => allKeys.filter(inScope), [allKeys, inScope]);
@@ -84,11 +84,11 @@ export default function MobileKeychainScreen() {
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)">
-      {nav.folderPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
+      {openPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
       <MobilePanelHeader
         title={t("mobile.morePages.keychain")}
         right={canCreateKey || canCreateIdentity || canCreateFolder ? (
-          <button data-keychain-add onClick={() => setAddMenuOpen(true)} className="p-2 text-(--t-text-primary)">
+          <button data-keychain-add onClick={() => setAddMenuOpen(true)} className="vt-icon-btn text-(--t-text-primary)">
             <Icon icon="lucide:plus" width={20} />
           </button>
         ) : undefined}
@@ -96,7 +96,7 @@ export default function MobileKeychainScreen() {
       <MobileFilterBar value={search} onChange={setSearch} placeholder={t("mobile.keychainScreen.filterPlaceholder")} />
       <MobileFolderBreadcrumb path={nav.folderPath} onNavigate={(i) => (i < 0 ? nav.navigateToRoot() : nav.navigateTo(i))} />
 
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div ref={axisRef} data-mobile-folder-level className="flex-1 overflow-y-auto pb-4">
         {!search && subFolders.length > 0 && (
           <div className="px-2 pt-1">
             {subFolders.map((f) => (

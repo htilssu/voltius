@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { useAutosave } from "@/hooks/useAutosave";
+import { FieldError, useReportBlocked, useRequiredField, type MobileEditFormProps } from "@/components/shared/fieldValidation";
 import { useStoredSecrets } from "@/hooks/useStoredSecrets";
 import { StoredSecretsNote } from "@/components/shared/VaultUnavailableNote";
 import {
   PanelShell, PanelHeader, FormSection,
-  formInputClass, formInputStyle, formLabelClass, formLabelStyle,
+  formInputClass, formInputStyle, formLabelClass, formLabelStyle, formIdentifierProps,
 } from "@/components/shared/Panel";
 import { PanelActionsMenu } from "@/components/shared/PanelActionsMenu";
 import { PinButton } from "@/components/shared/PinButton";
@@ -71,7 +72,7 @@ function ModeToggle({ mode, onChange }: { mode: KeyFormMode; onChange: (m: KeyFo
 // KeyForm (side panel)
 // ─────────────────────────────────────────────────────────────────
 
-export interface KeyFormProps {
+export interface KeyFormProps extends MobileEditFormProps {
   initial?: SshKey;
   initialMode?: KeyFormMode;
   onSubmit: (data: SshKeyFormData, privateKey: string | null, publicKey: string | null, passphrase: string | null) => void | Promise<void>;
@@ -88,7 +89,7 @@ export interface KeyFormProps {
 
 export const KeyForm = withEditAccess("key", (p: KeyFormProps) => p.initial, KeyFormEditor);
 
-function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDelete, flushRef, isDirtyRef, vaults, onMoveToVault, onCopyToVault, hideChrome, readOnly }: KeyFormProps & EditAccessProps) {
+function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDelete, flushRef, isDirtyRef, vaults, onMoveToVault, onCopyToVault, hideChrome, revealErrors, onBlockedChange, readOnly }: KeyFormProps & EditAccessProps) {
   const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
@@ -128,7 +129,7 @@ function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDe
   const { toggleExcluded, isObjectSynced } = useSyncPrefsStore();
   const isSynced = initial ? isObjectSynced(initial.id, "key") : true;
 
-  const { schedule, markDirty: _markDirty, flushAndClose, flush, saveState } = useAutosave({
+  const { schedule, markDirty: _markDirty, flushAndClose, flush, saveState, blocked } = useAutosave({
     onSave: () => keepSavedOnCancel(onSubmit(
       { name: name.trim() || defaultName, key_type: keyInfo.type ?? undefined, tags, folder_id: folderId ?? undefined, vault_id: resolveVaultIdForSave(vaultId) },
       privateKeyDirty.current ? privateKey : null,
@@ -139,6 +140,7 @@ function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDe
     // the field is emptied or corrected, and the inline error says why.
     canSave: () => (!!privateKey.trim() || (!isNew && !privateKeyDirty.current)) && !isPublicKeyInvalid(publicKey),
     readOnly,
+    flushOnUnmount: hideChrome,
   });
   const markDirty = useCallback(() => {
     if (isDirtyRef) isDirtyRef.current = true;
@@ -146,6 +148,8 @@ function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDe
   }, [_markDirty, isDirtyRef]);
 
   if (flushRef) flushRef.current = flush;
+  useReportBlocked(blocked, onBlockedChange);
+  const privateKeyField = useRequiredField(privateKey, { enabled: !!hideChrome && (isNew || privateKeyDirty.current), reveal: revealErrors });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => schedule(), [name, tags, privateKey, publicKey, passphrase, folderId, vaultId]);
@@ -250,7 +254,10 @@ function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDe
                 value={privateKey}
                 onChange={(e) => { markDirty(); privateKeyDirty.current = true; setPrivateKey(e.target.value); }}
                 placeholder="-----BEGIN OPENSSH PRIVATE KEY-----&#10;..."
+                {...formIdentifierProps}
+                {...privateKeyField.fieldProps}
               />
+              <FieldError show={privateKeyField.invalid} />
               {privateKey.trim() && (
                 <div className="flex items-center gap-1.5 mt-1.5">
                   {keyInfo.valid && keyInfo.type ? (

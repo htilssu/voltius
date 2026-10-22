@@ -3,7 +3,10 @@
     "bell": {
       "title": "通知",
       "clearHistory": "清除历史",
-      "noNotifications": "没有通知"
+      "noNotifications": "没有通知",
+      "emptyHint": "已全部处理",
+      "newSection": "新通知",
+      "earlierSection": "更早"
     },
     "emailVerification": {
       "banner": {

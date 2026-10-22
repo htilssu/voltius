@@ -9,6 +9,16 @@ import { useOrphanVaultIds } from "@/hooks/useAccessibleVaultIds";
 import { unknownVaultLabel } from "@/hooks/accessibleVaults";
 import { openVault } from "@/services/openVault";
 import { VaultLimitModal, useVaultLimitReached } from "@/components/shared/VaultLimitModal";
+import { useLongPress } from "../useLongPress";
+
+interface VaultEntry {
+  id: string;
+  teamId?: string;
+  name: string;
+  icon: string;
+  /** False for an orphan id: nothing on this device to manage. */
+  manageable: boolean;
+}
 
 export default function VaultSwitcherSheet() {
   const { t } = useTranslation();
@@ -18,6 +28,7 @@ export default function VaultSwitcherSheet() {
   const selectVaultOnly = useVaultStore((s) => s.selectVaultOnly);
   const addVault = useVaultStore((s) => s.addVault);
   const closeSheet = useMobileNavStore((s) => s.closeSheet);
+  const push = useMobileNavStore((s) => s.push);
   const orphanVaultIds = useOrphanVaultIds();
   const vaultLimitReached = useVaultLimitReached();
   const [limitOpen, setLimitOpen] = useState(false);
@@ -26,14 +37,15 @@ export default function VaultSwitcherSheet() {
 
   // Teams that are linked to a local vault already appear as that vault.
   const linkedTeamIds = new Set(vaults.map((v) => v.teamId).filter(Boolean));
-  const entries = [
-    ...vaults.map((v) => ({ id: v.id, teamId: v.teamId, name: v.name, icon: "lucide:vault" })),
-    ...teams.filter((team) => !linkedTeamIds.has(team.id)).map((team) => ({ id: team.id, teamId: team.id, name: team.name, icon: "lucide:users-round" })),
+  const entries: VaultEntry[] = [
+    ...vaults.map((v) => ({ id: v.id, teamId: v.teamId, name: v.name, icon: "lucide:vault", manageable: true })),
+    ...teams.filter((team) => !linkedTeamIds.has(team.id)).map((team) => ({ id: team.id, teamId: team.id, name: team.name, icon: "lucide:users-round", manageable: true })),
     ...orphanVaultIds.map((id) => ({
       id,
       teamId: undefined,
       name: unknownVaultLabel(id),
       icon: "lucide:circle-help",
+      manageable: false,
     })),
   ];
 
@@ -46,23 +58,17 @@ export default function VaultSwitcherSheet() {
   };
 
   return (
-    <BottomSheet title={t("common.entity.vaults")} onClose={closeSheet} registerBack={false}>
-      {entries.map((e) => {
-        const active = selectedVaultIds[0] === e.id;
-        return (
-          <button
-            key={e.id}
-            data-vault-entry={e.id}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left"
-            style={{ background: active ? "var(--t-bg-card)" : "transparent" }}
-            onClick={() => { openVault(e.id, e.teamId); closeSheet(); }}
-          >
-            <Icon icon={e.icon} width={18} className="text-(--t-text-dim)" />
-            <span className="flex-1 text-sm font-medium text-(--t-text-primary)">{e.name}</span>
-            {active && <Icon icon="lucide:check" width={16} style={{ color: "var(--t-accent)" }} />}
-          </button>
-        );
-      })}
+    <BottomSheet title={t("common.entity.vaults")} onClose={closeSheet}>
+      {entries.map((e) => (
+        <VaultEntryRow
+          key={e.id}
+          entry={e}
+          active={selectedVaultIds[0] === e.id}
+          onOpen={() => { openVault(e.id, e.teamId); closeSheet(); }}
+          // push() closes the sheet as it opens the page.
+          onSettings={e.manageable ? () => push({ kind: "vault-settings", vaultId: e.id }) : undefined}
+        />
+      ))}
 
       <div className="my-1 h-px" style={{ background: "var(--t-border)" }} />
 
@@ -100,5 +106,36 @@ export default function VaultSwitcherSheet() {
       )}
       {limitOpen && <VaultLimitModal onClose={() => setLimitOpen(false)} />}
     </BottomSheet>
+  );
+}
+
+/** One vault: tap switches to it; long-press or the trailing ⋮ opens its settings page. */
+function VaultEntryRow({ entry, active, onOpen, onSettings }: {
+  entry: VaultEntry; active: boolean; onOpen: () => void; onSettings?: () => void;
+}) {
+  const { t } = useTranslation();
+  const press = useLongPress(onSettings ?? (() => {}), onOpen);
+  return (
+    <div className="flex items-center rounded-xl" style={{ background: active ? "var(--t-bg-card)" : "transparent" }}>
+      <button
+        data-vault-entry={entry.id}
+        className="flex-1 min-w-0 flex items-center gap-3 px-3 py-3 rounded-xl text-left"
+        {...(onSettings ? press : { onClick: onOpen })}
+      >
+        <Icon icon={entry.icon} width={18} className="shrink-0 text-(--t-text-dim)" />
+        <span className="flex-1 min-w-0 truncate text-sm font-medium text-(--t-text-primary)">{entry.name}</span>
+        {active && <Icon icon="lucide:check" width={16} className="shrink-0" style={{ color: "var(--t-accent)" }} />}
+      </button>
+      {onSettings && (
+        <button
+          data-vault-entry-settings={entry.id}
+          aria-label={t("mobile.vaultSettings.openFor", { name: entry.name })}
+          className="vt-icon-btn shrink-0 text-(--t-text-dim)"
+          onClick={onSettings}
+        >
+          <Icon icon="lucide:ellipsis-vertical" width={20} />
+        </button>
+      )}
+    </div>
   );
 }

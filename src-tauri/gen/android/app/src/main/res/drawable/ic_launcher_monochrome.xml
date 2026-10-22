@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon (Android 13+): the Voltius bolt from src-tauri/icons/android-foreground.svg
+     (front bolt path, same 0.62 scale + offset as the coloured foreground), single colour.
+     The launcher tints it; it stays inside the 66 dp safe zone (farthest tip ~25 dp from centre). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="1024"
+    android:viewportHeight="1024">
+    <group
+        android:scaleX="0.62"
+        android:scaleY="0.62"
+        android:translateX="367.5"
+        android:translateY="274.5">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M18.85,391.06L358.73,19.63c3.74,-4.08 10.36,0.03 8.35,5.2L255.74,310.57a5,5 0,0 0,4.62 6.81l134.81,0.96a5,5 0,0 1,3.67 8.36L59.7,700.48c-3.72,4.1 -10.35,0.02 -8.37,-5.15l110.51,-289.1a5,5 0,0 0,-4.67 -6.8H22.54a5,5 0,0 1,-3.7 -8.37z" />
+    </group>
+</vector>

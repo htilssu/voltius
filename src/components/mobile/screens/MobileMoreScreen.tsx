@@ -8,6 +8,9 @@ import { useUIStore } from "@/stores/uiStore";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { getCurrentUserEmail } from "@/services/account";
 import type { MorePage } from "@/stores/mobileNavCore";
+import { useVaultStore } from "@/stores/vaultStore";
+import { useTeamStore } from "@/stores/teamStore";
+import { resolveVaultAdminTarget } from "@/components/vault-admin/vaultAdminTarget";
 
 function getPages(t: TFunction): { page: MorePage; label: string; icon: string }[] {
   return [
@@ -35,6 +38,9 @@ export default function MobileMoreScreen() {
   const tier = useSubscriptionStore((s) => s.tier);
   const [email, setEmail] = useState<string | null>(null);
 
+  const activeVaultId = useVaultStore((s) => s.selectedVaultIds[0]);
+  const activeVault = resolveVaultAdminTarget(activeVaultId, useVaultStore((s) => s.vaults), useTeamStore((s) => s.teams));
+
   const signedIn = accountMode === "server";
   useEffect(() => { if (signedIn) void getCurrentUserEmail().then(setEmail); }, [signedIn]);
 
@@ -42,6 +48,20 @@ export default function MobileMoreScreen() {
     <div className="flex-1 flex flex-col overflow-hidden">
       <MobileHeader />
       <div className="flex-1 overflow-y-auto py-2">
+        {activeVault && (
+          <button
+            data-more-page="vault-settings"
+            className="w-full flex items-center gap-3 px-4 py-3 mb-1 text-left active:bg-(--t-bg-card)"
+            onClick={() => push({ kind: "vault-settings", vaultId: activeVaultId! })}
+          >
+            <Icon icon="lucide:vault" width={20} className="text-(--t-text-dim)" />
+            <span className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-medium text-(--t-text-primary)">{t("mobile.vaultSettings.title")}</span>
+              <span className="text-xs text-(--t-text-dim) truncate">{activeVault.name}</span>
+            </span>
+            <Icon icon="lucide:chevron-right" width={16} className="text-(--t-text-dim)" />
+          </button>
+        )}
         {/* Account block */}
         {signedIn ? (
           <button

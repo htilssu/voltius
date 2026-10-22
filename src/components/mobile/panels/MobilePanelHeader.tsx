@@ -14,7 +14,7 @@ export default function MobilePanelHeader({ title, sessionName, right, onBack, h
     <header className="shrink-0 flex items-center gap-2 px-2 h-12 border-b"
       style={{ background: "var(--t-bg-chrome)", borderColor: "var(--t-border)" }}>
       {hideBack ? <span className="w-2" /> : (
-        <button data-mobile-back onClick={onBack ?? pop} className="p-2 text-(--t-text-primary)">
+        <button data-mobile-back onClick={onBack ?? pop} className="vt-icon-btn text-(--t-text-primary)">
           <Icon icon="lucide:arrow-left" width={22} />
         </button>
       )}

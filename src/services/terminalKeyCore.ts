@@ -3,7 +3,7 @@
 export type SpecialKey =
   | "Esc" | "Tab" | "ShiftTab" | "Up" | "Down" | "Left" | "Right"
   | "Home" | "End" | "PgUp" | "PgDn"
-  | "-" | "/" | "|" | "~";
+  | "-" | "/" | "|" | "~" | "\\";
 export interface KeyMods { ctrl: boolean; alt: boolean; appCursor: boolean; }
 /** Control byte for a printable char: Ctrl-A=0x01 … Ctrl-Z=0x1a, plus common punct. "" if none. */
 export function ctrlByte(ch: string): string {

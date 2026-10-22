@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "筛选…"
     },
-    "remoteSessions": {
-      "title": "其他设备上的实时会话"
-    },
     "snippets": {
       "searchPlaceholder": "搜索代码片段",
       "noMatches": "没有匹配项",
@@ -118,7 +115,18 @@
       "newTitle": "新建代码片段",
       "namePlaceholder": "代码片段名称",
       "contentPlaceholder": "echo hello",
-      "delete": "删除代码片段"
+      "delete": "删除代码片段",
+      "nameLabel": "名称",
+      "contentLabel": "脚本"
+    },
+    "editForm": {
+      "required": "必填",
+      "incompleteTitle": "不保存就离开？",
+      "incompleteBody": "有必填项为空，最近的更改暂时无法保存。",
+      "unsavedTitle": "放弃更改？",
+      "unsavedBody": "此代码片段的更改尚未保存。",
+      "keepEditing": "继续编辑",
+      "discard": "放弃"
     },
     "snippetsScreen": {
       "newSnippetLabel": "新建代码片段"
@@ -161,12 +169,20 @@
       "batchDeleteTitle_other": "删除 {{count}} 个项目？",
       "newFileOption": "新建文件",
       "folderNamePlaceholder": "文件夹名称",
-      "fileNamePlaceholder": "文件名称"
+      "fileNamePlaceholder": "文件名称",
+      "selectAll": "全选",
+      "onePane": "单窗格",
+      "twoPanes": "双窗格",
+      "moreActions": "更多操作",
+      "itemActions": "{{name}} 的操作"
     },
     "folders": {
       "home": "首页"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "没有主机"
+      },
       "shared": {
         "moveToVault": "移动到保险库",
         "copyToVault": "复制到保险库",
@@ -235,6 +251,52 @@
       "vaultSwitcher": {
         "newVault": "新建保险库",
         "namePlaceholder": "保险库名称"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "该主机已不存在，其快捷方式已移除。"
+    },
+    "share": {
+      "action": "分享",
+      "publicKey": "分享公钥",
+      "failed": "无法打开分享菜单",
+      "downloadFailed": "无法下载要分享的文件",
+      "largeTitle": "分享 {{size}}？",
+      "largeBody": "文件会先下载到这部手机，再交给你选择的应用。",
+      "tooLong": "文本太长，无法分享"
+    },
+    "vaultSettings": {
+      "title": "保管库设置",
+      "gone": "此设备上已不存在该保管库。",
+      "openFor": "{{name}} 的设置",
+      "nameRequired": "保管库需要一个名称。",
+      "nameReadOnly": "只有保管库管理员可以重命名。",
+      "kindTeam": "团队保管库",
+      "kindPrivate": "私人保管库",
+      "sections": {
+        "general": "常规",
+        "people": "成员与共享",
+        "danger": "危险操作"
+      },
+      "rows": {
+        "name": "名称",
+        "share": "共享和邀请",
+        "members": "成员",
+        "roles": "角色",
+        "security": "安全策略",
+        "makePrivate": "设为私有",
+        "delete": "删除保管库",
+        "leave": "离开保管库"
+      },
+      "summaries": {
+        "share": "邀请他人并管理加入链接",
+        "members_other": "{{count}} 名成员",
+        "roles": "每个角色可以做什么",
+        "security": "成员的锁定和会话规则",
+        "makePrivate": "移除其他所有人并保留私人副本",
+        "delete": "删除保管库及其全部内容",
+        "deleteTeam": "为所有成员删除",
+        "leave": "移除你对此保管库的访问权限"
       }
     }
   }

@@ -24,11 +24,13 @@ type Tab = "people" | "invite" | "links";
 
 interface Props {
   vaultId: string;
-  variant: "popover" | "full";
+  /** `page`: a full-screen mobile page that already shows the title in its app bar. */
+  variant: "popover" | "full" | "page";
   onRequestFull?: () => void;
+  initialTab?: Tab;
 }
 
-export function VaultShareSheet({ vaultId, variant, onRequestFull }: Props) {
+export function VaultShareSheet({ vaultId, variant, onRequestFull, initialTab = "people" }: Props) {
   const { t } = useTranslation();
   const vault = useVaultStore((s) => s.vaults.find((v) => v.id === vaultId));
   const teams = useTeamStore((s) => s.teams);
@@ -42,7 +44,7 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull }: Props) {
   const pendingInvitationsByTeam = useTeamStore((s) => s.pendingInvitationsByTeam);
   const seats = useSeatReadout();
 
-  const [tab, setTab] = useState<Tab>("people");
+  const [tab, setTab] = useState<Tab>(initialTab);
   // Owned by the sheet, never by a tab: the bug this component replaces was an
   // error written to a panel the same handler had just unmounted.
   const [error, setError] = useState("");
@@ -129,10 +131,10 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull }: Props) {
         vaultName={vault!.name}
         onCancel={() => onRequestFull?.()}
         onConverted={() => setTab("invite")}
-        inline={variant === "popover"}
+        inline={variant !== "full"}
       />
     );
-    return variant === "popover" ? <div className="p-4">{gate}</div> : gate;
+    return variant === "full" ? gate : <div className="p-4">{gate}</div>;
   }
 
   const canManage = canManageShare(myRoleNames);
@@ -180,7 +182,9 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull }: Props) {
 
   return (
     <div className="flex flex-col gap-3.5 p-4">
-      <h2 className="text-sm font-semibold text-(--t-text-primary)">{t("members.share.title", { vault: teamName })}</h2>
+      {variant !== "page" && (
+        <h2 className="text-sm font-semibold text-(--t-text-primary)">{t("members.share.title", { vault: teamName })}</h2>
+      )}
 
       {variant === "popover" && tab !== "invite" && (
         <button

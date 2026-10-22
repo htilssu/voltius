@@ -102,4 +102,18 @@ assertEqual(initialMobileNavState.tab, "hosts", "initial tab is hosts");
   assertEqual(r.handled, true, "back handled for snippet-target sheet");
   assertEqual(r.state.sheet, null, "snippet-target sheet cleared on back");
 }
+
+// vault settings: Back walks a sub-page, then the page, like any pushed page
+{
+  const s: MobileNavState = {
+    tab: "more",
+    stack: [{ kind: "vault-settings", vaultId: "v2" }, { kind: "vault-settings", vaultId: "v2", page: "roles" }],
+    sheet: null,
+  };
+  const r1 = handleBack(s);
+  assertEqual(r1.state.stack, [{ kind: "vault-settings", vaultId: "v2" }], "sub-page popped first");
+  const r2 = handleBack(r1.state);
+  assertEqual(r2.state.stack, [], "then the vault settings page");
+  assertEqual(r2.state.tab, "more", "the tab stays");
+}
 });

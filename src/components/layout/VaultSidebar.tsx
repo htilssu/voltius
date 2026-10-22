@@ -20,7 +20,7 @@ import { acceptInvitation, declineInvitation } from "@/services/invitationAction
 import type { MyPendingInvitation } from "@/stores/teamStore";
 import { useVaultAdmin } from "@/components/vault-admin/useVaultAdmin";
 import { VaultAdminSurface } from "@/components/vault-admin/VaultAdminSurface";
-import type { VaultAdminTarget } from "@/components/vault-admin/vaultAdminTarget";
+import { cloudVaultTarget, localVaultTarget, type VaultAdminTarget } from "@/components/vault-admin/vaultAdminTarget";
 
 function getInitials(name: string) {
   return name.trim().charAt(0).toUpperCase();
@@ -128,9 +128,7 @@ export default function VaultSidebar() {
             <VaultRailRow
               key={vault.id}
               testId={`vault-row-${vault.id}`}
-              onContextMenu={menuFor({
-                kind: "local", vaultId: vault.id, teamId: vault.teamId ?? null, name: vault.name,
-              })}
+              onContextMenu={menuFor(localVaultTarget(vault))}
             >
               <VaultButton
                 testId={`vault-button-${vault.id}`}
@@ -161,7 +159,7 @@ export default function VaultSidebar() {
             <VaultRailRow
               key={team.id}
               testId={`vault-row-${team.id}`}
-              onContextMenu={menuFor({ kind: "cloud", vaultId: null, teamId: team.id, name: team.name })}
+              onContextMenu={menuFor(cloudVaultTarget(team))}
             >
               <VaultButton
                 initial={getInitials(team.name)}

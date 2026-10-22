@@ -1,6 +1,7 @@
 {
   "common": {
     "action": {
+      "retry": "Повторить",
       "dismiss": "Скрыть",
       "cancel": "Отмена",
       "save": "Сохранить",

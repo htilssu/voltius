@@ -49,6 +49,7 @@ export const formIdentifierProps = {
 export function PanelShell({ children }: { children: React.ReactNode }) {
   return (
     <div
+      data-panel-shell
       className="flex flex-col h-full bg-(--t-bg-base)"
       style={{ boxShadow: "inset 1px 0 0 rgba(255,255,255,0.06), -12px 0 32px -16px rgba(0,0,0,0.55)" }}
     >
@@ -156,13 +157,14 @@ export function PanelHeader({
 export function FormSection({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
     <div
+      data-form-section
       className={`rounded-[var(--r-md)] overflow-hidden bg-(--t-bg-card) ${className ?? ""}`}
       style={{ boxShadow: "var(--t-ring)" }}
     >
-      <div className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-(--t-text-dim) border-b border-b-(--t-bg-card-hover)">
+      <div data-form-section-title className="px-4 py-2 text-xs font-bold uppercase tracking-widest text-(--t-text-dim) border-b border-b-(--t-bg-card-hover)">
         {label}
       </div>
-      <div className="px-4 py-3 space-y-3">{children}</div>
+      <div data-form-section-body className="px-4 py-3 space-y-3">{children}</div>
     </div>
   );
 }

@@ -45,7 +45,8 @@ export default function SFTPSection() {
           >
             <button
               onClick={() => void changeDownloadDir()}
-              className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary) active:bg-(--t-bg-card-hover)"
+              data-row-control
+              className="shrink-0 h-10 px-3 -mr-2 rounded-full text-sm font-medium text-(--t-accent)"
             >
               {t("settings.sftp.downloads.changeFolder")}
             </button>

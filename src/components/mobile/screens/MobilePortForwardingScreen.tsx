@@ -1,12 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { useAllPortForwardingRules } from "@/hooks/useAllPortForwardingRules";
 import { useAllFolders } from "@/hooks/useAllFolders";
 import { useRuleTunnels } from "@/hooks/useRuleTunnels";
-import { useCloseWhenGone } from "@/hooks/useCloseWhenGone";
 import { useFolderStore } from "@/stores/folderStore";
-import { usePortForwardingStore } from "@/stores/portForwardingStore";
 import { useMobileFolderScope } from "@/components/mobile/folders/useMobileFolderScope";
 import { AvatarTile } from "@/components/shared/AvatarTile";
 import MobileFilterBar from "@/components/mobile/MobileFilterBar";
@@ -19,7 +17,7 @@ import FolderActionsSheet from "@/components/mobile/sheets/FolderActionsSheet";
 import MobileFolderBreadcrumb from "@/components/mobile/folders/MobileFolderBreadcrumb";
 import MobileFolderRow from "@/components/mobile/folders/MobileFolderRow";
 import FolderBackTrap from "@/components/mobile/folders/FolderBackTrap";
-import { RuleForm } from "@/components/port_forwarding/RuleForm";
+import MobileRuleEditScreen from "./MobileRuleEditScreen";
 import { tunnelTypeChoices } from "@/components/port_forwarding/tunnelTypeChoices";
 import { scopeItems } from "@/components/mobile/folders/mobileFolderCore";
 import { folderItemCounter } from "@/utils/folderTree";
@@ -33,13 +31,11 @@ type AddMode = null | "menu" | "new-folder";
 export default function MobilePortForwardingScreen() {
   const { t } = useTranslation();
   const allFolders = useAllFolders();
-  const { inScope, can, nav, folders: pfFolders, folderIds: pfFolderIds, targetVaultId, canCreateFolder, canEditFolder } = useMobileFolderScope(allFolders, "port_forwarding");
+  const { inScope, can, nav, axisRef, openPath, folders: pfFolders, folderIds: pfFolderIds, targetVaultId, canCreateFolder, canEditFolder } = useMobileFolderScope(allFolders, "port_forwarding");
   const everyRule = useAllPortForwardingRules();
   const allRules = useMemo(() => everyRule.filter(inScope), [everyRule, inScope]);
   const folderCount = useMemo(() => folderItemCounter(allRules, pfFolders), [allRules, pfFolders]);
   const { statusFor, startRule, stopRule } = useRuleTunnels();
-  const createRule = usePortForwardingStore((s) => s.createRule);
-  const updateRule = usePortForwardingStore((s) => s.updateRule);
   const saveFolder = useFolderStore((s) => s.saveFolder);
   const updateFolder = useFolderStore((s) => s.updateFolder);
   const deleteFolder = useFolderStore((s) => s.deleteFolder);
@@ -49,7 +45,6 @@ export default function MobilePortForwardingScreen() {
   const [formRule, setFormRule] = useState<FormRule>(undefined);
   const [addMode, setAddMode] = useState<AddMode>(null);
   const [folderSheet, setFolderSheet] = useState<Folder | null>(null);
-  const dirtyRef = useRef<boolean>(false);
 
   const subfolders = useMemo(() => [...nav.visibleFolders].sort((a, b) => compareStrings(a.name, b.name)), [nav.visibleFolders]);
 
@@ -61,21 +56,19 @@ export default function MobilePortForwardingScreen() {
   }, [allRules, nav.activeFolderId, pfFolderIds, search]);
 
   const canCreateRule = can("EDIT_CONNECTIONS", targetVaultId);
-  const closeForm = () => { setFormRule(undefined); dirtyRef.current = false; };
+  const closeForm = () => setFormRule(undefined);
   const newRuleType = typeof formRule === "string" ? formRule : undefined;
   const editedRule = typeof formRule === "object" ? formRule : null;
-  const shownRuleId = editedRule?.id ?? null;
-  useCloseWhenGone(shownRuleId, allRules.some((r) => r.id === shownRuleId), closeForm);
   const createFolder = (edit: FolderEdit) =>
     void saveFolder({ ...edit, object_type: "port_forwarding", parent_folder_id: nav.activeFolderId ?? undefined, vault_id: targetVaultId });
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)">
-      {nav.folderPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
+      {openPath.map((f) => <FolderBackTrap key={f.id} onBack={nav.navigateUp} />)}
       <MobilePanelHeader
         title={t("mobile.morePages.portForwarding")}
         right={canCreateRule || canCreateFolder ? (
-          <button data-pf-add onClick={() => setAddMode("menu")} className="p-2 text-(--t-text-primary)">
+          <button data-pf-add onClick={() => setAddMode("menu")} className="vt-icon-btn text-(--t-text-primary)">
             <Icon icon="lucide:plus" width={22} />
           </button>
         ) : undefined}
@@ -84,7 +77,7 @@ export default function MobilePortForwardingScreen() {
       <MobileFolderBreadcrumb path={nav.folderPath} onNavigate={(i) => (i < 0 ? nav.navigateToRoot() : nav.navigateTo(i))} />
       <div className="px-4 py-1 text-xs text-(--t-text-dim)">{t("mobile.portForwardingScreen.summary", { total: allRules.length, active: allRules.filter((r) => statusFor(r).status === "active").length })}</div>
 
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div ref={axisRef} data-mobile-folder-level className="flex-1 overflow-y-auto pb-4">
         {!search && nav.folderPath.length === 0 && <MobileActiveTunnels />}
         {!search && subfolders.map((f) => (
           <MobileFolderRow key={f.id} folder={f} count={folderCount(f.id)} onOpen={() => nav.navigateInto(f)} onActions={canEditFolder(f) ? () => setFolderSheet(f) : undefined} />
@@ -119,17 +112,7 @@ export default function MobilePortForwardingScreen() {
       </div>
 
       {formRule !== undefined && formRule !== null && (
-        <div className="absolute inset-0 z-40 flex flex-col bg-(--t-bg-base)">
-          <div className="flex-1 overflow-y-auto">
-            <RuleForm
-              rule={editedRule}
-              initialTunnelType={newRuleType}
-              isDirtyRef={dirtyRef}
-              onClose={closeForm}
-              onSave={async (data) => { if (editedRule) await updateRule(editedRule.id, data); else await createRule(data); closeForm(); }}
-            />
-          </div>
-        </div>
+        <MobileRuleEditScreen rule={editedRule} tunnelType={newRuleType} onClose={closeForm} />
       )}
 
       {addMode === "menu" && (

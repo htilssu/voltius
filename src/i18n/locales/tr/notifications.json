@@ -3,7 +3,10 @@
     "bell": {
       "title": "Bildirimler",
       "clearHistory": "Geçmişi temizle",
-      "noNotifications": "Bildirim yok"
+      "noNotifications": "Bildirim yok",
+      "emptyHint": "Hepsi bu kadar",
+      "newSection": "Yeni",
+      "earlierSection": "Daha önce"
     },
     "emailVerification": {
       "banner": {

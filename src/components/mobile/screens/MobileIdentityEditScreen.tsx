@@ -1,49 +1,45 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import MobileEditHeader from "../MobileEditHeader";
+import MobileEditScreen, { useAutosaveExit } from "../MobileEditScreen";
+import KeychainItemActionsSheet from "../sheets/KeychainItemActionsSheet";
 import { IdentityForm } from "@/components/keychain/IdentityForm";
 import { useAllIdentities } from "@/hooks/useAllIdentities";
 import { useVaultScope } from "@/hooks/useVaultScope";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
-import { useCloseWhenGone } from "@/hooks/useCloseWhenGone";
+import { useEditedItem } from "@/hooks/useEditedItem";
 import { saveIdentityFromForm } from "@/services/keychainForm";
 
+/** New / edit identity. Autosaves like the host screen: no Save button, ⋮ once it exists. */
 export default function MobileIdentityEditScreen({ identityId }: { identityId?: string }) {
   const { t } = useTranslation();
   const pop = useMobileNavStore((s) => s.pop);
-  const identities = useAllIdentities();
   const { createVaultId } = useVaultScope();
-  const [editingId, setEditingId] = useState<string | undefined>(identityId);
-  const editing = editingId ? identities.find((i) => i.id === editingId) ?? null : null;
-  useCloseWhenGone(editingId, editing !== null, pop);
+  const { editing, gone, onCreated } = useEditedItem(useAllIdentities(), identityId, pop);
   const flushRef = useRef<(() => void) | null>(null);
   const inlineKeyIdRef = useRef<string | null>(null);
-
-  const flushAndPop = () => {
-    flushRef.current?.();
-    pop();
-  };
+  const [actions, setActions] = useState(false);
+  const exit = useAutosaveExit();
 
   return (
-    <div className="absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)">
-      <MobileEditHeader
-        title={editing ? t("keychain.identityForm.titleEdit") : t("keychain.toolbar.newIdentity")}
-        onBack={flushAndPop}
-        onSave={flushAndPop}
-        saveAttr="mobile-identity-save"
+    <MobileEditScreen
+      form="identity"
+      title={editing ? t("keychain.identityForm.titleEdit") : t("keychain.toolbar.newIdentity")}
+      onLeave={() => { flushRef.current?.(); pop(); }}
+      onDiscard={pop}
+      onOverflow={editing ? () => setActions(true) : undefined}
+      overlay={actions && editing && <KeychainItemActionsSheet kind="identity" item={editing} fromEditor onClose={() => setActions(false)} />}
+      {...exit.screenProps}
+    >
+      <IdentityForm
+        hideChrome
+        {...exit.formProps}
+        initial={editing ?? undefined}
+        flushRef={flushRef}
+        onSubmit={(data, password, inlineKeyMaterial) => (gone
+          ? undefined
+          : saveIdentityFromForm(editing, data, password, inlineKeyMaterial, inlineKeyIdRef, createVaultId, onCreated))}
+        onClose={pop}
       />
-      <div className="flex-1 overflow-y-auto relative">
-        <IdentityForm
-          hideChrome
-          initial={editing ?? undefined}
-          flushRef={flushRef}
-          onSubmit={(data, password, inlineKeyMaterial) =>
-            saveIdentityFromForm(
-              editing, data, password, inlineKeyMaterial, inlineKeyIdRef, createVaultId, (created) => setEditingId(created.id),
-            )}
-          onClose={pop}
-        />
-      </div>
-    </div>
+    </MobileEditScreen>
   );
 }

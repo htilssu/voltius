@@ -16,6 +16,8 @@ import { LazyNotesEditor as NotesEditor } from "@/components/notes/LazyNotesEdit
 import EncodingSelector from "./EncodingSelector";
 import { HostCommandField } from "./HostCommandField";
 import { LockMark } from "@/components/sshConfig/ManagedHost";
+import { ListRowContext } from "@/components/shared/listRowContext";
+import { useIsAndroid } from "@/utils/platform";
 
 export interface ConnectionFormProps {
   initial?: Connection;
@@ -60,6 +62,8 @@ export function AdvancedDisclosure({ open, onToggle, hasValues, children }: Adva
       <button
         type="button"
         onClick={onToggle}
+        data-advanced-toggle={open ? "open" : "closed"}
+        aria-expanded={open}
         className="flex items-center gap-1.5 text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors w-full pt-1"
       >
         <span>{t("connections.common.advanced")}</span>
@@ -70,7 +74,8 @@ export function AdvancedDisclosure({ open, onToggle, hasValues, children }: Adva
         className="grid transition-[grid-template-rows] duration-200 ease-out"
         style={{ gridTemplateRows: open ? "1fr" : "0fr", marginTop: open ? undefined : 0 }}
       >
-        <div className="overflow-hidden">
+        {/* data-collapsed: the mobile IME "next" order skips the hidden fields (formKeyboard.ts). */}
+        <div className="overflow-hidden" data-collapsed={open ? undefined : ""}>
           <div className="space-y-3 mt-3">{children}</div>
         </div>
       </div>
@@ -106,11 +111,16 @@ export function SettingRow({
   title?: string;
   children: ReactNode;
 }) {
+  // Android (mobile edit screens): an M3 list row, its control trailing (ListRowContext)
+  // and a tap on the label forwarded to it (rowTapControl, MobileEditScreen).
+  const isAndroid = useIsAndroid();
   return (
-    <div className="flex items-center gap-1.5 text-xs text-(--t-text-dim) w-full py-1" title={title}>
+    <div data-setting-row={isAndroid ? "" : undefined} data-form-setting-row className="flex items-center gap-1.5 text-xs text-(--t-text-dim) w-full py-1" title={title}>
       <Icon icon={icon} width={13} />
       <span>{label}</span>
-      <span className="ml-auto">{children}</span>
+      <ListRowContext.Provider value={isAndroid}>
+        <span className="ml-auto">{children}</span>
+      </ListRowContext.Provider>
     </div>
   );
 }
@@ -121,6 +131,7 @@ export function DrillInRow({ icon, label, count, onClick, locked }: { icon: stri
       type="button"
       onClick={onClick}
       disabled={locked}
+      data-form-drill-row
       className="flex items-center gap-1.5 text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors w-full py-1 disabled:cursor-not-allowed"
     >
       <Icon icon={icon} width={13} />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
-import { formInputClass, formInputStyle, formLabelClass, formLabelStyle } from "@/components/shared/Panel";
+import { formIdentifierProps, formInputClass, formInputStyle, formLabelClass, formLabelStyle } from "@/components/shared/Panel";
 import { Pills } from "@/components/shared/Pills";
 import { useCopiedFlash } from "@/hooks/useCopiedFlash";
 import { writeClipboard } from "@/utils/clipboard";
@@ -75,7 +75,7 @@ export function ListenerFields({ side, portLabel, portPlaceholder, port, onPort,
         {audience === "custom" && (
           <input className={`${formInputClass} mt-2`} style={formInputStyle} placeholder="192.168.1.2"
             aria-label={t("portForwarding.ruleForm.audience.customAddress")}
-            value={bindHost} onChange={(e) => onBindHost(e.target.value)} />
+            value={bindHost} onChange={(e) => onBindHost(e.target.value)} inputMode="url" {...formIdentifierProps} />
         )}
         {audience !== "private" && (
           <p className="mt-1.5 flex gap-1.5 text-[10px] leading-relaxed text-amber-400">
@@ -100,7 +100,7 @@ export function EndpointFields({ host, onHost, port, onPort }: {
       <div>
         <label className={formLabelClass} style={formLabelStyle}>{t("portForwarding.ruleForm.host")}</label>
         <input className={formInputClass} style={formInputStyle} placeholder="127.0.0.1"
-          value={host} onChange={(e) => onHost(e.target.value)} />
+          value={host} onChange={(e) => onHost(e.target.value)} inputMode="url" {...formIdentifierProps} />
       </div>
       <PortInput label={t("portForwarding.ruleForm.port")} placeholder="3000" value={port} onChange={onPort} />
     </div>

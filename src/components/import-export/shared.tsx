@@ -79,7 +79,7 @@ export function VaultChipSelect({ selectedIds, onChange, writableOnly = false }:
   };
 
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div data-chip-group className="flex flex-wrap gap-1.5">
       {allVaults.map(v => {
         const active = selectedIds.includes(v.id);
         return (

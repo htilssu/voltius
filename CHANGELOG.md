@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-10-22
+
+### Added
+
+- Sessions running on your other devices now appear on Android as the same cards as on desktop, with the device, how long ago it was active, and the working directory. Long-press a card to join the session or kill it. Killing waits 5 seconds and can be undone (#702)
+- On Android, opening or leaving a folder in Hosts, Snippets, Keychain, Port Forwarding and SFTP now slides the new level in from the side, instead of switching instantly (#703)
+
+## [0.61.1] - 2026-10-22
+
+### Added
+
+- The Android app now feels like a native app. It draws edge to edge around the status bar, notch and navigation bar, and the layout makes room for the keyboard. The system bar icons follow the Voltius theme, and launch shows a navy splash with the bolt instead of a white flash. Text follows the system font size, and the page no longer zooms, overscrolls or flashes on tap like a website (#666–#669, #673)
+- Back on Android no longer quits the app. One Back gesture works across pages, settings and sheets, with predictive back previews. Back on the home screen sends Voltius to the background, and SSH sessions stay connected there (#670–#672)
+- Material motion and touch feedback on Android: page push and pop transitions, a Material 3 navigation bar that fades between tabs, ripples and pressed states, haptic feedback, and bottom sheets you can drag from anywhere and fling to dismiss (#675, #676, #679–#682, #697)
+- Redesigned Android screens. Hosts has a large title, a pill-shaped search field, long-press actions and an extended + button. All tap targets are at least 48 dp. Settings use Material lists, and notifications open in a bottom sheet (#684, #687, #689, #690)
+- The Android terminal has 48 dp extra keys with swipe-up alternates. Swipe to switch sessions, and pick a host or local shell for a new session (#685)
+- Android SFTP uses a single pane with a selection mode and pull to refresh. Errors appear as snackbars with Retry (#683, #686)
+- On Android, Host, Key, Identity and port-forwarding forms save as you type, with no Save button. Back asks before discarding a form that can't be saved yet (#688)
+- A Vault settings page on Android lets you rename a vault and manage sharing, members, roles and security from the phone (#701)
+- Material You colors from your wallpaper, a themed app icon and launcher shortcuts to recent hosts on Android (#691–#693)
+- Share SFTP files, public keys and snippets through the Android share sheet. The tunnel notification lists active forwards and has a Stop tunnels action (#694, #695)
+
+### Fixed
+
+- Selection, link hover and mouse reports landed on the wrong cell in the terminal when UI scale wasn't 100% (#677)
+- Turning on the MCP server on desktop synced the setting to Android, which then opened an MCP socket that no client could use. The MCP server is now off on Android, and the Integrations settings are hidden there (#699)
+- Refined Czech translations (#696)
+- The Docker, Gist Sync, Monitoring, Process Manager and Proxmox plugins are rebuilt with the updated bundler and move to new patch versions. They work the same. 0.61.0 was never published because of this
+
 ## [0.60.5] - 2026-10-22
 
 ### Changed

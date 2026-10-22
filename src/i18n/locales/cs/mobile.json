@@ -8,9 +8,6 @@
     "filterBar": {
       "placeholder": "Filtrovat…"
     },
-    "remoteSessions": {
-      "title": "Aktivní na jiných zařízeních"
-    },
     "snippets": {
       "searchPlaceholder": "Hledat úryvky",
       "noMatches": "Žádné shody",
@@ -118,7 +115,18 @@
       "newTitle": "Nový úryvek",
       "namePlaceholder": "Název úryvku",
       "contentPlaceholder": "echo hello",
-      "delete": "Smazat úryvek"
+      "delete": "Smazat úryvek",
+      "nameLabel": "Název",
+      "contentLabel": "Skript"
+    },
+    "editForm": {
+      "required": "Povinné",
+      "incompleteTitle": "Odejít bez uložení?",
+      "incompleteBody": "Povinné pole je prázdné, takže poslední změny zatím nelze uložit.",
+      "unsavedTitle": "Zahodit změny?",
+      "unsavedBody": "Změny tohoto snippetu nebyly uloženy.",
+      "keepEditing": "Pokračovat v úpravách",
+      "discard": "Zahodit"
     },
     "snippetsScreen": {
       "newSnippetLabel": "Nový úryvek"
@@ -163,12 +171,20 @@
       "batchDeleteTitle_other": "Smazat {{count}} položek?",
       "newFileOption": "Nový soubor",
       "folderNamePlaceholder": "Název složky",
-      "fileNamePlaceholder": "Název souboru"
+      "fileNamePlaceholder": "Název souboru",
+      "selectAll": "Vybrat vše",
+      "onePane": "Jeden panel",
+      "twoPanes": "Dva panely",
+      "moreActions": "Další akce",
+      "itemActions": "Akce pro {{name}}"
     },
     "folders": {
       "home": "Domů"
     },
     "sheets": {
+      "newSession": {
+        "noHosts": "Žádné hosty"
+      },
       "shared": {
         "moveToVault": "Přesunout do trezoru",
         "copyToVault": "Kopírovat do trezoru",
@@ -241,6 +257,55 @@
       "vaultSwitcher": {
         "newVault": "Nový trezor",
         "namePlaceholder": "Název trezoru"
+      }
+    },
+    "shortcuts": {
+      "hostGone": "Tento hostitel už neexistuje. Jeho zkratka byla odebrána."
+    },
+    "share": {
+      "action": "Sdílet",
+      "publicKey": "Sdílet veřejný klíč",
+      "failed": "Nabídku sdílení se nepodařilo otevřít",
+      "downloadFailed": "Soubor ke sdílení se nepodařilo stáhnout",
+      "largeTitle": "Sdílet {{size}}?",
+      "largeBody": "Soubory se nejprve stáhnou do tohoto telefonu a pak se předají vybrané aplikaci.",
+      "tooLong": "Příliš dlouhé pro sdílení jako text"
+    },
+    "vaultSettings": {
+      "title": "Nastavení trezoru",
+      "gone": "Tento trezor už na tomto zařízení neexistuje.",
+      "openFor": "Nastavení trezoru {{name}}",
+      "nameRequired": "Trezor musí mít název.",
+      "nameReadOnly": "Přejmenovat ho mohou jen správci trezoru.",
+      "kindTeam": "Týmový trezor",
+      "kindPrivate": "Soukromý trezor",
+      "sections": {
+        "general": "Obecné",
+        "people": "Lidé",
+        "danger": "Nebezpečná zóna"
+      },
+      "rows": {
+        "name": "Název",
+        "share": "Sdílet a pozvat",
+        "members": "Členové",
+        "roles": "Role",
+        "security": "Bezpečnostní zásady",
+        "makePrivate": "Změnit na soukromý",
+        "delete": "Smazat trezor",
+        "leave": "Opustit trezor"
+      },
+      "summaries": {
+        "share": "Pozvat lidi a spravovat odkazy pro připojení",
+        "members_one": "{{count}} člen",
+        "members_few": "{{count}} členové",
+        "members_many": "{{count}} členů",
+        "members_other": "{{count}} členů",
+        "roles": "Co která role smí",
+        "security": "Pravidla zamykání a relací pro členy",
+        "makePrivate": "Odebrat všechny ostatní a ponechat soukromou kopii",
+        "delete": "Smaže trezor i celý jeho obsah",
+        "deleteTeam": "Smaže ho pro všechny členy",
+        "leave": "Odebrat si přístup k tomuto trezoru"
       }
     }
   }
