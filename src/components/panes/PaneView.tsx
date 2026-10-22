@@ -3,9 +3,10 @@ import { PaneHeader } from "@/components/panes/PaneHeader";
 import { PaneTerminal } from "@/components/panes/PaneTerminal";
 import { DropZones } from "@/components/panes/DropZones";
 import { ResizeHandle } from "@/components/panes/ResizeHandle";
-import { containsPane, useLayoutStore, type PaneNode } from "@/stores/layoutStore";
+import { containsPane, getPaneSessionIds, useLayoutStore, type PaneNode } from "@/stores/layoutStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useDragStore } from "@/stores/dragStore";
+import { HostPickerPanel } from "@/components/shared/HostPickerPanel";
 
 export function PaneView({ node, visible }: { node: PaneNode; visible: boolean }) {
   const activePaneId = useLayoutStore((s) => s.activePaneId);
@@ -22,7 +23,7 @@ export function PaneView({ node, visible }: { node: PaneNode; visible: boolean }
     const firstVisible = !maximizedPaneId || containsPane(node.first, maximizedPaneId);
     const secondVisible = !maximizedPaneId || containsPane(node.second, maximizedPaneId);
     return (
-      <div ref={containerRef} className={`flex flex-1 min-h-0 min-w-0 gap-1.5 ${node.direction === "h" ? "flex-row" : "flex-col"}`}>
+      <div ref={containerRef} className={`flex flex-1 min-h-0 min-w-0 ${node.direction === "h" ? "flex-row" : "flex-col"}`}>
         <div className={`flex min-h-0 min-w-0 ${firstVisible ? "" : "hidden"}`} style={{ flex: maximizedPaneId ? "1 1 0" : `${node.ratio} 1 0` }}>
           <PaneView node={node.first} visible={visible && firstVisible} />
         </div>
@@ -34,6 +35,27 @@ export function PaneView({ node, visible }: { node: PaneNode; visible: boolean }
     );
   }
 
+  if (!node.sessionId) return (
+    <div data-pane-id={node.id} className="relative flex flex-col flex-1 min-h-0 min-w-0 overflow-auto rounded-lg border border-(--t-accent)">
+      <HostPickerPanel terminalOnly showWsl={false} onBack={() => {
+        const layout = useLayoutStore.getState();
+        const tabId = layout.activeSplitTabId;
+        const remaining = getPaneSessionIds(layout.root);
+        layout.detachPane(node.id);
+        if (!useLayoutStore.getState().splitTabs.some((tab) => tab.id === tabId) && remaining[0]) {
+          useSessionStore.getState().setActive(remaining[0]);
+          useLayoutStore.getState().setSplitTabActive(false);
+        }
+      }} onPick={(host) => {
+        const sessions = useSessionStore.getState();
+        const id = host.kind === "remote"
+          ? sessions.beginSession(host.connection.id)
+          : sessions.beginLocalSession();
+        useLayoutStore.getState().fillPicker(node.id, id);
+      }} />
+      <DropZones target={{ type: "pane", paneId: node.id }} />
+    </div>
+  );
   if (!session) return null;
 
   const active = activePaneId === node.id;

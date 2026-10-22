@@ -6,6 +6,9 @@ import { useDragStore } from "@/stores/dragStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useToggleSettingsStore } from "@/stores/toggleSettingsStore";
 import TitleBar from "./TitleBar";
+import { usePaneDragController } from "@/components/panes/usePaneDragController";
+import { DropZones } from "@/components/panes/DropZones";
+import * as duplicateSessionService from "@/services/duplicateSession";
 
 vi.mock("@tauri-apps/api/window", () => ({
   getCurrentWindow: () => ({
@@ -51,6 +54,34 @@ beforeEach(() => {
   useLayoutStore.setState({ splitTabs: [], activeSplitTabId: null, root: null, splitTabActive: false, titlebarOrder: [] });
 });
 afterEach(cleanup);
+
+it("starts dragging the sole session tab through pointer events", () => {
+  useSessionStore.setState({ sessions: [s("only", "web")], activeSessionId: "only" });
+  useDragStore.getState().cancelDrag();
+  function DragHarness() {
+    usePaneDragController();
+    return <><TitleBar /><div data-testid="single-drop"><DropZones target={{ type: "session", sessionId: "only" }} /></div></>;
+  }
+  render(<DragHarness />);
+  const tab = document.querySelector("[data-titlebar-key='session:only']")!;
+  fireEvent.pointerDown(tab, { button: 0, pointerId: 1, clientX: 100, clientY: 20 });
+  expect(useDragStore.getState().isPointerDown).toBe(true);
+  fireEvent.pointerMove(window, { pointerId: 1, clientX: 200, clientY: 300 });
+  expect(useDragStore.getState()).toMatchObject({ isDragging: true, sessionId: "only", currentX: 200, currentY: 300 });
+  const zone = screen.getByTestId("single-drop").firstElementChild!;
+  vi.spyOn(zone, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 800, height: 600 } as DOMRect);
+  fireEvent.pointerEnter(zone, { pointerId: 1, clientX: 790, clientY: 300 });
+  expect(useDragStore.getState().dropTarget).toEqual({ type: "session", sessionId: "only", position: "right" });
+  const duplicate = vi.spyOn(duplicateSessionService, "duplicateSession").mockReturnValue("duplicate");
+  try {
+    fireEvent.pointerUp(window, { pointerId: 1 });
+    fireEvent.mouseUp(window);
+    expect(duplicate).not.toHaveBeenCalled();
+    expect(useLayoutStore.getState().root?.type).toBe("split");
+    expect(screen.getByText("Workspace")).toBeTruthy();
+    expect(useDragStore.getState().isPointerDown).toBe(false);
+  } finally { duplicate.mockRestore(); }
+});
 
 it("renders one pill for a host with two sessions, with its count and shown session", () => {
   render(<TitleBar />);

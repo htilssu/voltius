@@ -1,7 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
+
 import { Icon } from "@iconify/react";
 import { useUIStore } from "@/stores/uiStore";
 import { useSessionStore } from "@/stores/sessionStore";
@@ -48,10 +48,6 @@ import { useLastActiveByHost, useSessionTabHandlers } from "@/hooks/useTitlebarT
 
 const appWindow = getCurrentWindow();
 
-/** A split tab's title, noting how many more sessions it holds. */
-function splitTitle(t: TFunction, label: string, more: number): string {
-  return more > 0 ? t("layout.titleBar.splitLabelMore", { label, count: more }) : label;
-}
 
 export default function TitleBar() {
   const { t } = useTranslation();
@@ -376,7 +372,7 @@ export default function TitleBar() {
                   >
                     <Icon icon="lucide:layout-dashboard" width={18} />
                     <InlineNameEditor
-                      value={splitTabLabel(tab, tabActiveSession ?? undefined, t("layout.titleBar.splitFallback"))}
+                      value={splitTabLabel(tab)}
                       ariaLabel={t("layout.titleBar.renameTab")}
                       onCommit={(name) => { useLayoutStore.getState().renameSplitTab(tab.id, name); endRename(tabActiveSession?.id); }}
                       onCancel={() => endRename(tabActiveSession?.id)}
@@ -403,7 +399,7 @@ export default function TitleBar() {
                     className="max-w-[140px] truncate"
                     onClick={(e) => startRenameFromLabel(e, isActiveSplitTab, { kind: "split", id: tab.id })}
                   >
-                    {splitTitle(t, splitTabLabel(tab, tabActiveSession ?? undefined, t("layout.titleBar.splitFallback")), tabSessionIds.length - 1)}
+                    {splitTabLabel(tab)}
                   </span>
                   <span
                     onClick={(e) => handleUnifiedTabClose(e, tab.id)}

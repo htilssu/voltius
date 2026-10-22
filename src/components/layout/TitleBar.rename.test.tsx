@@ -17,11 +17,7 @@ vi.mock("@tauri-apps/api/window", () => ({
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(async () => undefined) }));
 vi.mock("@tauri-apps/api/event", () => ({ listen: vi.fn(async () => () => {}) }));
 vi.mock("react-i18next", () => ({
-  // The split tab's title interpolates its label, which these tests click by name.
-  useTranslation: () => ({
-    t: (key: string, o?: { label?: string; count?: number }) =>
-      key === "layout.titleBar.splitLabelMore" ? `${o?.label} + ${o?.count}` : key,
-  }),
+  useTranslation: () => ({ t: (key: string) => key }),
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 vi.mock("@iconify/react", () => ({ Icon: () => null }));
@@ -157,7 +153,7 @@ describe("renaming a split tab", () => {
 
   it("names the tab itself, leaving the sessions inside it alone", () => {
     render(<TitleBar />);
-    fireEvent.doubleClick(screen.getByText(/^s[12]/));
+    fireEvent.doubleClick(screen.getByText("Workspace"));
     fireEvent.change(editor(), { target: { value: "prod" } });
     fireEvent.keyDown(editor(), { key: "Enter" });
 
@@ -167,7 +163,7 @@ describe("renaming a split tab", () => {
 
   it("does not put the editor inside the tab button, where Space activates the tab", () => {
     render(<TitleBar />);
-    fireEvent.doubleClick(screen.getByText(/^s[12]/));
+    fireEvent.doubleClick(screen.getByText("Workspace"));
     expect(editor().closest("button")).toBeNull();
   });
 
@@ -175,7 +171,7 @@ describe("renaming a split tab", () => {
     render(<TitleBar />);
     const activeLeafSession = useLayoutStore.getState().splitTabs[0];
     expect(activeLeafSession).toBeTruthy();
-    fireEvent.doubleClick(screen.getByText(/^s[12]/));
+    fireEvent.doubleClick(screen.getByText("Workspace"));
     fireEvent.keyDown(editor(), { key: "Enter" });
 
     expect(focusSession).toHaveBeenCalled();
@@ -184,13 +180,14 @@ describe("renaming a split tab", () => {
   it("clicking the name of the active split tab opens the editor", () => {
     useLayoutStore.setState({ splitTabActive: true });
     render(<TitleBar />);
-    fireEvent.click(screen.getByText(/^s[12]/));
+    fireEvent.click(screen.getByText("Workspace"));
     expect(editor()).toBeTruthy();
   });
 
-  it("a named split tab stops following the active pane", () => {
+  it("a named split tab shows its name instead of Workspace", () => {
     useLayoutStore.getState().renameSplitTab(splitTab().id, "prod");
     render(<TitleBar />);
-    expect(screen.getByText(/^prod/)).toBeTruthy();
+    expect(screen.getByText("prod")).toBeTruthy();
+    expect(screen.queryByText("Workspace")).toBeNull();
   });
 });

@@ -4,6 +4,7 @@ import { useTerminal } from "@/hooks/useTerminal";
 import { TerminalMinimap } from "@/components/terminal/TerminalMinimap";
 import { useToggle } from "@/stores/toggleSettingsStore";
 import { terminalViewportClass } from "@/components/terminal/terminalLayout";
+import { TerminalPasswordSuggestions } from "./TerminalPasswordSuggestions";
 import "@xterm/xterm/css/xterm.css";
 
 interface Props {
@@ -44,6 +45,7 @@ export default function TerminalView({ sessionId, sessionType, onClosed, active,
           <TerminalMinimap sessionId={sessionId} />
         </div>
       )}
+      <TerminalPasswordSuggestions sessionId={sessionId} enabled={!!active && visible && sessionType !== "serial"} />
     </div>
   );
 }

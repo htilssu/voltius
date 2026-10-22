@@ -28,9 +28,11 @@ interface Props {
   sshOnly?: boolean;
   vaultId?: string;
   showRecents?: boolean;
+  showWsl?: boolean;
+  terminalOnly?: boolean;
 }
 
-export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, vaultId, showRecents = true }: Props) {
+export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, terminalOnly, vaultId, showRecents = true, showWsl = true }: Props) {
   const { t } = useTranslation();
   const loadConnections = useConnectionStore((s) => s.loadConnections);
   const loadFolders = useFolderStore((s) => s.loadFolders);
@@ -45,7 +47,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, vault
   const searchRef = useRef<HTMLInputElement>(null);
   useFilterShortcut(searchRef);
 
-  const { rows, recent, vaults, vaultFilter, setVaultFilter, toggleFolder, hasHosts } = useHostPicker({ query: search, sortMode, sshOnly, vaultId });
+  const { rows, recent, vaults, vaultFilter, setVaultFilter, toggleFolder, hasHosts } = useHostPicker({ query: search, sortMode, sshOnly, terminalOnly, vaultId });
   const matchesQuery = searchMatcher(search);
 
   return (
@@ -130,7 +132,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, vault
           />
         )}
 
-        {!isAndroid && wslDistros
+        {!isAndroid && showWsl && wslDistros
           .filter((d) => matchesQuery(d))
           .map((d) => {
             const icon = getConnectionIcon(d.split(/[-_ ]/)[0]);

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import i18n from "@/i18n";
 import { shouldSuppressDragClick, useDragStore } from "@/stores/dragStore";
 import { findSessionPane, useLayoutStore } from "@/stores/layoutStore";
@@ -12,7 +12,7 @@ import { resolveTitlebarTarget, stackKey, stackMemberKeys, titlebarGroupOf } fro
 export function usePaneDragController() {
   const isPointerDown = useDragStore((s) => s.isPointerDown);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isPointerDown) return;
 
     // Suppress native text selection for the whole drag gesture — without this
@@ -33,7 +33,16 @@ export function usePaneDragController() {
       const drag = useDragStore.getState();
       const layout = useLayoutStore.getState();
       if (drag.isDragging && drag.dropTarget) {
-        // Ctrl+drag a tab onto a drop zone duplicates the session instead of moving it.
+        // Only Ctrl+drag explicitly duplicates a connection.
+        const ownPane = drag.sessionId ? findSessionPane(layout.splitTabs, drag.sessionId) : null;
+        const selfDrop = drag.dropTarget.type === "session"
+          ? drag.dropTarget.sessionId === drag.sessionId
+          : drag.dropTarget.type === "pane" && drag.dropTarget.paneId === ownPane?.paneId;
+        if (drag.dragType === "tab" && selfDrop && !e.ctrlKey && drag.sessionId && drag.dropTarget.type !== "titlebar") {
+          layout.splitWithPicker(drag.sessionId, drag.dropTarget.position);
+          useDragStore.getState().endDrag();
+          return;
+        }
         if (drag.dragType === "tab" && e.ctrlKey && drag.sessionId && drag.dropTarget.type !== "titlebar") {
           const anchor = drag.dropTarget.type === "pane"
             ? { paneId: drag.dropTarget.paneId }
@@ -126,6 +135,7 @@ export function usePaneDragController() {
     const onAbort = () => useDragStore.getState().cancelDrag();
 
     window.addEventListener("mousemove", onMove);
+    window.addEventListener("pointermove", onMove);
     window.addEventListener("mouseup", onUp);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onAbort);
@@ -134,6 +144,7 @@ export function usePaneDragController() {
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("pointermove", onMove);
       window.removeEventListener("mouseup", onUp);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onAbort);
