@@ -362,7 +362,7 @@ export function renamePane(ports: PanePorts, sessionId: string, title: string | 
   return { ok: true, tab: projectTabOf(ports, after) };
 }
 
-/** Name a split tab. Unnamed, its label derives from the active pane (`splitTabLabel`). */
+/** Name a split tab. Unnamed, its label defaults to Workspace (`splitTabLabel`). */
 export function renameTab(ports: PanePorts, tabId: string, title: string | null): PaneResult {
   if (ports.isMobile()) return { ok: false, error: PANE_ERRORS.mobile };
   if (tabId.startsWith(SESSION_TAB_PREFIX)) return { ok: false, error: PANE_ERRORS.sessionTab };

@@ -169,7 +169,7 @@ export default function MainPanel() {
           <div className="absolute inset-0 flex overflow-hidden">
             <div className="flex-1 relative">
               {splitRoot && (
-                <div className={`absolute inset-0 flex overflow-hidden${showSplitWorkspace ? "" : " invisible pointer-events-none"}`}>
+                <div className={`absolute inset-0 flex overflow-hidden px-2 pb-2 pt-1${showSplitWorkspace ? "" : " invisible pointer-events-none"}`}>
                   <PaneView node={splitRoot} visible={showSplitWorkspace} />
                 </div>
               )}

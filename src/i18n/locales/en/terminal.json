@@ -1,5 +1,16 @@
 {
   "terminal": {
+    "passwordSuggestions": {
+      "add": "Add password for sudo",
+      "addDescription": "Add and store your identities securely in Voltius and use them for faster connections.",
+      "username": "Username",
+      "password": "Password",
+      "title": "Saved passwords",
+      "dismiss": "Dismiss password suggestions",
+      "hint": "Choose to fill. Press Enter yourself to submit.",
+      "empty": "No saved credentials.",
+      "unavailable": "Password unavailable. Check the saved credential or unlock your vault."
+    },
     "shared": {
       "copied": "Copied",
       "insert": "Insert",
