@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Selection, link hover and mouse reports landed on the wrong cell in the terminal when UI scale wasn't 100% (#677)
 - Turning on the MCP server on desktop synced the setting to Android, which then opened an MCP socket that no client could use. The MCP server is now off on Android, and the Integrations settings are hidden there (#699)
 - Refined Czech translations (#696)
-- The Docker, Gist Sync, Monitoring, Process Manager and Proxmox plugins are rebuilt with the updated bundler and move to new patch versions. They work the same. 0.61.0 was never published because of this
+- The Docker, Gist Sync, Monitoring, Process Manager and Proxmox plugins are rebuilt with the updated bundler and move to new patch versions. They work the same.
 
 ## [0.61.0] - 2026-10-23
 
