@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.62.1] - 2026-10-23
+
+### Fixed
+
+- The Docker plugin is rebuilt with the updated bundler and moves to a new patch version (Docker plugin 1.5.4). It works the same.
+
 ## [0.62.0] - 2026-10-22
 
 ### Added
