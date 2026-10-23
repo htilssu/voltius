@@ -1,0 +1,40 @@
+name: Check that a channel's secrets are configured
+description: >
+  Reports whether every named secret is non-empty, so a distribution channel
+  whose credentials were never set up is skipped with a warning instead of
+  failing the run. Secrets cannot be read in a job-level `if`, so callers run
+  this in an earlier job and gate on its output. Pass the secret values through
+  the calling step's `env`, under the same names listed in `names`.
+
+inputs:
+  names:
+    description: Space-separated env var names that must all be non-empty
+    required: true
+  channel:
+    description: Human-readable channel name for the skip warning
+    required: true
+
+outputs:
+  ok:
+    description: "'true' when every named secret is set, else 'false'"
+    value: ${{ steps.check.outputs.ok }}
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        NAMES: ${{ inputs.names }}
+        CHANNEL: ${{ inputs.channel }}
+      run: |
+        missing=""
+        for name in $NAMES; do
+          [ -n "${!name:-}" ] || missing="$missing $name"
+        done
+        if [ -n "$missing" ]; then
+          echo "::warning::$CHANNEL skipped — not configured:$missing"
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+        fi

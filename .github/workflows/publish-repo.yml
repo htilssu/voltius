@@ -2,7 +2,7 @@
 # the last 5 GitHub releases. Runs after a release is published (and can be
 # re-run manually). Stateless rebuild → smoke-tested install → rclone sync.
 #
-# Required repository secrets:
+# Repository secrets (unset: the run is skipped with a warning, not failed):
 #   REPO_GPG_PRIVATE_KEY, REPO_GPG_PASSPHRASE   package signing key
 #   R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY      R2 S3 token (bucket voltius-repo)
 name: publish-repo
@@ -24,7 +24,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Skips the publish with a warning, rather than failing, when the signing key
+  # or R2 token was never set up. Secrets can't be read in a job-level `if`.
+  configured:
+    runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - id: check
+        uses: ./.github/actions/secrets-configured
+        with:
+          channel: apt/yum repos
+          names: REPO_GPG_PRIVATE_KEY REPO_GPG_PASSPHRASE R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY
+        env:
+          REPO_GPG_PRIVATE_KEY: ${{ secrets.REPO_GPG_PRIVATE_KEY }}
+          REPO_GPG_PASSPHRASE: ${{ secrets.REPO_GPG_PASSPHRASE }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
   publish:
+    needs: configured
+    if: needs.configured.outputs.ok == 'true'
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
