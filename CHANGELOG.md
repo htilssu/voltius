@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The Docker plugin now includes the Portuguese translations (Docker plugin 1.5.5).
+
 ## [0.66.0] - 2026-10-31
 
 ### Changed
