@@ -509,6 +509,13 @@ jobs:
 
   publish-release:
     needs: [checksums, updater-manifest]
+    # Explicit, like checksums above: the implicit success() also sees the
+    # skipped publish-android behind checksums, and skips this job whenever
+    # Android signing isn't configured — leaving every release a draft.
+    if: >-
+      ${{ !cancelled() &&
+          needs.checksums.result == 'success' &&
+          needs.updater-manifest.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
