@@ -15,13 +15,12 @@ export function buildDecryptKeyCandidates(
   dek: number[] | null,
 ): number[][] {
   const out: number[][] = [];
-  const seen = new Set<string>();
   for (const key of [vaultKey, kek, dek]) {
-    if (!key || key.length === 0) continue;
-    const sig = key.join(",");
-    if (seen.has(sig)) continue;
-    seen.add(sig);
+    if (!key || key.length === 0 || out.some((k) => sameKey(k, key))) continue;
     out.push(key);
   }
   return out;
 }
+
+export const sameKey = (a: number[] | null, b: number[] | null): boolean =>
+  !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);

@@ -21,7 +21,8 @@ vi.mock("@/services/vault", () => ({
 }));
 vi.mock("@/stores/subscriptionStore", () => ({
   useSubscriptionStore: () => ({
-    tier: "free", trialEndsAt: null, isTrialActive: false, isPro: false, isTeams: false, isBusiness: false,
+    tier: "free", billingTier: "free", seatTeam: null, ownsTeamsPlan: false, trialKnown: false, trialUsed: false,
+    trialEndsAt: null, isTrialActive: false, isPro: false, isTeams: false, isBusiness: false,
     usedSeats: null, totalSeats: null, subscriptionStatus: null, subscriptionCancelled: false, renewsAt: null, endsAt: null,
   }),
 }));
@@ -29,7 +30,7 @@ vi.mock("@/utils/billing", () => ({ openPortal: vi.fn() }));
 vi.mock("@/utils/platform", async () => ({
   ...(await vi.importActual<typeof import("@/utils/platform")>("@/utils/platform")),
   usePlatform: () => "linux",
-  useIsAndroid: () => false,
+  useIsAndroid: () => false, useIsMobile: () => false,
 }));
 vi.mock("@/services/billingCheckout", () => ({ openBillingCheckout: vi.fn(async () => {}) }));
 vi.mock("./EditEmailModal", () => ({ default: () => null }));

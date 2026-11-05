@@ -6,6 +6,7 @@ import { __resetPluginStateWarnings } from "./syncStatus";
 import {
   aggregateSyncStatus,
   availableCatalogProviders,
+  isNearbyOnly,
   buildSyncProviders,
   toSyncProviderSummary,
   type LoadedPluginInfo,
@@ -31,6 +32,7 @@ function inputs(over: Partial<SyncProviderInputs> = {}): SyncProviderInputs {
       state: { status: "success", lastSync: new Date("2026-09-01T09:00:00Z"), error: null, blobSizeBytes: null },
       accountMode: "server",
       isPro: true,
+      canUpgrade: true,
       paused: false,
       syncNow: vi.fn(async () => {}),
     },
@@ -63,6 +65,8 @@ describe("buildSyncProviders", () => {
     expect(signedOut).toMatchObject({ availability: "locked", action: { kind: "signIn" }, syncNow: null });
     const [free] = buildSyncProviders(inputs({ voltius: { ...inputs().voltius, isPro: false } }));
     expect(free).toMatchObject({ availability: "needs_upgrade", action: { kind: "upgrade" }, syncNow: null });
+    const [noOffer] = buildSyncProviders(inputs({ voltius: { ...inputs().voltius, isPro: false, canUpgrade: false } }));
+    expect(noOffer).toMatchObject({ availability: "needs_upgrade", action: null });
     const [pro] = buildSyncProviders(inputs());
     expect(pro).toMatchObject({ availability: "active", action: null });
     expect(pro.state.configured).toBe(true);
@@ -153,6 +157,18 @@ describe("aggregateSyncStatus", () => {
       })),
     }));
 
+  test("no providers still carries the nearby count", () => {
+    expect(aggregateSyncStatus([], 2)).toMatchObject({ configured: false, nearby: 2 });
+    expect(aggregateSyncStatus([]).nearby).toBe(0);
+    expect(aggregateSyncStatus(providersWith({ status: "success" }), 3).nearby).toBe(3);
+  });
+
+  test("nearby never masks an error, even when unconfigured", () => {
+    const base = aggregateSyncStatus([], 2);
+    expect(isNearbyOnly(base)).toBe(true);
+    expect(isNearbyOnly({ ...base, status: "error" })).toBe(false);
+  });
+
   test("worst status wins and the error names its provider", () => {
     const effective = aggregateSyncStatus(providersWith({ status: "syncing" }, { status: "error", error: "Sync token is invalid or expired" }, { status: "offline" }));
     expect(effective).toMatchObject({ configured: true, status: "error", error: "Sync token is invalid or expired", errorSource: "P1" });
@@ -160,7 +176,7 @@ describe("aggregateSyncStatus", () => {
 
   test("an unreachable provider keeps its reason but is not named as a failing source", () => {
     const effective = aggregateSyncStatus(providersWith({ status: "success" }, { status: "offline", error: "connection refused" }));
-    expect(effective).toMatchObject({ status: "offline", error: "connection refused", errorSource: null });
+    expect(effective).toMatchObject({ status: "offline", error: "connection refused", errorSource: null, nearby: 0 });
   });
 
   test("rank order is error > offline > syncing > success > idle", () => {
@@ -187,7 +203,16 @@ describe("aggregateSyncStatus", () => {
 
   test("with no active provider it falls back to the Voltius state, unconfigured", () => {
     const providers = buildSyncProviders(inputs({ voltius: { ...inputs().voltius, accountMode: "local", state: { status: "idle", lastSync: null, error: null, blobSizeBytes: null } } }));
-    expect(aggregateSyncStatus(providers)).toEqual({ configured: false, paused: false, status: "idle", lastSync: null, error: null, errorSource: null });
+    expect(aggregateSyncStatus(providers)).toEqual({ configured: false, paused: false, status: "idle", lastSync: null, error: null, errorSource: null, nearby: 0 });
+  });
+
+  test("a free account's refused cloud sync is not an error, so nearby devices still show", () => {
+    const providers = buildSyncProviders(inputs({
+      voltius: { ...inputs().voltius, isPro: false, state: { status: "error", lastSync: null, error: "Server error: 402", blobSizeBytes: null } },
+    }));
+    const effective = aggregateSyncStatus(providers, 1);
+    expect(effective).toMatchObject({ configured: false, status: "idle", error: null });
+    expect(isNearbyOnly(effective)).toBe(true);
   });
 
   test("a paused Voltius provider is left out of the status and reported as paused", () => {

@@ -139,14 +139,23 @@
         ]
       },
       "sync": {
-        "mobileSub": "Bulut eşitleme ve eşitlenenler",
+        "mobileSub": "Bulut, yerel ağ ve eşitlenenler",
         "label": "Eşitleme",
         "keywords": [
           "yedekleme",
           "bulut",
           "gist",
           "eşitleme",
-          "pro"
+          "pro",
+          "yerel",
+          "ağ",
+          "yakındaki",
+          "wifi",
+          "lan",
+          "eşle",
+          "cihazlar",
+          "tailscale",
+          "vpn"
         ]
       },
       "plugins": {
@@ -186,6 +195,11 @@
           "mini harita",
           "tampon"
         ]
+      },
+      "devices": {
+        "mobileSub": "Cihazlarınızın burada dosya açmasına izin verin",
+        "label": "Cihazlar",
+        "keywords": ["cihazlar", "dosyalar", "sftp", "paylaşım", "klasörler", "erişim"]
       },
       "sftp": {
         "mobileSub": "İndirmeler, aktarımlar, düzenleyici",
@@ -329,7 +343,8 @@
             "windows": "Windows Hello",
             "macos": "Touch ID veya Mac parolanız",
             "linux": "sistem parolanız",
-            "android": "parmak iziniz veya ekran kilidiniz"
+            "android": "parmak iziniz veya ekran kilidiniz",
+            "ios": "Face ID, Touch ID veya parolanız"
           }
         }
       },
@@ -476,14 +491,19 @@
       },
       "loading": "İşleniyor...",
       "plan": {
-        "title": "Plan",
-        "badge": {
-          "business": "Business",
-          "teams": "Teams",
-          "proTrial": "Pro Denemesi — {{daysLeft}} gün kaldı",
+        "name": {
+          "free": "Ücretsiz",
           "pro": "Pro",
-          "free": "Ücretsiz"
+          "teams": "Teams",
+          "business": "Business"
         },
+        "trialName": "{{plan}} deneme sürümü",
+        "trialLeft": "{{plan}} — {{daysLeft}} gün kaldı",
+        "viaSeat": "{{plan}} · {{team}} ekibindeki koltuğunuz üzerinden",
+        "viaTooltip": "{{team}} üzerinden",
+        "throughSeat": "{{team}} ekibindeki koltuğunuz üzerinden",
+        "ownLine": "{{plan}} aboneliğiniz",
+        "title": "Plan",
         "manageBilling": "Faturalandırmayı yönet →",
         "subscription": {
           "cancelled": "{{date}} tarihinde iptal edilecek. O zamana kadar erişiminiz devam eder.",
@@ -502,6 +522,8 @@
           "localVault": "Yerel kasa",
           "auditLogs": "Denetim günlükleri",
           "gistSync": "GitHub Gist eşitleme",
+          "localSync": "Yerel ağ eşitlemesi",
+          "deviceFiles": "Cihazlarınız arasında dosya aktarımı",
           "realtimeSync": "Gerçek zamanlı bulut eşitleme",
           "unlimitedVaults": "Sınırsız özel kasa",
           "terminalSharing": "Terminal paylaşımı (1 oturum · 1 konuk)",
@@ -532,6 +554,12 @@
     },
     "sync": {
       "voltiusCloud": "Voltius Cloud",
+      "local": {
+        "pairSub": "Hesap olmadan ağınızdaki başka bir cihazla eşitleyin.",
+        "title": "Yerel eşitleme",
+        "pauseSub": "Siz devam ettirene kadar yakındaki diğer cihazlarınızla eşitlemeyi durdurur.",
+        "footer": "Kişisel kasanız, ikisi de çevrimiçiyken aynı ağdaki veya Tailscale gibi bir VPN üzerindeki cihazlarınız arasında doğrudan eşitlenir. Ücretsizdir, arada sunucu yoktur. Ekip kasaları dahil değildir."
+      },
       "active": {
         "title": "Bulut eşitleme etkin",
         "syncing": "Eşitleniyor…",
@@ -544,7 +572,7 @@
         "syncNow": "Şimdi eşitle"
       },
       "pause": {
-        "label": "Bu cihazda eşitlemeyi duraklat",
+        "label": "Bu cihazda bulut eşitlemeyi duraklat",
         "sub": "Sunucuyla arka plan eşitlemesini durdurur. Ekip kasaları güncellenmez ve siz sürdürene kadar açılışta yüklenmez. “Şimdi eşitle” yalnızca kendi verilerinizi eşitler."
       },
       "requiresPro": {
@@ -553,13 +581,13 @@
         "upgrade": "Yükselt"
       },
       "notConnected": {
-        "title": "Bulut hesabı bağlı değil",
-        "sub": "Cihazlar arasında eşitlemek için oturum açın veya bir bulut hesabı oluşturun.",
+        "title": "Oturum açılmadı",
+        "sub": "Voltius Cloud, cihazlarınız aynı anda çevrimiçi olmasa bile onları eşitlenmiş tutar ve şifreli bir yedek saklar. Ücretsiz bir hesapla cihazlarınız otomatik olarak eşlenir.",
         "signIn": "Oturum aç"
       },
       "providersTitle": "Eşitleme eklentileri",
       "prefsTitle": "Eşitleme Tercihleri",
-      "prefsFooter": "Devre dışı bırakılan türler hiçbir zaman yüklenmez. Tek tek nesneler de düzenleme panelinden hariç tutulabilir.",
+      "prefsFooter": "Devre dışı bırakılan türler bu cihazdan hiçbir zaman çıkmaz. Tek tek nesneler de düzenleme panelinden hariç tutulabilir.",
       "quickToggleLabel": "Eşitle: {{label}}",
       "objectType": {
         "connection": {
@@ -588,7 +616,7 @@
         }
       },
       "settingsTitle": "Ayarlar",
-      "settingsFooter": "Kapattığınız her şey bu cihazda kalır. Şifrelenmiş olarak bile hiçbir zaman yüklenmez. Eşitlemeyi yeniden açtığınızda bu cihazdaki değerler yayımlanır.",
+      "settingsFooter": "Kapattığınız her şey bu cihazda kalır ve şifrelenmiş olarak bile hiçbir yere gönderilmez. Eşitlemeyi yeniden açtığınızda bu cihazdaki değerler yayımlanır.",
       "settingDomain": {
         "themes": {
           "label": "Temalar",
@@ -812,6 +840,28 @@
       },
       "reportBug": "Hata bildir"
     },
+    "devices": {
+      "fileAccess": {
+        "title": "Dosya erişimi",
+        "enable": { "title": "Cihazlarımın bu bilgisayardaki dosyaları açmasına izin ver", "desc": "Diğer Voltius cihazlarınız aşağıdaki klasörlere SFTP üzerinden göz atabilir. Varsayılan olarak kapalı." },
+        "folders": "Paylaşılan klasörler",
+        "addFolder": "Klasör ekle",
+        "noFolders": "Cihazlarınızla paylaşmak için bir klasör ekleyin.",
+        "removeFolder": "{{folder}} paylaşımını durdur",
+        "readOnly": { "title": "Salt okunur", "desc": "Cihazlar buradan dosya kopyalayabilir, değiştiremez veya silemez." }
+      },
+      "allowed": {
+        "title": "İzin verilen cihazlar",
+        "asksEachTime": "Her seferinde sor",
+        "alwaysAllowed": "Her zaman izinli",
+        "connectedNow": "bağlı",
+        "disconnect": "Bağlantıyı kes",
+        "revoke": "İptal et",
+        "needsKey": "İzin vermek için bir kez bağlanın",
+        "alwaysLabel": "{{name}} için her zaman izin ver",
+        "empty": "Henüz başka cihaz yok."
+      }
+    },
     "sftp": {
       "downloads": {
         "title": "İndirmeler",
@@ -917,6 +967,15 @@
       "persistentSessions": {
         "title": "Kalıcı oturumlar",
         "desc": "Uzak kabuğu tmux içinde çalıştırarak (tmux yoksa screen kullanılır) kabuğunuzu ve çalışan işlemlerinizi bağlantı kesintilerinde canlı tutar. Sunucuda tmux veya screen gerekir. Bağlantı ayarlarındaki Gelişmiş bölümünden her sunucu için ayrı ayarlanabilir."
+      },
+      "detachedTtl": {
+        "title": "Boştaki ayrılmış oturumları kapat",
+        "desc": "Seçilen süre boyunca hiçbir cihaz bağlı değilse, sunucudaki kalıcı oturumu kapatır; ancak yalnızca içinde çalışan bir şey yoksa. tmux 3.2 veya daha yenisi olan Linux sunucularında çalışır; screen ve daha eski tmux sürümleri oturumları eskisi gibi korur. Bir değişiklik, oturuma bir sonraki bağlanışınızda uygulanır.",
+        "durationTitle": "Şu süreden sonra kapat",
+        "hours_one": "{{count}} saat",
+        "hours_other": "{{count}} saat",
+        "days_one": "{{count}} gün",
+        "days_other": "{{count}} gün"
       },
       "terminalTitle": "Terminal",
       "shellIntegration": {
@@ -1055,6 +1114,9 @@
       },
       "persistentSessions": {
         "label": "Kalıcı Oturumlar"
+      },
+      "detachedSessionTtl": {
+        "label": "Boştaki Ayrılmış Oturumları Kapat"
       },
       "restoreWorkspace": {
         "label": "Başlangıçta Çalışma Alanını Geri Yükle"

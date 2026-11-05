@@ -44,15 +44,7 @@
       "email": "E-mail",
       "notSignedIn": "Non connecté",
       "plan": "Forfait",
-      "cloudSync": "Synchronisation cloud",
       "off": "Désactivée",
-      "proTrial": "Essai Pro — {{days}} j restants",
-      "tier": {
-        "free": "Gratuit",
-        "pro": "Pro",
-        "teams": "Teams",
-        "business": "Business"
-      },
       "cancelsOn": "Résiliation le {{date}}. Vous conservez l'accès jusqu'à cette date.",
       "periodEnd": "la fin de la période",
       "renewsOn": "Renouvellement le {{date}}.",
@@ -64,13 +56,12 @@
       "teamsTrialNote": "Carte bancaire requise · aucun prélèvement pendant l'essai",
       "manageBilling": "Gérer la facturation",
       "viewAllPlans": "Voir tous les forfaits",
-      "signInToSync": "Se connecter pour synchroniser",
+      "signInToSync": "Se connecter à Voltius",
       "signOutConfirm": "Se déconnecter ? Votre coffre chiffré est supprimé de cet appareil et resynchronisé lors de votre prochaine connexion.",
       "signOut": "Se déconnecter"
     },
     "more": {
-      "settings": "Paramètres",
-      "planLabel": "Forfait {{tier}}"
+      "settings": "Paramètres"
     },
     "host": {
       "newTitle": "Nouvel hôte",
@@ -203,8 +194,6 @@
         "openFiles": "Ouvrir les fichiers",
         "copyAddress": "Copier l'adresse",
         "copiedAddress": "Adresse copiée : {{host}}",
-        "enableCloudSync": "Activer la synchronisation cloud",
-        "disableCloudSync": "Désactiver la synchronisation cloud",
         "enableReachabilityCheck": "Activer la vérification d'accessibilité",
         "disableReachabilityCheck": "Désactiver la vérification d'accessibilité"
       },

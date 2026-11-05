@@ -1,3 +1,4 @@
+#[cfg(any(target_os = "android", target_os = "ios", test))]
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
@@ -12,16 +13,14 @@ pub struct DownloadDirInfo {
 
 #[cfg(target_os = "android")]
 mod android {
-    use crate::android_ctx::{load_class, with_env};
+    use crate::android_ctx::{load_class, with_env, PickSlot};
     use jni::objects::{JClass, JObject, JString, JValue};
     use jni::JNIEnv;
-    use std::sync::Mutex;
-    use tokio::sync::oneshot;
 
     // Dotted name for the app class loader (see `android_ctx::load_class`): these commands are
     // `async`, so they run on tokio threads whose default `FindClass` can't see app classes.
     const CLASS: &str = "com.voltius.app.VoltiusDownloads";
-    static PICK_TX: Mutex<Option<oneshot::Sender<Option<String>>>> = Mutex::new(None);
+    static PICK: PickSlot = PickSlot::new();
 
     fn opt_string(env: &mut JNIEnv, v: JObject) -> Result<Option<String>, jni::errors::Error> {
         if v.is_null() {
@@ -107,19 +106,7 @@ mod android {
     }
 
     pub async fn pick() -> Result<Option<String>, String> {
-        let (tx, rx) = oneshot::channel();
-        *PICK_TX.lock().unwrap() = Some(tx);
-        let launched = with_env("download dir pick", |env, _ctx| {
-            let cls = load_class(env, CLASS)?;
-            env.call_static_method(&cls, "launchPicker", "()Z", &[])?
-                .z()
-        })?;
-        if !launched {
-            // No Activity handled it (app backgrounded); don't park forever.
-            let _ = PICK_TX.lock().unwrap().take();
-            return Err("could not open the folder picker (app not in foreground)".into());
-        }
-        rx.await.map_err(|_| "folder picker cancelled".to_string())
+        PICK.pick("folder picker", CLASS).await
     }
 
     /// JNI entry for `VoltiusDownloads.nativeDirPicked(uri)`. Fulfils the pending picker.
@@ -129,14 +116,7 @@ mod android {
         _class: JClass<'local>,
         uri: JString<'local>,
     ) {
-        let val = if uri.is_null() {
-            None
-        } else {
-            env.get_string(&uri).ok().map(|s| s.into())
-        };
-        if let Some(tx) = PICK_TX.lock().unwrap().take() {
-            let _ = tx.send(val);
-        }
+        PICK.fulfil(&mut env, &uri);
     }
 }
 
@@ -183,14 +163,6 @@ pub fn collect_publish_entries(
     Ok(out)
 }
 
-fn temp_download_path(cache_dir: &Path, transfer_id: &str, name: &str) -> PathBuf {
-    let safe = |s: &str| s.replace(['/', '\\'], "_");
-    cache_dir
-        .join("voltius-downloads")
-        .join(safe(transfer_id))
-        .join(safe(name))
-}
-
 /// A unique temp destination under the app cache for an in-flight download. The existing
 /// `sftp_download*` commands write here (real fs); `download_publish` then moves it into the
 /// SAF tree. Parent dirs are created; the leaf is returned for use as `localPath`.
@@ -200,17 +172,22 @@ pub fn download_temp_path(
     transfer_id: String,
     name: String,
 ) -> Result<String, String> {
-    let cache = crate::scratch::app_scratch_dir(&app)?;
-    let path = temp_download_path(&cache, &transfer_id, &name);
-    let dir = path
-        .parent()
-        .ok_or_else(|| "Invalid temp download path".to_string())?;
-    std::fs::create_dir_all(dir).map_err(|e| format!("Cannot create temp dir: {e}"))?;
+    let path = crate::scratch::transfer_file(&app, "voltius-downloads", &transfer_id, &name)?;
     Ok(path.to_string_lossy().into_owned())
 }
 
 #[tauri::command]
-pub async fn download_dir_get() -> Result<Option<DownloadDirInfo>, String> {
+pub async fn download_dir_get(app: AppHandle) -> Result<Option<DownloadDirInfo>, String> {
+    #[cfg(target_os = "ios")]
+    {
+        let dir = ios_downloads_dir(&app)?;
+        Ok(Some(DownloadDirInfo {
+            uri: dir.to_string_lossy().into_owned(),
+            display_name: Some("Files \u{203a} Voltius SSH".into()),
+        }))
+    }
+    #[cfg(not(target_os = "ios"))]
+    let _ = app;
     #[cfg(target_os = "android")]
     {
         match android::get_dir()? {
@@ -221,7 +198,7 @@ pub async fn download_dir_get() -> Result<Option<DownloadDirInfo>, String> {
             None => Ok(None),
         }
     }
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
         Ok(None)
     }
@@ -260,7 +237,21 @@ pub async fn download_dir_clear() -> Result<(), String> {
 /// Move a completed temp download (`temp_path`, a file or directory) into the SAF tree under
 /// `base_name`, then delete the temp. Android-only.
 #[tauri::command]
-pub async fn download_publish(temp_path: String, base_name: String) -> Result<(), String> {
+pub async fn download_publish(
+    app: AppHandle,
+    temp_path: String,
+    base_name: String,
+) -> Result<(), String> {
+    #[cfg(target_os = "ios")]
+    {
+        let dir = ios_downloads_dir(&app)?;
+        let dest = unique_destination(&dir, &base_name);
+        move_tree(Path::new(&temp_path), &dest)
+            .map_err(|e| format!("Failed to save {base_name} to Files: {e}"))?;
+        Ok(())
+    }
+    #[cfg(not(target_os = "ios"))]
+    let _ = &app;
     #[cfg(target_os = "android")]
     {
         if !android::is_writable()? {
@@ -278,16 +269,107 @@ pub async fn download_publish(temp_path: String, base_name: String) -> Result<()
         let _ = std::fs::remove_file(Path::new(&temp_path));
         Ok(())
     }
-    #[cfg(not(target_os = "android"))]
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
         let _ = (temp_path, base_name);
         Err("download publish is Android-only".into())
     }
 }
 
+/// iOS: downloads land in the app Documents folder, which the Files app shows
+/// under "On My iPhone > Voltius SSH" (UIFileSharingEnabled in Info.ios.plist).
+#[cfg(target_os = "ios")]
+fn ios_downloads_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    use tauri::Manager;
+    let dir = app
+        .path()
+        .document_dir()
+        .map_err(|e| format!("Cannot find the Documents folder: {e}"))?;
+    std::fs::create_dir_all(&dir)
+        .map_err(|e| format!("Cannot create the Documents folder: {e}"))?;
+    Ok(dir)
+}
+
+/// `dir/name`, or `dir/name (2)`, `dir/name (3)`... when it already exists. The
+/// counter goes before the extension of a file name ("a.txt" -> "a (2).txt").
+#[cfg(any(target_os = "ios", test))]
+fn unique_destination(dir: &Path, name: &str) -> PathBuf {
+    let name = crate::scratch::safe_file_name(name);
+    let first = dir.join(&name);
+    if !first.exists() {
+        return first;
+    }
+    let (stem, ext) = match name.rfind('.') {
+        Some(i) if i > 0 => (&name[..i], &name[i..]),
+        _ => (name.as_str(), ""),
+    };
+    (2..)
+        .map(|n| dir.join(format!("{stem} ({n}){ext}")))
+        .find(|p| !p.exists())
+        .expect("an unused name exists")
+}
+
+/// Move a file or directory, copying when a rename is not possible.
+#[cfg(any(target_os = "ios", test))]
+fn move_tree(from: &Path, to: &Path) -> std::io::Result<()> {
+    if std::fs::rename(from, to).is_ok() {
+        return Ok(());
+    }
+    if std::fs::metadata(from)?.is_dir() {
+        std::fs::create_dir_all(to)?;
+        for entry in std::fs::read_dir(from)? {
+            let entry = entry?;
+            if entry.file_type()?.is_symlink() {
+                continue;
+            }
+            move_tree(&entry.path(), &to.join(entry.file_name()))?;
+        }
+        std::fs::remove_dir_all(from)
+    } else {
+        std::fs::copy(from, to)?;
+        std::fs::remove_file(from)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unique_destination_adds_a_counter_before_the_extension() {
+        let dir = tempfile::tempdir().unwrap();
+        assert_eq!(
+            unique_destination(dir.path(), "a.txt"),
+            dir.path().join("a.txt")
+        );
+        std::fs::write(dir.path().join("a.txt"), "x").unwrap();
+        assert_eq!(
+            unique_destination(dir.path(), "a.txt"),
+            dir.path().join("a (2).txt")
+        );
+        std::fs::write(dir.path().join("a (2).txt"), "x").unwrap();
+        assert_eq!(
+            unique_destination(dir.path(), "a.txt"),
+            dir.path().join("a (3).txt")
+        );
+        std::fs::create_dir(dir.path().join(".bashrc")).unwrap();
+        assert_eq!(
+            unique_destination(dir.path(), ".bashrc"),
+            dir.path().join(".bashrc (2)")
+        );
+    }
+
+    #[test]
+    fn move_tree_moves_a_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let from = dir.path().join("from");
+        std::fs::create_dir_all(from.join("sub")).unwrap();
+        std::fs::write(from.join("sub/f"), "data").unwrap();
+        let to = dir.path().join("to");
+        move_tree(&from, &to).unwrap();
+        assert_eq!(std::fs::read_to_string(to.join("sub/f")).unwrap(), "data");
+        assert!(!from.exists());
+    }
     use std::fs;
 
     #[test]
@@ -314,25 +396,6 @@ mod tests {
             entries.iter().map(|(r, _)| r.clone()).collect::<Vec<_>>(),
             vec!["proj/README".to_string(), "proj/src/main.rs".to_string()],
         );
-    }
-
-    #[test]
-    fn temp_path_nests_under_the_app_cache_dir() {
-        let p = temp_download_path(
-            Path::new("/data/user/0/com.voltius.app/cache"),
-            "t1",
-            "a.bin",
-        );
-        assert_eq!(
-            p,
-            Path::new("/data/user/0/com.voltius.app/cache/voltius-downloads/t1/a.bin"),
-        );
-    }
-
-    #[test]
-    fn temp_path_flattens_separators_in_the_remote_name() {
-        let p = temp_download_path(Path::new("/cache"), "t1", "../../etc/passwd");
-        assert_eq!(p, Path::new("/cache/voltius-downloads/t1/.._.._etc_passwd"));
     }
 
     #[test]

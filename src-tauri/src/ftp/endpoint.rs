@@ -68,7 +68,7 @@ where
 }
 
 fn cancelled() -> AppError {
-    "Transfer cancelled".into()
+    crate::sftp::TRANSFER_CANCELLED.into()
 }
 
 impl FtpBackend {
@@ -248,6 +248,10 @@ impl Endpoint for FtpBackend {
         call!(*s, |ftp| ftp.custom_command(&cmd, &[Status::File]))
             .map(|_| ())
             .map_err(|e| failed("MFMT", e))
+    }
+
+    fn can_hash(&self) -> bool {
+        false
     }
 
     async fn hash(&self, _: &str, _: &CancellationToken) -> Result<Option<String>, AppError> {

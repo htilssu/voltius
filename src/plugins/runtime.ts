@@ -1,5 +1,6 @@
 import { invoke } from "@/lib/invoke";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { settleWithin } from "@/lib/settleWithin";
 import { closePfTunnel, getPfState, openPfTunnel } from "@/services/portForwardingTunnels";
 import { whenLoginSyncSettled } from "@/services/loginSyncGate";
 import { resolvePort } from "@/plugins/domains/ports";
@@ -35,7 +36,7 @@ import { vaultOptionsFrom } from "@/hooks/useVaultOptions";
 import { usePortForwardingStore } from "@/stores/portForwardingStore";
 import { useTransferQueueStore } from "@/stores/transferQueueStore";
 import { useHostPingStore } from "@/stores/hostPingStore";
-import { getSyncState, onSyncStateChange, getExcludedObjectIds, getPluginSkippedSyncFiles, writeFilteredSettings, openRemoteBlob, forEachRemoteBlob, mergeBlobPayload, importMergedPayload, type BlobPayload } from "@/services/sync";
+import { getSyncState, onSyncStateChange, getExcludedObjectIds, getPluginSkippedSyncFiles, writeFilteredSettings, openRemoteBlob, forEachRemoteBlob, mergeBlobPayload, importMergedPayload, serialMerge, blobDeviceId, notifyRemotePayloadMerged, type BlobPayload } from "@/services/sync";
 import { useThemeStore } from "@/stores/themeStore";
 import { useSyncPrefsStore } from "@/stores/syncPrefsStore";
 import type {
@@ -292,14 +293,6 @@ function ensureLifecycleSetup() {
     prevSessions = currentMap;
     prevActiveId = activeSessionId;
   });
-}
-
-/** Resolves with `p`, or with `orElse` if `p` rejects or outlasts `ms`. */
-function settleWithin<T>(p: Promise<T>, ms: number, orElse: T): Promise<T> {
-  return Promise.race([
-    p.catch(() => orElse),
-    new Promise<T>((r) => setTimeout(() => r(orElse), ms)),
-  ]);
 }
 
 async function ensureQuitHandler() {
@@ -2294,32 +2287,41 @@ function createPluginAPI(manifest: PluginManifest): PluginAPI {
 
       async importStates(encKey, blobs) {
         requirePerm(manifest, "sync:write");
-        const encKeyBytes = hexToBytes(encKey);
-        let merged: BlobPayload = await invoke<BlobPayload>("state_export_raw");
+        const { failed, bestThemeRaw, bestThemeUpdatedAt } = await serialMerge(async () => {
+          const encKeyBytes = hexToBytes(encKey);
+          let merged: BlobPayload = await invoke<BlobPayload>("state_export_raw");
+          const opened: Array<{ deviceId: string | null; remote: BlobPayload }> = [];
 
-        let bestThemeRaw: string | null = null;
-        let bestThemeUpdatedAt: string | null = null;
-        const excludedIds = getExcludedObjectIds();
-        const failed = await forEachRemoteBlob(blobs.map((b64, i) => ({ b64, i })), ({ i }) => `gist blob ${i + 1}`, async ({ b64 }) => {
-          const remote = await openRemoteBlob([encKeyBytes], base64ToByteArray(b64), excludedIds);
-          merged = mergeBlobPayload(merged, remote).payload;
+          let bestThemeRaw = null as string | null;
+          let bestThemeUpdatedAt = null as string | null;
+          const excludedIds = getExcludedObjectIds();
+          const failed = await forEachRemoteBlob(blobs.map((b64, i) => ({ b64, i })), ({ i }) => `gist blob ${i + 1}`, async ({ b64 }) => {
+            const bytes = base64ToByteArray(b64);
+            const remote = await openRemoteBlob([encKeyBytes], bytes, excludedIds);
+            merged = mergeBlobPayload(merged, remote).payload;
+            opened.push({ deviceId: blobDeviceId(bytes), remote });
 
-          const themeRaw = remote.files["theme.json"];
-          if (themeRaw) {
-            try {
-              const { updatedAt } = JSON.parse(themeRaw) as { updatedAt?: string };
-              if (updatedAt && (!bestThemeUpdatedAt || updatedAt > bestThemeUpdatedAt)) {
-                bestThemeUpdatedAt = updatedAt;
-                bestThemeRaw = themeRaw;
-              }
-            } catch {}
+            const themeRaw = remote.files["theme.json"];
+            if (themeRaw) {
+              try {
+                const { updatedAt } = JSON.parse(themeRaw) as { updatedAt?: string };
+                if (updatedAt && (!bestThemeUpdatedAt || updatedAt > bestThemeUpdatedAt)) {
+                  bestThemeUpdatedAt = updatedAt;
+                  bestThemeRaw = themeRaw;
+                }
+              } catch {}
+            }
+          });
+          if (failed.length > 0) {
+            appLog.warn(`[plugin:${id}] sync.importStates: skipped ${failed.length} of ${blobs.length} device blob(s) that could not be read`);
+            // Nothing readable is most likely a wrong key: surface it rather than report success.
+            if (failed.length === blobs.length) throw failed[0].error;
           }
+
+          await importMergedPayload(merged);
+          for (const { deviceId, remote } of opened) if (deviceId) notifyRemotePayloadMerged(deviceId, remote);
+          return { failed, bestThemeRaw, bestThemeUpdatedAt };
         });
-        if (failed.length > 0) {
-          appLog.warn(`[plugin:${id}] sync.importStates: skipped ${failed.length} of ${blobs.length} device blob(s) that could not be read`);
-          // Nothing readable is most likely a wrong key: surface it rather than report success.
-          if (failed.length === blobs.length) throw failed[0].error;
-        }
 
         // Inbound half of what getPluginSkippedSyncFiles enforces outbound: a
         // device that opted themes out of sync must not have them overwritten
@@ -2341,7 +2343,6 @@ function createPluginAPI(manifest: PluginManifest): PluginAPI {
           } catch {}
         }
 
-        await importMergedPayload(merged);
         for (const reload of Object.values(RELOADABLE_STORES)) {
           await reload();
         }

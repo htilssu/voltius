@@ -10,13 +10,14 @@ vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (k: string) => k }),
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
-vi.mock("@/utils/platform", () => ({ usePlatform: () => h.platform }));
+vi.mock("@/utils/platform", () => ({ isMobilePlatform: (p: string | null) => p === "android" || p === "ios", usePlatform: () => h.platform }));
 vi.mock("@/services/account", () => ({
   autoLogin: vi.fn(() => new Promise((resolve) => { h.finishLogin = resolve; })),
   getAppLock: vi.fn(async () => null),
   setAppLock: vi.fn(async () => {}),
   isServerMode: vi.fn(async () => false),
   getAccountMode: vi.fn(async () => "local"),
+  getAccountId: vi.fn(async () => "acc-1"),
 }));
 vi.mock("@/services/appLock", () => ({ systemAuthAvailable: async () => false, lockOnLaunchIfIdle: async () => null }));
 vi.mock("@/services/vault", () => ({ getVaultStatus: vi.fn(async () => ({ exists: true })) }));

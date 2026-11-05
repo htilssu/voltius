@@ -2,8 +2,7 @@ import type { TFunction } from "i18next";
 import type { SyncProviderAvailability } from "@/plugins/api";
 import { formatTime, HOUR_MINUTE } from "@/utils/localeFormat";
 import type { SyncStatus } from "./sync";
-import type { EffectiveSync } from "./syncProviders";
-import { SYNC_PAUSED_ICON } from "./syncStatus";
+import { isNearbyOnly, type EffectiveSync } from "./syncProviders";
 
 export function syncStatusLabel(
   t: TFunction,
@@ -26,8 +25,15 @@ export function syncFailureReason(status: SyncStatus, error: string | null): str
   return (status === "error" || status === "offline") && error ? error : null;
 }
 
+export function effectiveSyncLabel(t: TFunction, sync: EffectiveSync): string {
+  if (isNearbyOnly(sync)) return t("layout.sync.local.tooltip");
+  if (sync.configured) return syncStatusLabel(t, sync.status, sync.lastSync);
+  return t(sync.paused ? "layout.sync.paused" : "mobile.account.off");
+}
+
 /** One-line summary for a control with no room for a reason line; `status` is what the icon shows. */
 export function syncStatusTooltip(t: TFunction, sync: EffectiveSync, status: SyncStatus): string {
+  if (isNearbyOnly(sync)) return t("layout.sync.local.tooltip");
   if (!sync.configured) return t(sync.paused ? "layout.sync.status.paused" : "layout.sync.status.notConfigured");
   if (status === "error") {
     const error = sync.error ?? t("layout.sync.status.unknown");
@@ -41,8 +47,8 @@ export function syncStatusTooltip(t: TFunction, sync: EffectiveSync, status: Syn
 }
 
 export const INACTIVE_SYNC_ROWS = {
-  needs_upgrade: { icon: null, labelKey: "layout.sync.requiresPro", actionKey: "layout.sync.upgradeArrow", tone: "var(--t-text-dim)" },
-  disabled: { icon: "lucide:puzzle", labelKey: "layout.sync.pluginDisabled", actionKey: "layout.sync.enableArrow", tone: "var(--t-text-dim)" },
-  not_configured: { icon: "lucide:triangle-alert", labelKey: "layout.sync.notConfigured", actionKey: "layout.sync.configureArrow", tone: "var(--t-status-error)" },
-  paused: { icon: SYNC_PAUSED_ICON, labelKey: "layout.sync.paused", actionKey: "layout.sync.resumeArrow", tone: "var(--t-text-dim)" },
+  needs_upgrade: { labelKey: "layout.sync.requiresPro", actionKey: "layout.sync.upgradeArrow", tone: "var(--t-text-dim)" },
+  disabled: { labelKey: "layout.sync.pluginDisabled", actionKey: "layout.sync.enableArrow", tone: "var(--t-text-dim)" },
+  not_configured: { labelKey: "layout.sync.notConfigured", actionKey: "layout.sync.configureArrow", tone: "var(--t-status-error)" },
+  paused: { labelKey: "layout.sync.paused", actionKey: "layout.sync.resumeArrow", tone: "var(--t-text-dim)" },
 } as const satisfies Partial<Record<SyncProviderAvailability, unknown>>;

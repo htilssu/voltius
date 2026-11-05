@@ -137,14 +137,23 @@
         ]
       },
       "sync": {
-        "mobileSub": "Cloud sync and what gets synced",
+        "mobileSub": "Cloud, local network and what gets synced",
         "label": "Sync",
         "keywords": [
           "backup",
           "cloud",
           "gist",
           "sync",
-          "pro"
+          "pro",
+          "local",
+          "network",
+          "nearby",
+          "wifi",
+          "lan",
+          "pair",
+          "devices",
+          "tailscale",
+          "vpn"
         ]
       },
       "plugins": {
@@ -180,6 +189,11 @@
           "minimap",
           "buffer"
         ]
+      },
+      "devices": {
+        "mobileSub": "Let your devices open files here",
+        "label": "Devices",
+        "keywords": ["devices", "files", "sftp", "share", "folders", "access"]
       },
       "sftp": {
         "mobileSub": "Downloads, transfers, editor",
@@ -315,7 +329,8 @@
             "windows": "Windows Hello",
             "macos": "Touch ID or your Mac password",
             "linux": "your system password",
-            "android": "your fingerprint or screen lock"
+            "android": "your fingerprint or screen lock",
+            "ios": "Face ID, Touch ID or your passcode"
           }
         },
         "needsSystemAuth": "Turn on system authentication to lock an account without a master password.",
@@ -470,14 +485,19 @@
       },
       "loading": "Working...",
       "plan": {
-        "title": "Plan",
-        "badge": {
-          "business": "Business",
-          "teams": "Teams",
-          "proTrial": "Pro Trial — {{daysLeft}}d left",
+        "name": {
+          "free": "Free",
           "pro": "Pro",
-          "free": "Free"
+          "teams": "Teams",
+          "business": "Business"
         },
+        "trialName": "{{plan}} trial",
+        "trialLeft": "{{plan}} — {{daysLeft}}d left",
+        "viaSeat": "{{plan}} · through your seat in {{team}}",
+        "viaTooltip": "Through {{team}}",
+        "throughSeat": "Through your seat in {{team}}",
+        "ownLine": "Your {{plan}} subscription",
+        "title": "Plan",
         "manageBilling": "Manage billing →",
         "subscription": {
           "cancelled": "Cancels on {{date}}. You keep access until then.",
@@ -496,6 +516,8 @@
           "localVault": "Local vault",
           "auditLogs": "Audit logs",
           "gistSync": "GitHub Gist sync",
+          "localSync": "Local network sync",
+          "deviceFiles": "File transfer between your devices",
           "realtimeSync": "Real-time cloud sync",
           "unlimitedVaults": "Unlimited private vaults",
           "terminalSharing": "Terminal sharing (1 session · 1 guest)",
@@ -626,6 +648,12 @@
     },
     "sync": {
       "voltiusCloud": "Voltius Cloud",
+      "local": {
+        "pairSub": "Sync with another device on your network without an account.",
+        "title": "Local sync",
+        "pauseSub": "Stops syncing with your other devices nearby until you resume.",
+        "footer": "Your personal vault syncs directly between your devices on the same network or over a VPN like Tailscale, while both are online. Free, with no server in between. Team vaults are not included."
+      },
       "active": {
         "title": "Cloud sync active",
         "syncing": "Syncing…",
@@ -638,7 +666,7 @@
         "syncNow": "Sync now"
       },
       "pause": {
-        "label": "Pause sync on this device",
+        "label": "Pause cloud sync on this device",
         "sub": "Stops background sync with the server. Team vaults stop updating and do not load at launch until you resume. Sync now only syncs your own data."
       },
       "requiresPro": {
@@ -647,13 +675,13 @@
         "upgrade": "Upgrade"
       },
       "notConnected": {
-        "title": "Cloud account not connected",
-        "sub": "Sign in or create a cloud account to sync across devices.",
+        "title": "Not signed in",
+        "sub": "Voltius Cloud keeps your devices in sync even when they're not online together, with an encrypted backup. With a free account, your devices pair automatically.",
         "signIn": "Sign in"
       },
       "providersTitle": "Sync plugins",
       "prefsTitle": "Sync Preferences",
-      "prefsFooter": "Disabled types are never uploaded. Individual objects can also be excluded from their edit panel.",
+      "prefsFooter": "Disabled types never leave this device. Individual objects can also be excluded from their edit panel.",
       "quickToggleLabel": "Sync {{label}}",
       "objectType": {
         "connection": {
@@ -682,7 +710,7 @@
         }
       },
       "settingsTitle": "Settings",
-      "settingsFooter": "Anything switched off stays on this device. It is never uploaded, even encrypted. Turning sync back on publishes this device's values.",
+      "settingsFooter": "Anything switched off stays on this device and is never sent anywhere, even encrypted. Turning sync back on publishes this device's values.",
       "settingDomain": {
         "themes": { "label": "Themes", "sub": "Active theme and custom themes" },
         "uiPreferences": { "label": "Interface", "sub": "Scale, layouts and sort order" },
@@ -942,6 +970,28 @@
         }
       }
     },
+    "devices": {
+      "fileAccess": {
+        "title": "File access",
+        "enable": { "title": "Let my devices open files on this computer", "desc": "Your other Voltius devices can browse the folders below from SFTP. Off by default." },
+        "folders": "Shared folders",
+        "addFolder": "Add folder",
+        "noFolders": "Add a folder to share it with your devices.",
+        "removeFolder": "Stop sharing {{folder}}",
+        "readOnly": { "title": "Read-only", "desc": "Devices can copy files from here, not change or delete them." }
+      },
+      "allowed": {
+        "title": "Allowed devices",
+        "asksEachTime": "Asks each time",
+        "alwaysAllowed": "Always allowed",
+        "connectedNow": "connected now",
+        "disconnect": "Disconnect",
+        "revoke": "Revoke",
+        "needsKey": "Connect once to allow",
+        "alwaysLabel": "Always allow {{name}}",
+        "empty": "No other devices yet."
+      }
+    },
     "sftp": {
       "downloads": {
         "title": "Downloads",
@@ -1047,6 +1097,15 @@
       "persistentSessions": {
         "title": "Persistent sessions",
         "desc": "Keep your shell and running processes alive across disconnects by wrapping the remote shell in tmux (falls back to screen). Requires tmux or screen on the host. Can be overridden per host, under Advanced in the connection's settings."
+      },
+      "detachedTtl": {
+        "title": "Close idle detached sessions",
+        "desc": "Close a persistent session on the host once no device has been attached to it for the chosen time, but only if nothing is running in it. Works on Linux hosts with tmux 3.2 or newer; screen and older tmux keep sessions as before. A change applies to a session the next time it is attached.",
+        "durationTitle": "Close after",
+        "hours_one": "{{count}} hour",
+        "hours_other": "{{count}} hours",
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days"
       },
       "terminalTitle": "Terminal",
       "shellIntegration": {
@@ -1185,6 +1244,9 @@
       },
       "persistentSessions": {
         "label": "Persistent Sessions"
+      },
+      "detachedSessionTtl": {
+        "label": "Close Idle Detached Sessions"
       },
       "restoreWorkspace": {
         "label": "Restore Workspace on Launch"

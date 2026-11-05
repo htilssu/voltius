@@ -7,7 +7,7 @@ import { usePluginStore } from "@/stores/pluginStore";
 import { usePluginRegistryStore } from "@/stores/pluginRegistryStore";
 import { useMarketplaceStore } from "@/stores/marketplaceStore";
 import { useUIStore } from "@/stores/uiStore";
-import { catalogIcon } from "@/plugins/catalogIcon";
+import { catalogIcon, catalogEntryIcon } from "@/plugins/catalogIcon";
 import { satisfiesMinAppVersion } from "@/plugins/version";
 import { availableUpdate, availableSeededUpdate } from "@/plugins/updates";
 import { loadSeededEntries, type SeededEntry } from "@/stores/seededTombstoneStore";
@@ -20,7 +20,7 @@ import { attributePage } from "@/plugins/attributePage";
 import { usePluginInstaller } from "@/components/settings/usePluginInstaller";
 import { useBrowseCatalog } from "@/hooks/useBrowseCatalog";
 import { DirtyDot, ResetButton, SettingRow } from "./shared";
-import { useIsAndroid } from "@/utils/platform";
+import { useIsMobile } from "@/utils/platform";
 import { visiblePlugins } from "@/components/settings/settingsMobileCore";
 import { searchMatcher } from "@/utils/search";
 
@@ -231,7 +231,7 @@ export function InstalledTab() {
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   useFilterShortcut(searchRef);
-  const isAndroid = useIsAndroid();
+  const isMobile = useIsMobile();
   const [seededEntries, setSeededEntries] = useState<Map<string, SeededEntry>>(new Map());
 
   useEffect(() => {
@@ -313,7 +313,7 @@ export function InstalledTab() {
   const bundled = bundledPluginManifests(externalPluginIds);
   const allBundled = visiblePlugins(
     bundled.map((manifest) => ({ manifest })),
-    isAndroid,
+    isMobile,
   );
   const allExternal = installedMeta;
 
@@ -394,7 +394,7 @@ export function InstalledTab() {
                     onClick={() => startUpdate(seededUpdate, manifest.permissions)}
                     disabled={isUpdating}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                    style={{ background: "var(--t-accent)", color: "var(--t-bg-base)", opacity: isUpdating ? 0.6 : 1 }}
+                    style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isUpdating ? 0.6 : 1 }}
                     title={t("settings.plugins.installed.updateTitle", { version: seededUpdate.version })}
                   >
                     <Icon icon={isUpdating ? "lucide:loader" : "lucide:arrow-up-circle"} width={12} className={isUpdating ? "animate-spin" : ""} />
@@ -490,7 +490,7 @@ export function InstalledTab() {
                     onClick={() => startUpdate(update, getLoadedPlugins().find((m) => m.id === meta.id)?.permissions ?? [])}
                     disabled={isUpdating || updateVersionUnsatisfied}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                    style={{ background: "var(--t-accent)", color: "var(--t-bg-base)", opacity: isUpdating || updateVersionUnsatisfied ? 0.6 : 1 }}
+                    style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isUpdating || updateVersionUnsatisfied ? 0.6 : 1 }}
                     title={updateVersionUnsatisfied
                       ? t("settings.plugins.browse.requiresVersion", { version: update.minAppVersion })
                       : t("settings.plugins.installed.updateTitle", { version: update.version })}
@@ -581,6 +581,12 @@ function BrowseTab() {
   const [reviewInstalls, setReviewInstalls] = useToggle("plugin-install-review");
 
   const [search, setSearch] = useState("");
+  const browseQuery = useUIStore((s) => s.pluginBrowseQuery);
+  useEffect(() => {
+    if (browseQuery === null) return;
+    setSearch(browseQuery);
+    useUIStore.getState().setPluginBrowseQuery(null);
+  }, [browseQuery]);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showSources, setShowSources] = useState(false);
   const [uninstalling, setUninstalling] = useState<Set<string>>(new Set());
@@ -673,7 +679,7 @@ function BrowseTab() {
                 onClick={() => void handleAddSource()}
                 disabled={addingSource || !newSourceUrl.trim()}
                 className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{ background: "var(--t-accent)", color: "var(--t-bg-base)", opacity: addingSource ? 0.6 : 1 }}
+                style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: addingSource ? 0.6 : 1 }}
               >
                 {addingSource ? <Icon icon="lucide:loader" width={14} className="animate-spin" /> : t("settings.plugins.browse.add")}
               </button>
@@ -784,7 +790,7 @@ function BrowseTab() {
               <div key={plugin.id} className="rounded-xl bg-(--t-bg-card) border border-(--t-border) px-4 py-3">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-(--t-bg-elevated) border border-(--t-border) mt-0.5">
-                    <Icon icon={catalogIcon(plugin.icon, plugin.theme ? "lucide:palette" : "lucide:puzzle")} width={15} className="text-(--t-accent)" />
+                    <Icon icon={catalogEntryIcon(plugin)} width={15} className="text-(--t-accent)" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -818,7 +824,7 @@ function BrowseTab() {
                       disabled={isBusy || versionUnsatisfied}
                       title={versionUnsatisfied ? t("settings.plugins.browse.requiresVersion", { version: plugin.minAppVersion }) : undefined}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                      style={{ background: "var(--t-accent)", color: "var(--t-bg-base)", opacity: isBusy || versionUnsatisfied ? 0.6 : 1 }}
+                      style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isBusy || versionUnsatisfied ? 0.6 : 1 }}
                     >
                       {isBusy
                         ? <><Icon icon="lucide:loader" width={12} className="animate-spin" /> {t("settings.plugins.browse.installing")}</>
@@ -831,7 +837,7 @@ function BrowseTab() {
                       disabled={isBusy || updateVersionUnsatisfied}
                       title={updateVersionUnsatisfied ? t("settings.plugins.browse.requiresVersion", { version: update.minAppVersion }) : t("settings.plugins.installed.updateTitle", { version: update.version })}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                      style={{ background: "var(--t-accent)", color: "var(--t-bg-base)", opacity: isBusy || updateVersionUnsatisfied ? 0.6 : 1 }}
+                      style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isBusy || updateVersionUnsatisfied ? 0.6 : 1 }}
                     >
                       {isBusy
                         ? <><Icon icon="lucide:loader" width={12} className="animate-spin" /> {t("settings.plugins.installed.updating")}</>
@@ -868,20 +874,22 @@ type Tab = "installed" | "browse";
 
 export default function PluginsSection() {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("installed");
+  const browseRequested = useUIStore((s) => s.pluginBrowseQuery !== null);
+  const [tab, setTab] = useState<Tab>(browseRequested ? "browse" : "installed");
+  useEffect(() => { if (browseRequested) setTab("browse"); }, [browseRequested]);
   const installedMeta = useMarketplaceStore((s) => s.installedMeta);
   const catalog = useMarketplaceStore((s) => s.catalog);
   const catalogLoading = useMarketplaceStore((s) => s.catalogLoading);
   const fetchCatalog = useMarketplaceStore((s) => s.fetchCatalog);
   const appVersion = useMarketplaceStore((s) => s.appVersion);
-  const isAndroid = useIsAndroid();
+  const isMobile = useIsMobile();
   const externalIds = new Set(installedMeta.map((m) => m.id));
   // Filtered through visiblePlugins before anything counts against it — a desktopOnly
   // seeded plugin is still loaded on Android but renders no row and
   // no button there, so an update for it must never be counted either.
   const visibleBundledManifests = visiblePlugins(
     bundledPluginManifests(externalIds).map((manifest) => ({ manifest })),
-    isAndroid,
+    isMobile,
   ).map(({ manifest }) => manifest);
   const totalCount = installedMeta.length + visibleBundledManifests.length;
   const [seededEntries, setSeededEntries] = useState<Map<string, SeededEntry>>(new Map());

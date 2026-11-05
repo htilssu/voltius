@@ -1,10 +1,18 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  canShare, mimeForName, publicKeyShareText, shareFiles, shareMime, shareStageId, shareTotalBytes,
+  canShare, canShareFiles, mimeForName, publicKeyShareText, shareFiles, shareMime, shareStageId, shareTotalBytes,
   shareableFiles, shareText, snippetShareText, MAX_SHARE_TEXT,
 } from "./share";
 import { isLeaveLockSuppressed } from "./leaveLockSuppression";
+
+const platform = vi.hoisted(() => ({ os: null as string | null }));
+const invoke = vi.hoisted(() => vi.fn(() => Promise.resolve(true)));
+vi.mock("@/lib/invoke", () => ({ invoke }));
+vi.mock("@/utils/platform", async (orig) => ({
+  ...(await orig<typeof import("@/utils/platform")>()),
+  getPlatformSync: () => platform.os,
+}));
 
 const ED = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHk3m1Qq7oHqH2k1lR3n8d0Zr5fXy6V2eJt0c5o4p9Ws demo@voltius";
 const PRIVATE = [
@@ -14,7 +22,11 @@ const PRIVATE = [
 ].join("\n");
 
 type W = Window & { VoltiusShare?: unknown };
-afterEach(() => { delete (window as W).VoltiusShare; });
+afterEach(() => {
+  delete (window as W).VoltiusShare;
+  platform.os = null;
+  vi.unstubAllGlobals();
+});
 
 function installBridge() {
   const b = { shareText: vi.fn(() => true), shareFiles: vi.fn(() => true) };
@@ -104,5 +116,48 @@ describe("bridge", () => {
     document.dispatchEvent(new Event("visibilitychange"));
     vis.mockRestore();
     return Promise.resolve().then(() => Promise.resolve()).then(() => expect(isLeaveLockSuppressed()).toBe(false));
+  });
+});
+
+describe("iOS web share", () => {
+  it("shares text through navigator.share on iOS", () => {
+    const share = vi.fn(() => Promise.resolve());
+    vi.stubGlobal("navigator", { ...navigator, share });
+    platform.os = "ios";
+    expect(canShare()).toBe(true);
+    expect(shareText(ED, "key")).toBe(true);
+    expect(share).toHaveBeenCalledWith({ text: ED, title: "key" });
+  });
+  it("offers nothing on desktop even where WebKit has navigator.share", () => {
+    vi.stubGlobal("navigator", { ...navigator, share: vi.fn() });
+    platform.os = "macos";
+    expect(canShare()).toBe(false);
+    expect(shareText(ED)).toBe(false);
+  });
+  it("prefers the Android bridge when it is there", () => {
+    const share = vi.fn(() => Promise.resolve());
+    vi.stubGlobal("navigator", { ...navigator, share });
+    platform.os = "ios";
+    const b = installBridge();
+    expect(shareText(ED, "t")).toBe(true);
+    expect(b.shareText).toHaveBeenCalled();
+    expect(share).not.toHaveBeenCalled();
+  });
+});
+
+describe("shareFiles on iOS", () => {
+  it("opens the native share sheet with the staged paths", () => {
+    platform.os = "ios";
+    expect(canShareFiles()).toBe(true);
+    const paths = ["/cache/voltius-downloads/share-t1/a.png"];
+    expect(shareFiles(paths, ["a.png"])).toBe(true);
+    expect(invoke).toHaveBeenCalledWith("share_files_native", { paths });
+    expect(isLeaveLockSuppressed()).toBe(true);
+  });
+
+  it("offers nothing on desktop", () => {
+    platform.os = "linux";
+    expect(canShareFiles()).toBe(false);
+    expect(shareFiles(["/tmp/a"], ["a"])).toBe(false);
   });
 });

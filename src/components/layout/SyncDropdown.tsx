@@ -1,15 +1,15 @@
-import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { useAnchoredPopover } from "@/hooks/useAnchoredPopover";
 import { runSyncMenuAction, useSyncProviderPanel } from "@/hooks/useSyncProviderPanel";
-import { VOLTIUS_PROVIDER_ID, type SyncProviderAction, type SyncProviderView } from "@/services/syncProviders";
-import { SyncStatusIcon } from "@/components/shared/SyncStatusIcon";
+import { splitCloudProvider, type SyncProviderAction, type SyncProviderView } from "@/services/syncProviders";
 import { useVaultContents } from "@/hooks/useVaultContents";
 import { ContentCounts } from "@/components/shared/ContentCounts";
 import type { usePluginInstaller } from "@/components/settings/usePluginInstaller";
 import { useAvailableSyncProviders } from "@/hooks/useAvailableSyncProviders";
 import { AvailableSyncProviderRow } from "@/components/shared/AvailableSyncProviderRow";
+import { LocalNetworkSection } from "@/components/shared/LocalNetworkSection";
+import { providerLang, SyncHeaderButton, SyncInlineAction, SyncSectionHeader } from "@/components/shared/SyncSectionParts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -21,36 +21,9 @@ function formatBytes(bytes: number): string {
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 
-function HeaderButton({ onClick, title, disabled = false, faded = false, children }: {
-  onClick: () => void;
-  title: string;
-  disabled?: boolean;
-  faded?: boolean;
-  children: React.ReactNode;
-}) {
-  const rest = disabled ? "var(--t-text-dim)" : "var(--t-text-secondary)";
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-medium transition-all"
-      style={{ color: rest, background: "var(--t-bg-elevated)", opacity: faded ? 0.4 : 1 }}
-      onMouseEnter={(e) => {
-        if (!disabled) e.currentTarget.style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = rest;
-      }}
-      title={title}
-    >
-      {children}
-    </button>
-  );
-}
-
 function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAction: (action: SyncProviderAction) => void }) {
   const { t } = useTranslation();
-  const { motion, syncNow, inactive: inactiveRow, status } = useSyncProviderPanel(provider);
+  const { syncNow, inactive: inactiveRow, status, header } = useSyncProviderPanel(provider);
 
   const act = () => {
     if (provider.action) onAction(provider.action);
@@ -59,26 +32,16 @@ function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAct
 
   return (
     <div data-sync-provider={provider.id} className="px-3 py-2.5 space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <Icon icon={provider.icon} width={12} style={{ color: "var(--t-text-dim)" }} />
-          {/* Plugin providers carry their English product name; keep it out of Turkish casing. */}
-          <span lang={provider.id === VOLTIUS_PROVIDER_ID ? undefined : "en"} className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--t-text-dim)" }}>
-            {provider.label}
-          </span>
-        </div>
-        <div className="flex items-stretch gap-1">
-          {toggle && (
-            <HeaderButton onClick={() => onAction(toggle)} title={t(`layout.sync.${toggle.kind}`)}>
-              <Icon icon={toggle.kind === "pause" ? "lucide:pause" : "lucide:play"} width={10} />
-            </HeaderButton>
-          )}
-          <HeaderButton onClick={syncNow.run} disabled={syncNow.busy || !syncNow.available} faded={!syncNow.available} title={t("layout.sync.syncNow")}>
-            <Icon icon="lucide:refresh-cw" width={10} />
-            {t("layout.sync.syncNow")}
-          </HeaderButton>
-        </div>
-      </div>
+      <SyncSectionHeader variant="dropdown" icon={provider.icon} label={provider.label} lang={providerLang(provider.id)} status={header}>
+        {toggle && (
+          <SyncHeaderButton onClick={() => onAction(toggle)} title={t(`layout.sync.${toggle.kind}`)}>
+            <Icon icon={toggle.kind === "pause" ? "lucide:pause" : "lucide:play"} width={10} />
+          </SyncHeaderButton>
+        )}
+        <SyncHeaderButton onClick={syncNow.run} disabled={syncNow.busy || !syncNow.available} faded={!syncNow.available} title={t("layout.sync.syncNow")}>
+          <Icon icon="lucide:refresh-cw" width={10} />
+        </SyncHeaderButton>
+      </SyncSectionHeader>
 
       {provider.availability === "locked" && (
         <button
@@ -94,30 +57,10 @@ function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAct
         </button>
       )}
 
-      {inactiveRow && (
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5" style={{ color: inactiveRow.tone }}>
-            {inactiveRow.icon && <Icon icon={inactiveRow.icon} width={11} />}
-            <span className="text-xs">{t(inactiveRow.labelKey)}</span>
-          </div>
-          <button
-            onClick={act}
-            className="text-[10px] font-medium transition-opacity"
-            style={{ color: "var(--t-accent)" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "0.75")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "1")}
-          >
-            {t(inactiveRow.actionKey)}
-          </button>
-        </div>
-      )}
+      {inactiveRow && provider.action && <SyncInlineAction onClick={act} label={t(inactiveRow.actionKey)} />}
 
       {status && (
         <>
-          <div className="flex items-center gap-1.5" style={{ color: status.color }}>
-            <SyncStatusIcon sync={motion} width={12} />
-            <span className="text-xs">{status.label}</span>
-          </div>
           {status.reason && (
             <p className="text-[10px] leading-relaxed break-words" style={{ color: status.color }}>
               {status.reason}
@@ -192,6 +135,7 @@ export function SyncDropdown({ anchorRef, open, onClose, providers, installer }:
   if (!fade.mounted) return null;
 
   const onAction = (action: SyncProviderAction) => runSyncMenuAction(action, onClose);
+  const { cloud, others } = splitCloudProvider(providers);
 
   const anchor = anchorRef.current;
   const rect = anchor?.getBoundingClientRect();
@@ -201,7 +145,7 @@ export function SyncDropdown({ anchorRef, open, onClose, providers, installer }:
   return (
     <div
       ref={fade.panelRef}
-      className={`surface-float fixed z-50 w-64 overflow-hidden ${fade.className}`}
+      className={`surface-float fixed z-50 w-76 overflow-hidden ${fade.className}`}
       style={{ top, right, ...fade.style }}
     >
       <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: "1px solid var(--t-border)" }}>
@@ -219,12 +163,11 @@ export function SyncDropdown({ anchorRef, open, onClose, providers, installer }:
         </button>
       </div>
 
-      {providers.map((provider, i) => (
-        <Fragment key={provider.id}>
-          {i > 0 && <div style={{ height: 1, background: "var(--t-border)" }} />}
-          <SyncSection provider={provider} onAction={onAction} />
-        </Fragment>
-      ))}
+      <div className="divide-y divide-(--t-border)">
+        {cloud && <SyncSection provider={cloud} onAction={onAction} />}
+        <LocalNetworkSection variant="dropdown" onClose={onClose} />
+        {others.map((provider) => <SyncSection key={provider.id} provider={provider} onAction={onAction} />)}
+      </div>
 
       <MoreSyncProviders installer={installer} />
 

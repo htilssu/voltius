@@ -1,22 +1,12 @@
 import { Icon } from "@iconify/react";
-import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import { useDragStore } from "@/stores/dragStore";
 import { useAllConnections } from "@/hooks/useAllConnections";
 import { useSessionStore } from "@/stores/sessionStore";
 import { getConnectionIcon, getConnectionIconColor } from "@/utils/icons";
-import type { TerminalSession } from "@/types";
 import { sessionLabel } from "@/utils/sessionLabel";
-
-function sessionBadge(session: TerminalSession, t: TFunction): string {
-  if (session.type === "ssh") return t("panes.badge.ssh");
-  if (session.type === "serial") return t("panes.badge.serial");
-  if (session.type === "multiplayer") return t("panes.badge.multiplayer");
-  return t("panes.badge.local");
-}
+import { SessionTypeBadge } from "@/components/panes/SessionTypeBadge";
 
 export function DragGhost() {
-  const { t } = useTranslation();
   const isDragging = useDragStore((s) => s.isDragging);
   const currentX = useDragStore((s) => s.currentX);
   const currentY = useDragStore((s) => s.currentY);
@@ -55,12 +45,7 @@ export function DragGhost() {
           <Icon icon={icon} width={13} />
         </span>
         <span className="truncate max-w-48">{sessionLabel(session)}</span>
-        <span
-          className="px-1.5 py-0.5 rounded-sm border text-[10px]"
-          style={{ borderColor: "var(--t-border)", background: "var(--t-bg-elevated)" }}
-        >
-          {sessionBadge(session, t)}
-        </span>
+        <SessionTypeBadge type={session.type} />
       </div>
     </div>
   );

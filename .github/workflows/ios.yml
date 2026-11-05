@@ -1,0 +1,264 @@
+# Builds the App Store package (.ipa) for iOS on a macOS runner. tag-release
+# calls it with a release tag: the package then goes to TestFlight and is
+# submitted for App Store review (scripts/asc/release.mjs), released
+# automatically once Apple approves it.
+#
+# Signing is manual: the Apple Distribution certificate (IOS_CERTIFICATE, a
+# base64 .p12, and IOS_CERTIFICATE_PASSWORD) and the "Voltius App Store"
+# provisioning profile (IOS_MOBILE_PROVISION, base64) are read by the Tauri CLI.
+#
+# The iOS bundle id is app.voltius (src-tauri/tauri.ios.conf.json): Apple
+# reported com.voltius.app as taken by another team.
+#
+# The build uses VITE_DISTRIBUTION=appstore, which hides the purchase buttons.
+name: ios
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+  push:
+    branches: [ci/ios]
+    paths-ignore: ["scripts/asc/**", ".github/workflows/asc.yml", ".github/workflows/ios-e2e.yml", "scripts/ios-e2e/**"]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Ref to build"
+        required: true
+        type: string
+      testflight:
+        description: "Upload the package to TestFlight"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+# A newer push replaces the build of the previous one; release and TestFlight
+# runs are never cancelled.
+concurrency:
+  group: ios-${{ inputs.tag || github.event_name }}-${{ github.event_name == 'push' && !inputs.tag && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'push' && !inputs.tag }}
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || inputs.ref || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+
+      - name: Read toolchain channel from rust-toolchain.toml
+        id: rust
+        run: echo "channel=$(sed -nE "s/^channel[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/p" rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.rust.outputs.channel }}
+          targets: aarch64-apple-ios
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          key: aarch64-apple-ios
+          workspaces: ". -> target"
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Generate the Xcode project
+        run: pnpm tauri ios init --ci
+
+      - name: Use the Voltius app icons
+        run: bash scripts/ios/use-app-icons.sh
+
+      # iPhone only: the mobile shell is not laid out for iPad (it still runs
+      # there in iPhone compatibility mode), and the store then needs no iPad
+      # screenshots.
+      - name: Target iPhone only
+        run: |
+          perl -pi -e 's/TARGETED_DEVICE_FAMILY = "?1,2"?;/TARGETED_DEVICE_FAMILY = 1;/' src-tauri/gen/apple/voltius.xcodeproj/project.pbxproj
+          grep -n "TARGETED_DEVICE_FAMILY" src-tauri/gen/apple/voltius.xcodeproj/project.pbxproj
+
+      # The Tauri CLI installs the profile in ~/Library/MobileDevice, but Xcode 16+
+      # reads ~/Library/Developer/Xcode/UserData. Install it in both places.
+      - name: Install the provisioning profile
+        env:
+          IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
+        run: |
+          profile="$RUNNER_TEMP/voltius.mobileprovision"
+          echo "$IOS_MOBILE_PROVISION" | base64 --decode > "$profile"
+          uuid=$(security cms -D -i "$profile" | plutil -extract UUID raw -o - -)
+          echo "profile UUID: $uuid"
+          for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$dir"
+            cp "$profile" "$dir/$uuid.mobileprovision"
+          done
+
+      # With the App Store Connect API key, the Tauri CLI builds and archives
+      # unsigned, then signs at export time with the certificate and profile
+      # above. Signing at build time fails: Xcode 26 reports that voltius_iOS
+      # "requires a provisioning profile" although the profile is installed.
+      - name: Write the App Store Connect API key
+        env:
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          printf "%s\n" "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Build the App Store package
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
+          APPLE_DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          VOLTIUS_REQUIRE_SEEDED_PLUGINS: "1"
+          VITE_DISTRIBUTION: appstore
+        # CFBundleVersion must be new for every upload and have at most three
+        # numbers, so it is the run number and attempt (--build-number would
+        # append a fourth one to the app version). Called from tag-release, the
+        # run is tag-release's.
+        run: >-
+          pnpm tauri ios build --export-method app-store-connect --ci
+          --config "{\"bundle\":{\"iOS\":{\"bundleVersion\":\"${{ github.run_number }}.${{ github.run_attempt }}\"}}}"
+
+      - name: Upload to TestFlight
+        if: inputs.testflight || inputs.tag
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          cp "$APPLE_API_KEY_PATH" "$HOME/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY.p8"
+          ipa=$(ls src-tauri/gen/apple/build/arm64/*.ipa)
+          xcrun altool --upload-app --type ios --file "$ipa" --apiKey "$APPLE_API_KEY" --apiIssuer "$APPLE_API_ISSUER" --output-format normal
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_$APPLE_API_KEY.p8"
+
+      - name: Submit for App Store review
+        if: inputs.tag
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          TAG: ${{ inputs.tag }}
+          BUILD: ${{ github.run_number }}.${{ github.run_attempt }}
+        run: |
+          node scripts/store/release-notes.mjs "${TAG#v}" 4000 > "$RUNNER_TEMP/whats-new.txt"
+          node scripts/asc/release.mjs --version "${TAG#v}" --build "$BUILD" --notes "$RUNNER_TEMP/whats-new.txt"
+
+      - name: Upload the package
+        uses: actions/upload-artifact@v7
+        with:
+          name: voltius-ios-ipa
+          path: src-tauri/gen/apple/build/arm64/*.ipa
+          retention-days: 14
+
+      - name: Show the signing settings
+        if: failure()
+        run: |
+          rm -f "$RUNNER_TEMP/AuthKey.p8"
+          grep -n -E "CODE_SIGN|PROVISIONING|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER|name = (debug|release)|Build configuration list" src-tauri/gen/apple/voltius.xcodeproj/project.pbxproj || true
+          cat src-tauri/gen/apple/ExportOptions.plist || true
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" || true
+          security find-identity -v -p codesigning || true
+
+  # Runs the app in the iOS simulator and keeps screenshots and logs, since
+  # nobody on the team has an iPhone.
+  simulator:
+    if: ${{ !inputs.tag }}
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || inputs.ref || github.ref }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup node
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+
+      - name: Read toolchain channel from rust-toolchain.toml
+        id: rust
+        run: echo "channel=$(sed -nE "s/^channel[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/p" rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.rust.outputs.channel }}
+          targets: aarch64-apple-ios-sim
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          key: aarch64-apple-ios-sim
+          workspaces: ". -> target"
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Generate the Xcode project
+        run: pnpm tauri ios init --ci
+
+      - name: Use the Voltius app icons
+        run: bash scripts/ios/use-app-icons.sh
+
+      # iPhone only: the mobile shell is not laid out for iPad (it still runs
+      # there in iPhone compatibility mode), and the store then needs no iPad
+      # screenshots.
+      - name: Target iPhone only
+        run: |
+          perl -pi -e 's/TARGETED_DEVICE_FAMILY = "?1,2"?;/TARGETED_DEVICE_FAMILY = 1;/' src-tauri/gen/apple/voltius.xcodeproj/project.pbxproj
+          grep -n "TARGETED_DEVICE_FAMILY" src-tauri/gen/apple/voltius.xcodeproj/project.pbxproj
+
+      - name: Build for the simulator
+        env:
+          VOLTIUS_REQUIRE_SEEDED_PLUGINS: "1"
+          VITE_DISTRIBUTION: appstore
+        run: pnpm tauri ios build --target aarch64-sim --ci
+
+      - name: Run in the simulator
+        run: |
+          app=$(find src-tauri/gen/apple/build -name "*.app" -maxdepth 3 | head -1)
+          echo "app: $app"
+          device=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)[\"devices\"]; print(next(x[\"udid\"] for r in sorted(d, reverse=True) if \"iOS\" in r for x in d[r] if x[\"name\"].startswith(\"iPhone\") and \"Pro\" in x[\"name\"] and \"Max\" not in x[\"name\"]))")
+          echo "device: $device"
+          xcrun simctl boot "$device"
+          xcrun simctl bootstatus "$device"
+          xcrun simctl install "$device" "$app"
+          mkdir -p sim
+          xcrun simctl launch --console-pty "$device" app.voltius > sim/console.log 2>&1 &
+          for t in 5 15 30 60; do
+            sleep $((t - ${prev:-0})); prev=$t
+            xcrun simctl io "$device" screenshot "sim/launch-${t}s.png"
+          done
+          xcrun simctl spawn "$device" log show --last 3m --style compact --predicate "process == \"Voltius\"" > sim/system.log || true
+          tail -50 sim/console.log || true
+
+      - name: Upload screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: voltius-ios-simulator
+          path: sim/
+          retention-days: 14

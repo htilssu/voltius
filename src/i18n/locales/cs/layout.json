@@ -22,12 +22,15 @@
       "vaultUnreadableRetry": "Zkusit jiné heslo",
       "chooseHowToUse": "Vyberte, jak chcete Voltius používat",
       "getStarted": "Začít",
-      "getStartedSub": "Zabezpečeno systémovou klíčenkou — bez hesla",
+      "getStartedSub": "Bez účtu — spárujte zařízení ve vaší síti",
+      "getStartedSub_ios": "Zabezpečeno systémovou klíčenkou — bez hesla",
       "or": "nebo",
       "cloudAccount": "Cloudový účet",
-      "cloudAccountSub": "Synchronizace mezi zařízeními — přihlaste se nebo si účet vytvořte",
+      "cloudAccountSub": "Zařízení se spárují automaticky · Pro přidá cloud a zálohu",
+      "cloudAccountSub_ios": "Synchronizace mezi zařízeními — přihlaste se nebo si účet vytvořte",
       "back": "Zpět",
-      "signupPrompt": "Vytvořte si účet pro synchronizaci mezi zařízeními",
+      "signupPrompt": "Vytvořte si účet a zařízení se spárují automaticky",
+      "signupPrompt_ios": "Vytvořte si účet pro synchronizaci mezi zařízeními",
       "signinPrompt": "Přihlaste se a obnovte synchronizovaná data",
       "emailPlaceholder": "E-mail",
       "masterPasswordMinPlaceholder": "Hlavní heslo (min. 8 znaků)",
@@ -52,8 +55,10 @@
     "cloudAuthModal": {
       "registerTitle": "Vytvořit cloudový účet",
       "signinTitle": "Přihlásit se ke cloudovému účtu",
-      "registerDesc": "Vytvořte si účet pro synchronizaci tohoto trezoru a odemkněte cloudové funkce. Vaše data zůstanou end-to-end šifrovaná.",
-      "signinDesc": "Přihlaste se a zapněte synchronizaci, předplatné, týmové funkce a sdílené trezory.",
+      "registerDesc": "Vytvořte si účet, aby se vaše zařízení spárovala automaticky, a odemkněte cloudové funkce. Vaše data zůstanou end-to-end šifrovaná.",
+      "registerDesc_ios": "Vytvořte si účet pro synchronizaci tohoto trezoru a odemkněte cloudové funkce. Vaše data zůstanou end-to-end šifrovaná.",
+      "signinDesc": "Přihlaste se, aby se vaše zařízení spárovala automaticky, a používejte synchronizaci s cloudem, předplatné, týmové funkce a sdílené trezory.",
+      "signinDesc_ios": "Přihlaste se a zapněte synchronizaci, předplatné, týmové funkce a sdílené trezory.",
       "addTitle": "Přidat další účet",
       "addDesc": "Přihlaste se k jinému cloudovému účtu nebo si ho vytvořte. Současný účet zůstane v nabídce účtu, abyste se na něj mohli přepnout zpět.",
       "createMasterPasswordPlaceholder": "Vytvořte hlavní heslo",
@@ -167,7 +172,6 @@
     },
     "sync": {
       "title": "Synchronizace",
-      "voltiusSync": "Voltius Sync",
       "moreProviders": "Další poskytovatelé synchronizace",
       "syncNow": "Synchronizovat nyní",
       "signInForSync": "Přihlaste se pro synchronizaci s cloudem",
@@ -182,6 +186,89 @@
       "pause": "Pozastavit synchronizaci",
       "resume": "Pokračovat v synchronizaci",
       "encryptedBlob": "Šifrovaná data · {{size}}",
+      "local": {
+        "intro": "Voltius požádá o nalezení vašich zařízení v této síti, aby se mohla synchronizovat přímo.",
+        "introContinue": "Pokračovat",
+        "title": "Místní síť",
+        "pause": "Pozastavit místní synchronizaci",
+        "resume": "Pokračovat v místní synchronizaci",
+        "status": {
+          "live_one": "Připojeno k {{count}} zařízení",
+          "live_few": "Připojeno k {{count}} zařízením",
+          "live_many": "Připojeno k {{count}} zařízení",
+          "live_other": "Připojeno k {{count}} zařízením",
+          "syncing": "Synchronizace se zařízením {{name}}…",
+          "none": "Žádná zařízení v okolí",
+          "paused": "Místní synchronizace pozastavena",
+          "blocked": "Voltius se nemůže připojit k vaší síti. Povolte přístup k místní síti v Nastavení systému › Soukromí a zabezpečení.",
+          "blockedOther": "Voltius se nemůže připojit k vaší síti. Zkontrolujte, zda brána firewall povoluje Voltius v privátních sítích.",
+          "blockedNetwork": "Voltius se nemůže připojit k vaší místní síti. Zkontrolujte, že jste připojeni k Wi-Fi."
+        },
+        "openSettings": "Otevřít nastavení",
+        "route": {
+          "lan": "Stejná Wi-Fi",
+          "tailscale": "Tailscale",
+          "vpn": "VPN"
+        },
+        "row": {
+          "syncing_one": "Synchronizace {{count}} změny",
+          "syncing_few": "Synchronizace {{count}} změn",
+          "syncing_many": "Synchronizace {{count}} změny",
+          "syncing_other": "Synchronizace {{count}} změn",
+          "behind_one": "Offline · pozadu o {{count}} změnu",
+          "behind_few": "Offline · pozadu o {{count}} změny",
+          "behind_many": "Offline · pozadu o {{count}} změny",
+          "behind_other": "Offline · pozadu o {{count}} změn",
+          "offlineOk": "Offline · aktuální",
+          "seenBehind_one": "Naposledy {{when}} · pozadu o {{count}}",
+          "seenBehind_few": "Naposledy {{when}} · pozadu o {{count}}",
+          "seenBehind_many": "Naposledy {{when}} · pozadu o {{count}}",
+          "seenBehind_other": "Naposledy {{when}} · pozadu o {{count}}",
+          "seenOk": "Naposledy {{when}} · aktuální",
+          "paused": "Pozastaveno",
+          "keyChanged": "Toto zařízení nelze ověřit · Spárujte ho znovu a ověřte ho",
+          "moved": "Přesunuto na účet Voltius — pro další synchronizaci se tam přihlaste"
+        },
+        "catchUp": "Změny se k nim dostanou, až budou obě zařízení příště online a navzájem dostupná.",
+        "upsell": "Voltius Cloud udržuje zařízení synchronizovaná, i když nejsou online současně.",
+        "tooltip": "Synchronizace s okolními zařízeními",
+        "toast": {
+          "lan": "{{name}} je poblíž · Synchronizace přes Wi-Fi",
+          "tailscale": "{{name}} je poblíž · Synchronizace přes Tailscale",
+          "vpn": "{{name}} je poblíž · Synchronizace přes VPN"
+        },
+        "pair": {
+          "title": "Spárovat zařízení",
+          "searching": "Otevřete Spárovat zařízení i na druhém zařízení. Obě nechte ve stejné síti.",
+          "signedInHint": "Je druhé zařízení přihlášené k účtu Voltius? Přihlaste se tady raději stejným účtem.",
+          "compare": "Zkontrolujte, že obě obrazovky ukazují tento kód",
+          "confirm": "Kódy se shodují",
+          "cancel": "Zrušit",
+          "peerConfirmed": "{{name}} potvrdilo",
+          "combine": "Sloučit obojí",
+          "useTheirs": "Použít data zařízení {{name}}",
+          "done": "Spárováno se zařízením {{name}}",
+          "close": "Zavřít",
+          "tryAgain": "Zkusit znovu",
+          "joining": "Párování…",
+          "hasData": "Toto zařízení už obsahuje data. Sloučte je s daty zařízení {{name}}, nebo místo toho použijte data zařízení {{name}}.",
+          "replaces": "Nahradí zařízení {{name}}"
+        },
+        "forget": {
+          "label": "Zapomenout",
+          "aria": "Zapomenout {{name}}",
+          "account": "Přestat v tomto zařízení synchronizovat se zařízením {{name}} přes místní síť. Chcete-li ho odebrat úplně, odhlaste se na tom zařízení.",
+          "group": "Odebrat {{name}} z vašich zařízení. Ponechá si, co už má, a nic nového nedostane, dokud ho znovu nespárujete.",
+          "keyChanged": "Identita tohoto zařízení se změnila. Spárujte ho znovu, aby se nová identita ověřila kódem – ale jen pokud toto zařízení poznáváte.",
+          "failed": "Zařízení {{name}} se nepodařilo zapomenout. Zkuste to znovu."
+        },
+        "leave": {
+          "label": "Opustit tuto skupinu",
+          "prompt": "Toto zařízení přestane synchronizovat s vašimi ostatními zařízeními přes místní síť. Ponechá si, co už má, a ostatní ho odeberou ze svého seznamu. Později ho můžete znovu spárovat.",
+          "confirm": "Opustit",
+          "failed": "Skupinu se nepodařilo opustit. Zkuste to znovu."
+        }
+      },
       "status": {
         "syncing": "Synchronizace…",
         "synced": "Synchronizováno",
@@ -260,10 +347,6 @@
         "closeTab_other": "Zavřít kartu ({{count}} relací)"
       },
       "plan": {
-        "proTrial": "Zkušební Pro — zbývá {{daysLeft}} d",
-        "teams": "Teams",
-        "business": "Business",
-        "pro": "Pro",
         "upgradeTrial": "Vyšší tarif · 14 dní na vyzkoušení zdarma",
         "upgrade": "Vyšší tarif"
       },
@@ -326,6 +409,18 @@
       "promptReason": "Odemknout Voltius",
       "sealReason": "Potvrďte uložení klíče trezoru v tomto zařízení",
       "bindingLost": "Přihlášení k zařízení se změnilo. Zadejte hlavní heslo."
+    },
+    "deviceFiles": {
+      "title": "{{name}} chce otevřít vaše soubory",
+      "subtitle": "Vaše zařízení · {{route}}",
+      "newDevice": "Nové zařízení",
+      "folders": "Uvidí složky, které sdílíte v Nastavení › Zařízení: {{folders}}.",
+      "readWrite": "Může tam kopírovat, přejmenovávat a mazat soubory.",
+      "readOnly": "Může odtud kopírovat soubory.",
+      "deny": "Zamítnout",
+      "once": "Povolit jednou",
+      "always": "Vždy povolit",
+      "sessionToast": "{{name}} otevřel vaše soubory"
     }
   }
 }

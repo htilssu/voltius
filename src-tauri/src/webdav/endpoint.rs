@@ -195,7 +195,7 @@ impl Endpoint for WebDavBackend {
             };
             tokio::select! {
                 done = segments => done,
-                _ = cancel.cancelled() => Err("Transfer cancelled".into()),
+                _ = cancel.cancelled() => Err(crate::sftp::TRANSFER_CANCELLED.into()),
             }
         })))
     }
@@ -222,6 +222,10 @@ impl Endpoint for WebDavBackend {
     async fn set_mtime(&self, _: &str, _: u64) -> Result<(), AppError> {
         // WebDAV has no portable way to set it; the server stamps the upload time.
         Ok(())
+    }
+
+    fn can_hash(&self) -> bool {
+        false
     }
 
     async fn hash(&self, _: &str, _: &CancellationToken) -> Result<Option<String>, AppError> {

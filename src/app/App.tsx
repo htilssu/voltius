@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DesktopShell from "@/components/layout/DesktopShell";
 import { lazyNamed } from "@/utils/lazyNamed";
-import { usePlatform } from "@/utils/platform";
+import { isMobilePlatform, usePlatform } from "@/utils/platform";
 import SplashScreen from "@/components/layout/SplashScreen";
 import AppLockOverlay from "@/components/layout/AppLockOverlay";
 import SettingsModal from "@/components/settings/SettingsModal";
@@ -39,6 +39,9 @@ import CloudAuthModal from "@/components/layout/CloudAuthModal";
 import WhatsNewModal from "@/components/changelog/WhatsNewModal";
 import { EmailVerificationRequiredModal } from "@/components/notifications/EmailVerificationRequiredModal";
 import { DeepLinkConfirmModal } from "@/components/terminal/DeepLinkConfirmModal";
+import { FileAccessRequestModal } from "@/components/shared/FileAccessRequestModal";
+import { LanSyncIntroModal } from "@/components/shared/LanSyncIntroModal";
+import { PairDeviceDialog } from "@/components/shared/PairDeviceDialog";
 import { useDeepLinkStore } from "@/stores/deepLinkStore";
 import { GlobalTransferQueue } from "@/components/filetransfer/GlobalTransferQueue";
 import { RuleSetPromptHost } from "@/components/permissions/RuleSetPromptHost";
@@ -90,7 +93,7 @@ function App() {
   }
 
   if (platform === null) return null;
-  const isMobileShell = platform === "android";
+  const isMobileShell = isMobilePlatform(platform);
 
   return (
     <div className="chrome-frame h-full w-full flex flex-col overflow-hidden animate-fadeIn">
@@ -99,12 +102,15 @@ function App() {
       <ImportExportModal />
 
       <NotificationToastContainer />
+      {!isMobileShell && <FileAccessRequestModal />}
       <ThemeCreator />
       <TrialExpiredModal />
       <CloudAuthModal />
       <WhatsNewModal />
       <EmailVerificationRequiredModal />
       <DeepLinkConfirmModal />
+      <LanSyncIntroModal />
+      <PairDeviceDialog />
       <RuleSetPromptHost />
       <VaultIdentityDialogHost />
       <GlobalTransferQueue />

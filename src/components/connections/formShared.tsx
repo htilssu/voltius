@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import type { Connection } from "@/types";
@@ -17,7 +17,7 @@ import EncodingSelector from "./EncodingSelector";
 import { HostCommandField } from "./HostCommandField";
 import { LockMark } from "@/components/sshConfig/ManagedHost";
 import { ListRowContext } from "@/components/shared/listRowContext";
-import { useIsAndroid } from "@/utils/platform";
+import { useIsMobile } from "@/utils/platform";
 
 export interface ConnectionFormProps {
   initial?: Connection;
@@ -113,12 +113,13 @@ export function SettingRow({
 }) {
   // Android (mobile edit screens): an M3 list row, its control trailing (ListRowContext)
   // and a tap on the label forwarded to it (rowTapControl, MobileEditScreen).
-  const isAndroid = useIsAndroid();
+  const isMobile = useIsMobile();
+  const rowContext = useMemo(() => (isMobile ? { label } : null), [isMobile, label]);
   return (
-    <div data-setting-row={isAndroid ? "" : undefined} data-form-setting-row className="flex items-center gap-1.5 text-xs text-(--t-text-dim) w-full py-1" title={title}>
+    <div data-setting-row={isMobile ? "" : undefined} data-form-setting-row className="flex items-center gap-1.5 text-xs text-(--t-text-dim) w-full py-1" title={title}>
       <Icon icon={icon} width={13} />
       <span>{label}</span>
-      <ListRowContext.Provider value={isAndroid}>
+      <ListRowContext.Provider value={rowContext}>
         <span className="ml-auto">{children}</span>
       </ListRowContext.Provider>
     </div>

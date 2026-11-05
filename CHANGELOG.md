@@ -7,6 +7,84 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.66.0] - 2026-10-31
+
+### Changed
+
+- Cloud sync is much faster. Devices whose data hasn't changed since the last sync are skipped, and the rest download in parallel and merge in one step, so the first sync after launch no longer takes up to a minute (#749)
+- Voltius Cloud now sits above Local network in the sync menu and the Android sync sheet. Plugin sync providers (Gist, Cloudflare, S3) stay below Local network (#750)
+
+### Fixed
+
+- A sync requested while another was running is no longer dropped. It now runs right after the current one, so a remote change or local edit no longer waits for the next sync (#749)
+
+## [0.65.0] - 2026-10-31
+
+### Added
+
+- Local network sync: your devices now sync directly with each other on the same network, with no server in the path and no internet needed. It is free on every plan and on by default. Devices signed into the same account find each other automatically; installs without an account pair once by comparing a 6-digit code. Beyond the Wi-Fi, devices also reach each other over Tailscale, private IPv6 and addresses they remember. The sync menu and the Android sync sheet show each nearby device, with pause and Forget (#729, #730, #731, #737, #741, #742)
+- My devices: your own Voltius computers appear in the SFTP host picker, so you can browse and move files between them like any other host, on the same network or over Tailscale. Files never go through Voltius servers. A computer shares only the folders you pick in Settings › Devices › File access (off by default, optionally read-only), and asks before a device's first access. Android can browse your computers but can't be browsed yet. Needs a Voltius account (#735, #739)
+- Team and Business seat members now get their team's plan everywhere in the app, including cloud sync. Every plan display (title bar, Settings › Account, sharing and limit popups) reads the same, for example "Teams · through your seat in Acme" (#740)
+- Persistent sessions now close on their own once no device has been attached for a set time, but only when nothing is running in them. Set it in Settings › Hosts › "Close idle detached sessions" (on by default, 24 h). Works on Linux hosts with tmux 3.2 or newer; other hosts keep their sessions as before (#736)
+- Ctrl+K search suggests catalogue plugins you haven't installed yet; picking one opens it in Settings › Plugins › Browse. The `m>` Marketplace category now lists every installable plugin (#744)
+- On Android, you can upload files to any SFTP host through the system file picker, or drag them in from another app in split screen (#735)
+
+### Changed
+
+- Sync menu sections have a new header: the section icon is tinted by status (grey idle or paused, accent syncing, green synced, amber blocked), with the status line under the name. The menu is wider, so device names and status are no longer cut off (#745)
+- Sync wording now says which sync stops: when a plan ends, cloud sync pauses and devices on the same network keep syncing. The cloud provider is now called "Voltius Cloud", and per-item toggles read "Sync to my devices" / "Keep on this device only" (#746)
+- Text on accent-coloured buttons now uses a contrast-checked colour, so it stays readable on every theme (#746)
+
+### Fixed
+
+- After a Voltius server outage, sync now recovers on its own within 30 s instead of waiting up to 5 minutes or for a manual Sync (#727, #728)
+- Cancelling an SFTP transfer right after starting it now always stops it; a cancel sent before the transfer had started used to be lost. On Android, cancelling an upload also stops copying the file (#732, #733, #738)
+- On Android, picker sheets in settings and forms show the name of their setting instead of "Select" (#736)
+
+## [0.64.1] - 2026-10-28
+
+### Added
+
+- On Android, the Snippets screen has a Community tab, as on desktop: browse and search the community catalogue, open a pack to choose which snippets to install, and install them into the current vault (#725)
+
+### Fixed
+
+- In the community snippet list, the author and snippet count are no longer cut off when the description is long (#725)
+
+## [0.64.0] - 2026-10-28
+
+### Added
+
+- Snippet scripts are now syntax-highlighted everywhere they appear: snippet cards and lists, community packs, Ctrl+K search, the terminal snippets panel and the snippet chooser. The snippet editor is now a code editor and still autocompletes `{{variables}}`. Voltius detects the language from the script: shell by default, PowerShell when the script clearly uses PowerShell, and a shebang always decides (#720)
+
+### Fixed
+
+- In bash, when a command's output doesn't end with a newline (for example a `curl` that returns JSON), the prompt now starts on a new line. Before, the prompt was drawn after the output and recalling history with Up/Down garbled the line (#716, #719)
+- The Windows installer and `voltius.exe` now show "Voltius" as the publisher and include a copyright notice (#718)
+
+## [0.63.1] - 2026-10-24
+
+### Changed
+
+- On Android, every search field (Snippets, Keychain, Known Hosts, Logs, Port Forwarding, the host and snippet pickers, Processes) now uses the same rounded search bar as Hosts (#710)
+- The Android app is now built with R8, which shrinks and optimizes its code (#712)
+
+### Fixed
+
+- On Android, unlocking no longer fails with "Keychain read error" after reinstalling the app, for example when moving from the GitHub APK to the Google Play build. Android restored the old keychain file, which the new install can't decrypt; Voltius now sets it aside and opens a fresh one, and the keychain is no longer included in Android backups or device transfers (#713)
+- The session type badge no longer overflows the pane header and the drag preview
+
+## [0.63.0] - 2026-10-23
+
+### Added
+
+- You can delete your Voltius account from the app: Settings → Account on desktop, and the Account page on Android. You confirm by typing your email. Your cloud account, encrypted vault and sync data are deleted, any subscription is cancelled, and this device is signed out. If you are the billing owner of a team that has another Owner, they take the team over; if you are its only Owner and it still has members, you are asked to make someone else an Owner first. You can also request deletion at voltius.app/delete-account (#705)
+- Portuguese, in three variants: Portuguese, Brazilian Portuguese and European Portuguese. Thanks to @heliopereira (#706, #707)
+
+### Changed
+
+- The macOS app is now signed with an Apple Developer ID and notarized by Apple, so it opens without a security warning. After updating, macOS asks once for access to the keychain (#704)
+
 ## [0.62.1] - 2026-10-23
 
 ### Fixed

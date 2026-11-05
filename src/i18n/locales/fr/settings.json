@@ -137,14 +137,23 @@
         ]
       },
       "sync": {
-        "mobileSub": "Synchronisation cloud et contenu synchronisé",
+        "mobileSub": "Cloud, réseau local et contenu synchronisé",
         "label": "Synchronisation",
         "keywords": [
           "sauvegarde",
           "nuage",
           "gist",
           "synchronisation",
-          "pro"
+          "pro",
+          "local",
+          "réseau",
+          "proximité",
+          "wifi",
+          "lan",
+          "associer",
+          "appareils",
+          "tailscale",
+          "vpn"
         ]
       },
       "plugins": {
@@ -180,6 +189,11 @@
           "mini-carte",
           "tampon"
         ]
+      },
+      "devices": {
+        "mobileSub": "Laisser vos appareils ouvrir des fichiers ici",
+        "label": "Appareils",
+        "keywords": ["appareils", "fichiers", "sftp", "partage", "dossiers", "accès"]
       },
       "sftp": {
         "mobileSub": "Téléchargements, transferts, éditeur",
@@ -323,7 +337,8 @@
             "windows": "Windows Hello",
             "macos": "Touch ID ou le mot de passe de votre Mac",
             "linux": "votre mot de passe système",
-            "android": "votre empreinte ou le verrouillage de l'écran"
+            "android": "votre empreinte ou le verrouillage de l'écran",
+            "ios": "Face ID, Touch ID ou votre code"
           }
         }
       },
@@ -470,14 +485,19 @@
       },
       "loading": "Traitement…",
       "plan": {
-        "title": "Abonnement",
-        "badge": {
-          "business": "Business",
-          "teams": "Teams",
-          "proTrial": "Essai Pro — {{daysLeft}}j restants",
+        "name": {
+          "free": "Gratuit",
           "pro": "Pro",
-          "free": "Gratuit"
+          "teams": "Teams",
+          "business": "Business"
         },
+        "trialName": "Essai {{plan}}",
+        "trialLeft": "{{plan}} — {{daysLeft}}j restants",
+        "viaSeat": "{{plan}} · via votre siège dans {{team}}",
+        "viaTooltip": "Via {{team}}",
+        "throughSeat": "Via votre siège dans {{team}}",
+        "ownLine": "Votre abonnement {{plan}}",
+        "title": "Abonnement",
         "manageBilling": "Gérer la facturation →",
         "subscription": {
           "cancelled": "Se termine le {{date}}. Vous conservez l'accès jusqu'à cette date.",
@@ -496,6 +516,8 @@
           "localVault": "Coffre-fort local",
           "auditLogs": "Journaux d'audit",
           "gistSync": "Synchronisation GitHub Gist",
+          "localSync": "Synchronisation sur le réseau local",
+          "deviceFiles": "Transfert de fichiers entre vos appareils",
           "realtimeSync": "Synchronisation cloud en temps réel",
           "unlimitedVaults": "Coffres-forts privés illimités",
           "terminalSharing": "Partage de terminal (1 session · 1 invité)",
@@ -629,6 +651,12 @@
     },
     "sync": {
       "voltiusCloud": "Voltius Cloud",
+      "local": {
+        "pairSub": "Synchronisez avec un autre appareil de votre réseau, sans compte.",
+        "title": "Synchronisation locale",
+        "pauseSub": "Arrête la synchronisation avec vos autres appareils à proximité jusqu'à ce que vous la repreniez.",
+        "footer": "Votre coffre personnel se synchronise directement entre vos appareils sur le même réseau ou via un VPN comme Tailscale, tant que les deux sont en ligne. Gratuit, sans serveur intermédiaire. Les coffres d'équipe ne sont pas inclus."
+      },
       "active": {
         "title": "Synchronisation cloud active",
         "syncing": "Synchronisation en cours…",
@@ -641,7 +669,7 @@
         "syncNow": "Synchroniser"
       },
       "pause": {
-        "label": "Mettre la synchronisation en pause sur cet appareil",
+        "label": "Mettre la synchronisation cloud en pause sur cet appareil",
         "sub": "Arrête la synchronisation en arrière-plan avec le serveur. Les coffres d'équipe ne sont plus mis à jour et ne se chargent pas au démarrage tant que la synchronisation n'est pas reprise. « Synchroniser » ne synchronise que vos propres données."
       },
       "requiresPro": {
@@ -650,13 +678,13 @@
         "upgrade": "Mettre à niveau"
       },
       "notConnected": {
-        "title": "Compte cloud non connecté",
-        "sub": "Connectez-vous ou créez un compte cloud pour synchroniser vos appareils.",
+        "title": "Non connecté",
+        "sub": "Voltius Cloud garde vos appareils synchronisés même lorsqu'ils ne sont pas en ligne en même temps, avec une sauvegarde chiffrée. Avec un compte gratuit, vos appareils s'associent automatiquement.",
         "signIn": "Se connecter"
       },
       "providersTitle": "Plugins de synchronisation",
       "prefsTitle": "Préférences de synchronisation",
-      "prefsFooter": "Les types désactivés ne sont jamais envoyés. Les objets peuvent aussi être exclus depuis leur panneau d'édition.",
+      "prefsFooter": "Les types désactivés ne quittent jamais cet appareil. Les objets peuvent aussi être exclus depuis leur panneau d'édition.",
       "quickToggleLabel": "Synchroniser {{label}}",
       "objectType": {
         "connection": {
@@ -685,7 +713,7 @@
         }
       },
       "settingsTitle": "Paramètres",
-      "settingsFooter": "Tout ce qui est désactivé reste sur cet appareil. Rien n'est envoyé, même chiffré. Réactiver la synchronisation publie les valeurs de cet appareil.",
+      "settingsFooter": "Tout ce qui est désactivé reste sur cet appareil et n'est jamais envoyé nulle part, même chiffré. Réactiver la synchronisation publie les valeurs de cet appareil.",
       "settingDomain": {
         "themes": { "label": "Thèmes", "sub": "Thème actif et thèmes personnalisés" },
         "uiPreferences": { "label": "Interface", "sub": "Échelle, dispositions et tri" },
@@ -948,6 +976,28 @@
         }
       }
     },
+    "devices": {
+      "fileAccess": {
+        "title": "Accès aux fichiers",
+        "enable": { "title": "Laisser mes appareils ouvrir des fichiers sur cet ordinateur", "desc": "Vos autres appareils Voltius peuvent parcourir les dossiers ci-dessous depuis SFTP. Désactivé par défaut." },
+        "folders": "Dossiers partagés",
+        "addFolder": "Ajouter un dossier",
+        "noFolders": "Ajoutez un dossier pour le partager avec vos appareils.",
+        "removeFolder": "Arrêter de partager {{folder}}",
+        "readOnly": { "title": "Lecture seule", "desc": "Les appareils peuvent copier des fichiers d'ici, sans les modifier ni les supprimer." }
+      },
+      "allowed": {
+        "title": "Appareils autorisés",
+        "asksEachTime": "Demande à chaque fois",
+        "alwaysAllowed": "Toujours autorisé",
+        "connectedNow": "connecté",
+        "disconnect": "Déconnecter",
+        "revoke": "Révoquer",
+        "needsKey": "Connectez-vous une fois pour autoriser",
+        "alwaysLabel": "Toujours autoriser {{name}}",
+        "empty": "Aucun autre appareil pour l'instant."
+      }
+    },
     "sftp": {
       "downloads": {
         "title": "Téléchargements",
@@ -1053,6 +1103,17 @@
       "persistentSessions": {
         "title": "Sessions persistantes",
         "desc": "Maintient votre shell et vos processus actifs lors des déconnexions en enveloppant le shell distant dans tmux (repli sur screen). Nécessite tmux ou screen sur l'hôte. Peut être remplacé par hôte, sous Avancé dans les paramètres de la connexion."
+      },
+      "detachedTtl": {
+        "title": "Fermer les sessions détachées inactives",
+        "desc": "Ferme une session persistante sur l'hôte lorsqu'aucun appareil n'y est attaché depuis la durée choisie, mais seulement si rien n'y tourne. Fonctionne sur les hôtes Linux avec tmux 3.2 ou plus récent ; screen et les anciennes versions de tmux conservent les sessions comme avant. Un changement s'applique à une session la prochaine fois qu'elle est attachée.",
+        "durationTitle": "Fermer après",
+        "hours_one": "{{count}} heure",
+        "hours_many": "{{count}} heures",
+        "hours_other": "{{count}} heures",
+        "days_one": "{{count}} jour",
+        "days_many": "{{count}} jours",
+        "days_other": "{{count}} jours"
       },
       "terminalTitle": "Terminal",
       "shellIntegration": {
@@ -1192,6 +1253,9 @@
       },
       "persistentSessions": {
         "label": "Sessions persistantes"
+      },
+      "detachedSessionTtl": {
+        "label": "Fermer les sessions détachées inactives"
       },
       "restoreWorkspace": {
         "label": "Restaurer l'espace de travail au lancement"

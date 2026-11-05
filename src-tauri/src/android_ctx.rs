@@ -9,10 +9,11 @@
 //! Any JNI consumer (keychain store, ANDROID_ID machine fingerprint) goes through
 //! [`with_env`] rather than touching `ndk_context`.
 
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
-use jni::objects::{GlobalRef, JClass, JObject};
+use jni::objects::{GlobalRef, JClass, JObject, JString};
 use jni::{JNIEnv, JavaVM};
+use tokio::sync::oneshot;
 
 struct AndroidCtx {
     vm: JavaVM,
@@ -22,6 +23,15 @@ struct AndroidCtx {
 
 // JavaVM and GlobalRef are both Send + Sync, so this is too.
 static CTX: OnceLock<AndroidCtx> = OnceLock::new();
+static APP: OnceLock<tauri::AppHandle> = OnceLock::new();
+
+pub fn set_app(app: &tauri::AppHandle) {
+    let _ = APP.set(app.clone());
+}
+
+pub fn app() -> Option<&'static tauri::AppHandle> {
+    APP.get()
+}
 
 /// JNI entry point for `VoltiusKeychain.nativeInit(context)`. Idempotent; stores the VM and
 /// a global ref to the application Context. Named for the Kotlin class that declares the
@@ -59,7 +69,7 @@ pub extern "system" fn Java_com_voltius_app_VoltiusKeychain_nativeInit<'local>(
 
 /// Run `f` with an attached `JNIEnv` and the application `Context`. Returns `Err` (never
 /// panics) if `nativeInit` hasn't run or the attach fails. On a Java exception, describes it
-/// to logcat and clears it so the VM stays usable.
+/// to logcat, clears it so the VM stays usable, and names it in the error.
 pub fn with_env<T>(
     op: &str,
     f: impl FnOnce(&mut JNIEnv, &JObject) -> Result<T, jni::errors::Error>,
@@ -71,11 +81,49 @@ pub fn with_env<T>(
         .vm
         .attach_current_thread()
         .map_err(|e| format!("{op}: attach: {e}"))?;
-    f(&mut env, ctx.context.as_obj()).map_err(|e| {
-        let _ = env.exception_describe();
-        let _ = env.exception_clear();
-        format!("{op}: {e}")
+    let result = f(&mut env, ctx.context.as_obj());
+    result.map_err(|e| match take_java_exception(&mut env) {
+        Some(thrown) => format!("{op}: {thrown}"),
+        None => format!("{op}: {e}"),
     })
+}
+
+/// Clears the pending Java exception and renders it with its causes.
+fn take_java_exception(env: &mut JNIEnv) -> Option<String> {
+    if !env.exception_check().unwrap_or(false) {
+        return None;
+    }
+    let thrown = env.exception_occurred().ok();
+    let _ = env.exception_describe();
+    let _ = env.exception_clear();
+    let mut current = JObject::from(thrown?);
+    let mut parts = Vec::new();
+    for _ in 0..4 {
+        match throwable_text(env, &current) {
+            Some(text) => parts.push(text),
+            None => break,
+        }
+        let cause = env
+            .call_method(&current, "getCause", "()Ljava/lang/Throwable;", &[])
+            .and_then(|v| v.l());
+        match cause {
+            Ok(next) if !next.is_null() && !env.is_same_object(&next, &current).unwrap_or(true) => {
+                current = next;
+            }
+            _ => break,
+        }
+    }
+    let _ = env.exception_clear();
+    (!parts.is_empty()).then(|| parts.join(", caused by: "))
+}
+
+fn throwable_text(env: &mut JNIEnv, thrown: &JObject) -> Option<String> {
+    let text = env
+        .call_method(thrown, "toString", "()Ljava/lang/String;", &[])
+        .and_then(|v| v.l())
+        .ok()?;
+    let text: String = env.get_string(&JString::from(text)).ok()?.into();
+    Some(text.split_whitespace().collect::<Vec<_>>().join(" "))
 }
 
 /// Resolve an app class by dotted binary name (e.g. `com.voltius.app.VoltiusDownloads`) via
@@ -110,5 +158,41 @@ pub fn call_static_bool(class: &str, method: &str, value: bool) {
     });
     if let Err(e) = res {
         log::warn!("{class}.{method}: {e}");
+    }
+}
+
+pub struct PickSlot(Mutex<Option<oneshot::Sender<Option<String>>>>);
+
+impl PickSlot {
+    pub const fn new() -> Self {
+        Self(Mutex::new(None))
+    }
+
+    // `class` must expose a static `launchPicker(): Boolean` and later call back into `fulfil`.
+    pub async fn pick(&self, what: &str, class: &str) -> Result<Option<String>, String> {
+        let (tx, rx) = oneshot::channel();
+        *self.0.lock().unwrap() = Some(tx);
+        let launched = with_env(what, |env, _ctx| {
+            let cls = load_class(env, class)?;
+            env.call_static_method(&cls, "launchPicker", "()Z", &[])?
+                .z()
+        });
+        if !matches!(launched, Ok(true)) {
+            let _ = self.0.lock().unwrap().take();
+            launched?;
+            return Err(format!("could not open the {what} (app not in foreground)"));
+        }
+        rx.await.map_err(|_| format!("{what} cancelled"))
+    }
+
+    pub fn fulfil(&self, env: &mut JNIEnv, value: &JString) {
+        let val = if value.is_null() {
+            None
+        } else {
+            env.get_string(value).ok().map(|s| s.into())
+        };
+        if let Some(tx) = self.0.lock().unwrap().take() {
+            let _ = tx.send(val);
+        }
     }
 }

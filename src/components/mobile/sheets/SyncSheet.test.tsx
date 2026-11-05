@@ -1,12 +1,14 @@
 import { describe, test, expect, vi, afterEach } from "vitest";
-import { render, cleanup, fireEvent } from "@testing-library/react";
+import { render, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import type { SyncProviderView } from "@/services/syncProviders";
+import type { DeviceRow } from "@/services/lanSyncDevices";
 import { NOT_CONFIGURED_SYNC_STATE } from "@/services/syncStatus";
 
 const h = vi.hoisted(() => ({
   providers: [] as unknown[],
   runAction: vi.fn(),
   closeSheet: vi.fn(),
+  lanRows: [] as DeviceRow[],
 }));
 
 vi.mock("react-i18next", () => ({
@@ -17,6 +19,18 @@ vi.mock("@iconify/react", () => ({ Icon: ({ icon }: { icon: string }) => <i data
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(async () => undefined) }));
 vi.mock("@/hooks/useSyncProviders", () => ({ useSyncProviders: () => ({ providers: h.providers }) }));
 vi.mock("@/services/syncProviderAction", () => ({ runSyncProviderAction: h.runAction }));
+vi.mock("@/hooks/useLanDeviceRows", () => ({ useLanDeviceRows: () => h.lanRows }));
+vi.mock("@/services/lanSync", () => ({
+  setLanSyncPaused: vi.fn(async () => {}),
+  lanScope: async () => null,
+  inLanGroup: async () => false,
+  forgetDevice: vi.fn(async () => {}),
+  openPairing: vi.fn(async () => {}),
+  closePairing: vi.fn(async () => {}),
+  confirmPairing: vi.fn(async () => {}),
+  cancelPairing: vi.fn(async () => {}),
+}));
+vi.mock("@/services/account", () => ({ getAccountMode: async () => "local-nopassword" }));
 vi.mock("@/stores/mobileNavStore", () => ({
   // getState: BottomSheet registers a back interceptor, which reads the nav layer.
   useMobileNavStore: Object.assign(
@@ -26,6 +40,7 @@ vi.mock("@/stores/mobileNavStore", () => ({
 }));
 
 import SyncSheet from "./SyncSheet";
+import { useLanSyncStore } from "@/stores/lanSyncStore";
 
 const view = (over: Partial<SyncProviderView>): SyncProviderView => ({
   id: "voltius", label: "Voltius Sync", icon: "lucide:cloud", availability: "active",
@@ -35,7 +50,7 @@ const view = (over: Partial<SyncProviderView>): SyncProviderView => ({
 
 const row = (slug: string) => document.querySelector<HTMLButtonElement>(`[data-sync-action='${slug}']`);
 
-afterEach(() => { cleanup(); h.runAction.mockReset(); h.closeSheet.mockReset(); });
+afterEach(() => { cleanup(); h.runAction.mockReset(); h.closeSheet.mockReset(); h.lanRows = []; useLanSyncStore.setState({ status: "stopped" }); });
 
 describe("SyncSheet", () => {
   test("an active provider shows its status, syncs on demand and pauses without closing", () => {
@@ -104,5 +119,38 @@ describe("SyncSheet", () => {
     render(<SyncSheet />);
     expect([...document.querySelectorAll("[data-sync-provider]")].map((e) => e.getAttribute("data-sync-provider")))
       .toEqual(["voltius", "plugin-gist-sync"]);
+  });
+
+  test("sheet variant renders between Voltius Cloud and plugin providers with 44 px rows", () => {
+    useLanSyncStore.setState({ status: "running", paused: false });
+    h.lanRows = [
+      { deviceId: "d1", name: "Desktop", platform: "linux", nearby: true, route: "lan", dot: "live", behind: 0, lastSeen: null },
+      { deviceId: "d2", name: "MacBook", platform: "macos", nearby: false, route: null, dot: "offline-ok", behind: 0, lastSeen: null },
+    ];
+    h.providers = [view({ id: "voltius" }), view({ id: "plugin-gist-sync" })];
+    render(<SyncSheet />);
+    const lan = document.querySelector("[data-lan-section]")!;
+    const order = [...document.querySelectorAll("[data-sync-provider], [data-lan-section]")]
+      .map((e) => e.getAttribute("data-sync-provider") ?? "lan");
+    expect(order).toEqual(["voltius", "lan", "plugin-gist-sync"]);
+    const rows = [...lan.querySelectorAll("[data-lan-device]")];
+    expect(rows).toHaveLength(2);
+    for (const r of rows) expect(r.classList.contains("min-h-11")).toBe(true);
+    expect(lan.querySelector("[data-lan-action='pause']")).not.toBeNull();
+  });
+
+  test("no local section while local sync is stopped with no known devices", () => {
+    h.providers = [view({})];
+    render(<SyncSheet />);
+    expect(document.querySelector("[data-lan-section]")).toBeNull();
+  });
+
+  test("Pair a device swaps the sync sheet for the pairing sheet and Close returns", async () => {
+    h.providers = [view({})];
+    render(<SyncSheet />);
+    await waitFor(() => expect(document.querySelector("[data-lan-action='pair']")).not.toBeNull());
+    fireEvent.click(document.querySelector("[data-lan-action='pair']")!);
+    expect(document.querySelector("[data-pair-sheet]")).not.toBeNull();
+    expect(document.querySelector("[data-lan-section]")).toBeNull();
   });
 });

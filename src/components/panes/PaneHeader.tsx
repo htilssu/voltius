@@ -25,16 +25,10 @@ import { sessionUserAtHost } from "@/components/terminal/sessionOverlay";
 import { focusSession } from "@/hooks/useTerminal";
 import { InlineNameEditor } from "@/components/shared/InlineNameEditor";
 import { StatusDot } from "@/components/shared/StatusDot";
+import { SessionTypeBadge } from "@/components/panes/SessionTypeBadge";
 import { latencyColor, sessionStatusTone } from "@/utils/statusTone";
 import type { TerminalSession } from "@/types";
 import { useCopiedFlash } from "@/hooks/useCopiedFlash";
-
-function sessionBadge(session: TerminalSession, t: TFunction): string {
-  if (session.type === "ssh") return t("panes.badge.ssh");
-  if (session.type === "serial") return t("panes.badge.serial");
-  if (session.type === "multiplayer") return t("panes.badge.multiplayer");
-  return t("panes.badge.local");
-}
 
 interface ConnectedSystemInfo {
   os_name: string;
@@ -354,9 +348,7 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
       </div>
 
       <div className="hidden sm:flex items-center gap-1.5 shrink-0 self-stretch">
-        <span className="px-1.5 py-0.5 rounded-sm border border-(--t-border) bg-(--t-bg-elevated) text-[10px] font-semibold">
-          {sessionBadge(session, t)}
-        </span>
+        <SessionTypeBadge type={session.type} />
         {mcpOwner && (
           <McpMark
             variant="chip"

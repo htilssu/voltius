@@ -96,18 +96,10 @@ jobs:
           }
           Write-Host "uninstalled cleanly"
 
-  # There is deliberately no homebrew-cask core job. `brew audit --cask --new`
-  # runs a signature scan that Voltius cannot pass while it is ad-hoc signed
-  # rather than notarized:
-  #
-  #   Signature verification failed: Scan completed, but failed because the
-  #   software is not signed by a distributor that meets the system Gatekeeper
-  #   requirements.
-  #
-  # That is a hard gate, not a style nit, so a core submission is blocked until
-  # there is an Apple Developer account to notarize with. `brew style` and the
-  # rest of the audit do pass — see gen-homebrew-cask.sh --core, kept for the
-  # day that changes. The tap keeps being audited by publish-installers.yml.
+  # There is no homebrew-cask core job yet. Its `brew audit --cask --new`
+  # signature scan used to fail on the ad-hoc signed app; releases are notarized
+  # since 0.63.0, so a core submission is no longer blocked by it. The tap keeps
+  # being audited by publish-installers.yml.
 
   # Proves the MSIX packs at all: it needs Windows plus the Windows SDK, so
   # nothing else in this repo can. This is a check, never a submission: it builds
@@ -119,17 +111,21 @@ jobs:
       publish: false
     secrets: inherit
 
-  # Proves the self-signed certificate signs on a hosted runner, which no release can afford to discover.
+  # Proves the Developer ID certificate signs and the API key notarizes on a hosted
+  # runner, which no release can afford to discover.
   macos-signing:
     runs-on: macos-latest
     steps:
       - name: Check macOS signing configuration
         id: signing
         env:
-          MACOS_SIGNING_CERTIFICATE: ${{ secrets.MACOS_SIGNING_CERTIFICATE }}
-          MACOS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: |
-          if [ -n "$MACOS_SIGNING_CERTIFICATE" ] && [ -n "$MACOS_SIGNING_CERTIFICATE_PASSWORD" ]; then
+          if [ -n "$APPLE_CERTIFICATE" ] && [ -n "$APPLE_CERTIFICATE_PASSWORD" ] && [ -n "$APPLE_API_KEY_P8" ] && [ -n "$APPLE_API_KEY" ] && [ -n "$APPLE_API_ISSUER" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"
@@ -143,13 +139,22 @@ jobs:
       - name: Import the macOS signing certificate
         if: steps.signing.outputs.configured == 'true'
         env:
-          MACOS_SIGNING_CERTIFICATE: ${{ secrets.MACOS_SIGNING_CERTIFICATE }}
-          MACOS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_SIGNING_CERTIFICATE_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
         run: bash scripts/import-macos-signing-cert.sh
 
-      - name: Sign a binary and check its requirement
+      - name: Sign a binary and notarize it
         if: steps.signing.outputs.configured == 'true'
+        env:
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
         run: |
-          cp /bin/ls "$RUNNER_TEMP/voltius-sign-probe"
-          codesign --force --options runtime -s "$APPLE_SIGNING_IDENTITY" "$RUNNER_TEMP/voltius-sign-probe"
-          bash scripts/check-macos-signature.sh "$RUNNER_TEMP/voltius-sign-probe"
+          probe="$RUNNER_TEMP/voltius-sign-probe"
+          cp /bin/ls "$probe"
+          codesign --force --options runtime --timestamp -s "$APPLE_SIGNING_IDENTITY" "$probe"
+          bash scripts/check-macos-signature.sh "$probe"
+          ditto -c -k "$probe" "$probe.zip"
+          xcrun notarytool submit "$probe.zip" --key "$APPLE_API_KEY_PATH" --key-id "$APPLE_API_KEY" --issuer "$APPLE_API_ISSUER" --wait --output-format json > "$RUNNER_TEMP/notary.json"
+          cat "$RUNNER_TEMP/notary.json"
+          grep -q '"status" *: *"Accepted"' "$RUNNER_TEMP/notary.json" || { echo "notarization was not accepted" >&2; exit 1; }

@@ -8,22 +8,28 @@ const h = vi.hoisted(() => ({
   available: true,
   exists: true,
   mode: null as string | null,
+  accountId: "acc-1" as string | null,
   launchLock: null as string | null,
   secret: "plain",
-  authProps: null as null | { isLocked: boolean; systemAuth?: boolean },
+  authProps: null as null | { isLocked: boolean; systemAuth?: boolean; vaultUnreadable?: boolean },
+  stopLanSync: vi.fn(async () => {}),
+  startSessionSync: vi.fn(),
+  startLanSyncInBackground: vi.fn(),
+  getAppLock: vi.fn(async () => null as string | null),
 }));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (k: string) => k }),
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
-vi.mock("@/utils/platform", () => ({ usePlatform: () => "linux" }));
+vi.mock("@/utils/platform", () => ({ isMobilePlatform: (p: string | null) => p === "android" || p === "ios", usePlatform: () => "linux" }));
 vi.mock("@/services/account", () => ({
   autoLogin: h.autoLogin,
-  getAppLock: vi.fn(async () => h.lock),
+  getAppLock: h.getAppLock,
   setAppLock: vi.fn(async () => {}),
   isServerMode: vi.fn(async () => h.mode === "server"),
   getAccountMode: vi.fn(async () => h.mode),
+  getAccountId: vi.fn(async () => h.accountId),
 }));
 vi.mock("@/services/appLock", () => ({
   systemAuthAvailable: vi.fn(async () => h.available),
@@ -35,9 +41,14 @@ vi.mock("@/stores/securityStore", () => ({
 }));
 vi.mock("@/services/vault", () => ({ getVaultStatus: vi.fn(async () => ({ exists: h.exists })) }));
 vi.mock("./AuthPage", () => ({
-  default: (p: { isLocked: boolean; systemAuth?: boolean }) => { h.authProps = p; return <div>auth-page</div>; },
+  default: (p: { isLocked: boolean; systemAuth?: boolean; vaultUnreadable?: boolean }) => { h.authProps = p; return <div>auth-page</div>; },
 }));
 vi.mock("./LogoBadge", () => ({ default: () => <div /> }));
+vi.mock("@/services/lanSync", () => ({
+  startSessionSync: h.startSessionSync,
+  startLanSyncInBackground: h.startLanSyncInBackground,
+  stopLanSync: h.stopLanSync,
+}));
 
 import SplashScreen from "./SplashScreen";
 
@@ -47,10 +58,15 @@ beforeEach(() => {
   h.systemAuthUnlock = false;
   h.exists = true;
   h.mode = null;
+  h.accountId = "acc-1";
   h.launchLock = null;
   h.secret = "plain";
   h.authProps = null;
   h.autoLogin.mockClear();
+  h.stopLanSync.mockClear();
+  h.startSessionSync.mockClear();
+  h.startLanSyncInBackground.mockClear();
+  h.getAppLock.mockReset().mockImplementation(async () => h.lock);
 });
 afterEach(() => {
   cleanup();
@@ -60,6 +76,14 @@ afterEach(() => {
 async function advance(ms: number) {
   await act(async () => { await vi.advanceTimersByTimeAsync(ms); });
 }
+
+test("boot stops a LAN manager a reload left running, before deciding how to unlock", async () => {
+  h.lock = "vault";
+  render(<SplashScreen onReady={() => {}} />);
+  await advance(2000);
+  expect(h.stopLanSync).toHaveBeenCalledTimes(1);
+  expect(h.stopLanSync.mock.invocationCallOrder[0]).toBeLessThan(h.getAppLock.mock.invocationCallOrder[0]);
+});
 
 test("a vault lock that survived a restart goes to the unlock page, never auto-login", async () => {
   h.lock = "vault";
@@ -153,4 +177,28 @@ test("a declined login on a cloud account with no vault file yet still gets the 
   render(<SplashScreen onReady={() => {}} />);
   await advance(2000);
   expect(h.authProps).toMatchObject({ isLocked: true });
+});
+
+test("a vault file whose account id is gone from the keychain goes to the unreadable panel, not the password form", async () => {
+  h.autoLogin.mockResolvedValueOnce("declined");
+  h.accountId = null;
+  render(<SplashScreen onReady={() => {}} />);
+  await advance(2000);
+  expect(h.authProps).toMatchObject({ isLocked: true, vaultUnreadable: true });
+});
+
+test("a vault lock over a vault whose account id is gone goes to the unreadable panel", async () => {
+  h.lock = "vault";
+  h.accountId = null;
+  render(<SplashScreen onReady={() => {}} />);
+  await advance(2000);
+  expect(h.authProps).toMatchObject({ isLocked: true, vaultUnreadable: true });
+});
+
+test("a no-account install starts lan sync once it has loaded", async () => {
+  h.mode = "local";
+  render(<SplashScreen onReady={() => {}} />);
+  await advance(10_000);
+  expect(h.startLanSyncInBackground).toHaveBeenCalledTimes(1);
+  expect(h.startSessionSync).not.toHaveBeenCalled();
 });

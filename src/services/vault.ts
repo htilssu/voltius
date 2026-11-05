@@ -1,7 +1,9 @@
+import { notifyAccountModeChanged } from "@/utils/accountMode";
 import { invoke } from "@/lib/invoke";
+import { logFailure } from "@/lib/logger";
 import { useOrgLockPolicyStore } from "@/stores/orgLockPolicyStore";
 import { clearPersistedAccountUiState } from "@/stores/persistedAccountUiState";
-import { ACCOUNT_CACHE_KEYS } from "./accountCacheKeys";
+import { VAULT_RESET_KEYS } from "./accountCacheKeys";
 import { backendErrorCode } from "./backendErrors";
 import { VaultLockedError, VaultUnreadableError } from "./vaultErrors";
 
@@ -117,10 +119,19 @@ export async function verifyVaultKey(encKey: number[]): Promise<void> {
   await invokeDecrypting("secrets_verify", { encKey });
 }
 
-export async function lockVault(): Promise<void> {
+// The LAN listener outlives a page reload, so it must stop wherever the key is dropped.
+async function dropKey(): Promise<void> {
   pendingKey = null;
   unlocked = false;
-  await invoke("secrets_lock");
+  try {
+    await invoke("secrets_lock");
+  } finally {
+    await import("@/services/lanSync").then((m) => m.stopLanSync()).catch(logFailure("lan-sync stop"));
+  }
+}
+
+export async function lockVault(): Promise<void> {
+  await dropKey();
   const { onSessionEnd } = await import("@/services/teamDataManager");
   onSessionEnd();
 }
@@ -183,20 +194,26 @@ export async function readLocalSecrets(keys: string[]): Promise<Record<string, s
   return out;
 }
 
-export async function resetVault(): Promise<void> {
-  pendingKey = null;
-  unlocked = false;
-  // Before the storage wipe: the store writes itself back to localStorage on set.
+// Memory before storage: a persisted store writes itself back to localStorage on its next set.
+export async function clearAccountUiState(): Promise<void> {
   useOrgLockPolicyStore.getState().setPolicy(null);
+  const { useLanSyncStore } = await import("@/stores/lanSyncStore");
+  useLanSyncStore.getState().forgetAccount();
   clearPersistedAccountUiState();
-  await invoke("secrets_lock");
+  await (await import("@/services/lanSync")).clearLanSyncScopes();
+}
+
+export async function resetVault(): Promise<void> {
+  await dropKey();
+  await clearAccountUiState();
   await invoke("vault_reset"); // deletes secrets.enc + connections.json + legacy vault.hold
 
   // Clear all keychain entries so the app starts fresh
-  for (const key of ACCOUNT_CACHE_KEYS) {
+  for (const key of VAULT_RESET_KEYS) {
     await invoke("keychain_delete", { key }).catch(() => {});
   }
   await invoke("vault_secret_clear").catch(() => {});
+  notifyAccountModeChanged();
 }
 
 export async function storeLocalSecret(key: string, value: string): Promise<void> {

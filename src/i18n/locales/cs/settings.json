@@ -137,14 +137,23 @@
         ]
       },
       "sync": {
-        "mobileSub": "Cloudová synchronizace a co se synchronizuje",
+        "mobileSub": "Cloud, místní síť a co se synchronizuje",
         "label": "Synchronizace",
         "keywords": [
           "záloha",
           "cloud",
           "gist",
           "synchronizace",
-          "pro"
+          "pro",
+          "místní",
+          "síť",
+          "poblíž",
+          "wifi",
+          "lan",
+          "spárovat",
+          "zařízení",
+          "tailscale",
+          "vpn"
         ]
       },
       "plugins": {
@@ -180,6 +189,11 @@
           "minimapa",
           "buffer"
         ]
+      },
+      "devices": {
+        "mobileSub": "Povolit zařízením otevírat zde soubory",
+        "label": "Zařízení",
+        "keywords": ["zařízení", "soubory", "sftp", "sdílení", "složky", "přístup"]
       },
       "sftp": {
         "mobileSub": "Stahování, přenosy, editor",
@@ -323,7 +337,8 @@
             "windows": "Windows Hello",
             "macos": "Touch ID nebo heslo k Macu",
             "linux": "systémové heslo",
-            "android": "otisk prstu nebo zámek obrazovky"
+            "android": "otisk prstu nebo zámek obrazovky",
+            "ios": "Face ID, Touch ID nebo kód zařízení"
           }
         }
       },
@@ -470,14 +485,19 @@
       },
       "loading": "Probíhá...",
       "plan": {
-        "title": "Tarif",
-        "badge": {
-          "business": "Business",
-          "teams": "Teams",
-          "proTrial": "Zkušební Pro — zbývá {{daysLeft}} d",
+        "name": {
+          "free": "Zdarma",
           "pro": "Pro",
-          "free": "Free"
+          "teams": "Teams",
+          "business": "Business"
         },
+        "trialName": "Zkušební verze {{plan}}",
+        "trialLeft": "{{plan}} — zbývá {{daysLeft}} d",
+        "viaSeat": "{{plan}} · prostřednictvím vašeho místa v týmu {{team}}",
+        "viaTooltip": "Prostřednictvím týmu {{team}}",
+        "throughSeat": "Prostřednictvím vašeho místa v týmu {{team}}",
+        "ownLine": "Vaše předplatné {{plan}}",
+        "title": "Tarif",
         "manageBilling": "Spravovat fakturaci →",
         "subscription": {
           "cancelled": "Končí {{date}}. Do té doby máte přístup.",
@@ -496,6 +516,8 @@
           "localVault": "Lokální trezor",
           "auditLogs": "Auditní logy",
           "gistSync": "Synchronizace přes GitHub Gist",
+          "localSync": "Synchronizace v místní síti",
+          "deviceFiles": "Přenos souborů mezi vašimi zařízeními",
           "realtimeSync": "Synchronizace s cloudem v reálném čase",
           "unlimitedVaults": "Neomezeně soukromých trezorů",
           "terminalSharing": "Sdílení terminálu (1 relace · 1 host)",
@@ -632,6 +654,12 @@
     },
     "sync": {
       "voltiusCloud": "Voltius Cloud",
+      "local": {
+        "pairSub": "Synchronizujte s dalším zařízením ve vaší síti bez účtu.",
+        "title": "Místní synchronizace",
+        "pauseSub": "Zastaví synchronizaci s vašimi dalšími zařízeními poblíž, dokud ji neobnovíte.",
+        "footer": "Váš osobní trezor se synchronizuje přímo mezi vašimi zařízeními ve stejné síti nebo přes VPN, jako je Tailscale, pokud jsou obě online. Zdarma, bez serveru mezi nimi. Týmové trezory nejsou zahrnuty."
+      },
       "active": {
         "title": "Synchronizace s cloudem aktivní",
         "syncing": "Synchronizace…",
@@ -644,7 +672,7 @@
         "syncNow": "Synchronizovat nyní"
       },
       "pause": {
-        "label": "Pozastavit synchronizaci na tomto zařízení",
+        "label": "Pozastavit synchronizaci s cloudem na tomto zařízení",
         "sub": "Zastaví synchronizaci se serverem na pozadí. Týmové trezory se přestanou aktualizovat a při spuštění se nenačtou, dokud synchronizaci neobnovíte. „Synchronizovat nyní“ synchronizuje jen vaše vlastní data."
       },
       "requiresPro": {
@@ -653,13 +681,13 @@
         "upgrade": "Přejít na vyšší tarif"
       },
       "notConnected": {
-        "title": "Cloudový účet není připojen",
-        "sub": "Přihlaste se nebo si vytvořte cloudový účet pro synchronizaci mezi zařízeními.",
+        "title": "Nepřihlášeno",
+        "sub": "Voltius Cloud udržuje vaše zařízení synchronizovaná, i když nejsou online současně, a uchovává šifrovanou zálohu. S bezplatným účtem se vaše zařízení spárují automaticky.",
         "signIn": "Přihlásit se"
       },
       "providersTitle": "Pluginy synchronizace",
       "prefsTitle": "Předvolby synchronizace",
-      "prefsFooter": "Vypnuté typy se nikdy nenahrávají. Jednotlivé objekty lze vyloučit také v jejich panelu úprav.",
+      "prefsFooter": "Vypnuté typy nikdy neopustí toto zařízení. Jednotlivé objekty lze vyloučit také v jejich panelu úprav.",
       "quickToggleLabel": "Synchronizovat: {{label}}",
       "objectType": {
         "connection": {
@@ -688,7 +716,7 @@
         }
       },
       "settingsTitle": "Nastavení",
-      "settingsFooter": "Vše vypnuté zůstává na tomto zařízení. Nikdy se nenahrává, ani šifrovaně. Opětovným zapnutím synchronizace se odešlou hodnoty nastavení z tohoto zařízení.",
+      "settingsFooter": "Vše vypnuté zůstává na tomto zařízení a nikam se neodesílá, ani šifrovaně. Opětovným zapnutím synchronizace se odešlou hodnoty nastavení z tohoto zařízení.",
       "settingDomain": {
         "themes": {
           "label": "Motivy",
@@ -1176,6 +1204,28 @@
         }
       }
     },
+    "devices": {
+      "fileAccess": {
+        "title": "Přístup k souborům",
+        "enable": { "title": "Povolit mým zařízením otevírat soubory v tomto počítači", "desc": "Vaše další zařízení Voltius mohou procházet níže uvedené složky přes SFTP. Ve výchozím stavu vypnuto." },
+        "folders": "Sdílené složky",
+        "addFolder": "Přidat složku",
+        "noFolders": "Přidejte složku, abyste ji mohli sdílet se svými zařízeními.",
+        "removeFolder": "Přestat sdílet {{folder}}",
+        "readOnly": { "title": "Pouze pro čtení", "desc": "Zařízení mohou odsud kopírovat soubory, ale ne je měnit ani mazat." }
+      },
+      "allowed": {
+        "title": "Povolená zařízení",
+        "asksEachTime": "Zeptat se pokaždé",
+        "alwaysAllowed": "Vždy povoleno",
+        "connectedNow": "připojeno",
+        "disconnect": "Odpojit",
+        "revoke": "Odvolat",
+        "needsKey": "Pro povolení se jednou připojte",
+        "alwaysLabel": "Vždy povolit {{name}}",
+        "empty": "Zatím žádná další zařízení."
+      }
+    },
     "sftp": {
       "downloads": {
         "title": "Stahování",
@@ -1281,6 +1331,19 @@
       "persistentSessions": {
         "title": "Trvalé relace",
         "desc": "Zachovat shell a běžící procesy i při odpojení spuštěním vzdáleného shellu v tmux (případně ve screen). Vyžaduje tmux nebo screen na hostu. Pro jednotlivé hosty lze nastavit jinou volbu v sekci Pokročilé v nastavení připojení."
+      },
+      "detachedTtl": {
+        "title": "Zavírat nečinné odpojené relace",
+        "desc": "Zavře trvalou relaci na hostu, pokud k ní po zvolenou dobu nebylo připojeno žádné zařízení, ale jen když v ní nic neběží. Funguje na linuxových hostech s tmux 3.2 nebo novějším; screen a starší tmux ponechávají relace jako dříve. Změna se u relace projeví při jejím příštím připojení.",
+        "durationTitle": "Zavřít po",
+        "hours_one": "{{count}} hodina",
+        "hours_few": "{{count}} hodiny",
+        "hours_many": "{{count}} hodiny",
+        "hours_other": "{{count}} hodin",
+        "days_one": "{{count}} den",
+        "days_few": "{{count}} dny",
+        "days_many": "{{count}} dne",
+        "days_other": "{{count}} dní"
       },
       "terminalTitle": "Terminál",
       "shellIntegration": {
@@ -1421,6 +1484,9 @@
       },
       "persistentSessions": {
         "label": "Trvalé relace"
+      },
+      "detachedSessionTtl": {
+        "label": "Zavírat nečinné odpojené relace"
       },
       "restoreWorkspace": {
         "label": "Obnovit pracovní plochu při spuštění"

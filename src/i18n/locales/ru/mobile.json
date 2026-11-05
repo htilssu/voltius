@@ -44,15 +44,7 @@
       "email": "Email",
       "notSignedIn": "Не выполнен вход",
       "plan": "Тариф",
-      "cloudSync": "Облачная синхронизация",
       "off": "Выкл.",
-      "proTrial": "Pro пробный период — осталось {{days}} дн.",
-      "tier": {
-        "free": "Бесплатный",
-        "pro": "Pro",
-        "teams": "Teams",
-        "business": "Business"
-      },
       "cancelsOn": "Отменяется {{date}}. До этого момента доступ сохраняется.",
       "periodEnd": "конец периода",
       "renewsOn": "Продление {{date}}.",
@@ -64,13 +56,12 @@
       "teamsTrialNote": "Нужна карта · во время пробного периода списаний нет",
       "manageBilling": "Управление оплатой",
       "viewAllPlans": "Посмотреть все тарифы",
-      "signInToSync": "Войти для синхронизации",
+      "signInToSync": "Войти в Voltius",
       "signOutConfirm": "Выйти из аккаунта? Зашифрованное хранилище будет удалено с этого устройства и повторно синхронизировано при следующем входе.",
       "signOut": "Выйти"
     },
     "more": {
-      "settings": "Настройки",
-      "planLabel": "Тариф {{tier}}"
+      "settings": "Настройки"
     },
     "host": {
       "newTitle": "Новый хост",
@@ -204,8 +195,6 @@
         "openFiles": "Открыть файлы",
         "copyAddress": "Копировать адрес",
         "copiedAddress": "Скопировано: {{host}}",
-        "enableCloudSync": "Включить облачную синхронизацию",
-        "disableCloudSync": "Отключить облачную синхронизацию",
         "enableReachabilityCheck": "Включить проверку доступности",
         "disableReachabilityCheck": "Отключить проверку доступности"
       },

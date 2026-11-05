@@ -17,6 +17,8 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Runtime};
 use tokio_util::sync::CancellationToken;
 
+pub(crate) const NO_SHELL: &str = "This connection cannot run commands on the host";
+
 /// Where a transfer's progress and skipped-name events go: the app, or a test's recorder.
 pub trait TransferEvents: Send + Sync {
     fn send<S: Serialize + Clone>(&self, event: &str, payload: S);
@@ -42,7 +44,7 @@ pub trait FileBackend<E: TransferEvents = AppHandle>: Send + Sync {
 
     /// Run a POSIX `sh` script with `args` as `$1…` on the host the files live on.
     async fn run_sh(&self, _script: &str, _args: &[&str]) -> Result<Captured, String> {
-        Err("This connection cannot run commands on the host".into())
+        Err(NO_SHELL.into())
     }
     async fn set_attrs(&self, change: &AttrChange) -> Result<(), AppError> {
         apply_via_shell(self, change).await
@@ -153,7 +155,7 @@ pub trait FileBackend<E: TransferEvents = AppHandle>: Send + Sync {
         let _ = self.mkdir(base).await;
         for p in local_paths {
             if token.is_cancelled() {
-                return Err("Transfer cancelled".into());
+                return Err(crate::sftp::TRANSFER_CANCELLED.into());
             }
             // Local paths, so let `Path` handle the platform's separator.
             let Some(name) = Path::new(p).file_name().and_then(|n| n.to_str()) else {
@@ -179,7 +181,7 @@ pub trait FileBackend<E: TransferEvents = AppHandle>: Send + Sync {
     ) -> Result<(), AppError> {
         for p in remote_paths {
             if token.is_cancelled() {
-                return Err("Transfer cancelled".into());
+                return Err(crate::sftp::TRANSFER_CANCELLED.into());
             }
             // Remote paths are always POSIX, whatever the host runs.
             let name = p.trim_end_matches('/').rsplit('/').next().unwrap_or(p);
@@ -396,6 +398,9 @@ mod tests {
             Ok(Box::new(std::io::Cursor::new(
                 &content.as_bytes()[offset as usize..],
             )))
+        }
+        fn can_hash(&self) -> bool {
+            false
         }
         async fn hash(&self, _: &str, _: &CancellationToken) -> Result<Option<String>, AppError> {
             Ok(None)

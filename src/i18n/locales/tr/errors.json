@@ -30,7 +30,28 @@
     "vault-role-read-only": "Bu kasaya yazma izniniz yok (rolünüz: {{role}}). Yalnızca sahipler, yöneticiler ve düzenleyiciler değişiklik yapabilir.",
     "vault-permissions-unavailable": "Anahtar zinciri kullanılamadığı için kasa izinleri doğrulanamadı. Tekrar deneyin.",
     "vault-permissions-corrupted": "Kasa izin verileri bozuk. Erişimi yenilemek için tekrar oturum açın.",
-    "knock-udp-via-proxy": "UDP vuruşları bir proxy üzerinden gönderilemez. Bu sunucu için TCP adımları veya doğrudan bağlantı kullanın."
+    "knock-udp-via-proxy": "UDP vuruşları bir proxy üzerinden gönderilemez. Bu sunucu için TCP adımları veya doğrudan bağlantı kullanın.",
+    "device-file-access-off": "Bu cihazda dosya erişimi kapalı. Cihazda Ayarlar › Cihazlar bölümünden açın.",
+    "device-access-denied": "Cihaz, dosyalarını açma isteğini reddetti.",
+    "device-approval-timed-out": "Cihazdaki isteğe zamanında yanıt verilmedi.",
+    "device-busy": "Bu cihazda çok fazla dosya oturumu açık. Birini kapatıp tekrar deneyin.",
+    "device-unreachable": "Bu cihaza ulaşılamıyor. Açık ve aynı ağda olduğundan emin olun.",
+    "device-access-expired": "Bu cihaza erişim sona erdi. İzin istemek için yeniden açın.",
+    "device-read-only": "Bu cihaz bu klasörleri salt okunur olarak paylaşıyor.",
+    "device-forgotten": "Bu cihazı unuttunuz, bu yüzden dosyaları kapatıldı.",
+    "pair": {
+      "ended": {
+        "accountDevice": "Diğer cihaz bir Voltius hesabına giriş yapmış. Burada aynı hesapla giriş yapın.",
+        "bothGrouped": "İki cihaz da zaten başka cihazlarla eşlenmiş. Birinde gruptan ayrılın, sonra yeniden eşleyin.",
+        "alreadyPaired": "Bu cihazlar zaten eşlenmiş.",
+        "timedOut": "Eşleme zaman aşımına uğradı.",
+        "cancelled": "Eşleme iptal edildi.",
+        "busy": "Diğer cihaz şu anda başka biriyle eşleniyor. Biraz sonra tekrar deneyin.",
+        "tooManyAttempts": "Çok fazla başarısız deneme. Eşleme kapatıldı. Yeniden denemek için Cihaz eşle ekranını tekrar açın.",
+        "failed": "Eşleme tamamlanamadı. Tekrar deneyin.",
+        "stopped": "Eşleme durdu. Yeniden denemek için Cihaz eşle ekranını tekrar açın."
+      }
+    }
   },
   "errorAt": {
     "proxy": "Proxy {{proxy}}: {{cause}}",

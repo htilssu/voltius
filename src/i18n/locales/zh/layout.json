@@ -22,12 +22,15 @@
       "vaultUnreadableRetry": "尝试其他密码",
       "chooseHowToUse": "选择您想如何使用 Voltius",
       "getStarted": "开始使用",
-      "getStartedSub": "由操作系统密钥链保护——无需密码",
+      "getStartedSub": "无需账户——可与同一网络中的设备配对",
+      "getStartedSub_ios": "由操作系统密钥链保护——无需密码",
       "or": "或",
       "cloudAccount": "云账户",
-      "cloudAccountSub": "跨设备同步——登录或创建一个",
+      "cloudAccountSub": "设备自动配对 · Pro 增加云同步和备份",
+      "cloudAccountSub_ios": "跨设备同步——登录或创建一个",
       "back": "返回",
-      "signupPrompt": "创建账户以跨设备同步",
+      "signupPrompt": "创建账户，让您的设备自动配对",
+      "signupPrompt_ios": "创建账户以跨设备同步",
       "signinPrompt": "登录以恢复同步的数据",
       "emailPlaceholder": "邮箱",
       "masterPasswordMinPlaceholder": "主密码（至少 8 个字符）",
@@ -52,8 +55,10 @@
     "cloudAuthModal": {
       "registerTitle": "创建云账户",
       "signinTitle": "登录云账户",
-      "registerDesc": "创建账户以同步此保险库并解锁云功能。您的数据保持端到端加密。",
-      "signinDesc": "登录以启用同步、订阅、团队功能和共享保险库。",
+      "registerDesc": "创建账户以自动配对您的设备并解锁云功能。您的数据保持端到端加密。",
+      "registerDesc_ios": "创建账户以同步此保险库并解锁云功能。您的数据保持端到端加密。",
+      "signinDesc": "登录以自动配对您的设备，并使用云同步、订阅、团队功能和共享保险库。",
+      "signinDesc_ios": "登录以启用同步、订阅、团队功能和共享保险库。",
       "addTitle": "添加其他账户",
       "addDesc": "登录或创建另一个云账户。当前账户会保留在账户菜单中，可随时切换回来。",
       "createMasterPasswordPlaceholder": "创建主密码",
@@ -167,7 +172,6 @@
     },
     "sync": {
       "title": "同步",
-      "voltiusSync": "Voltius 同步",
       "moreProviders": "更多同步方式",
       "syncNow": "立即同步",
       "signInForSync": "登录以进行云同步",
@@ -182,6 +186,77 @@
       "pause": "暂停同步",
       "resume": "继续同步",
       "encryptedBlob": "加密数据块 · {{size}}",
+      "local": {
+        "intro": "Voltius 将请求在此网络上查找您的设备，以便它们直接同步。",
+        "introContinue": "继续",
+        "title": "本地网络",
+        "pause": "暂停本地同步",
+        "resume": "继续本地同步",
+        "status": {
+          "live_other": "已与 {{count}} 台设备实时同步",
+          "syncing": "正在与 {{name}} 同步…",
+          "none": "附近没有设备",
+          "paused": "本地同步已暂停",
+          "blocked": "Voltius 无法访问您的网络。请在“系统设置 › 隐私与安全性”中允许“本地网络”访问。",
+          "blockedOther": "Voltius 无法访问您的网络。请检查防火墙是否允许 Voltius 访问专用网络。",
+          "blockedNetwork": "Voltius 无法访问您的本地网络。请检查是否已连接 Wi-Fi。"
+        },
+        "openSettings": "打开设置",
+        "route": {
+          "lan": "同一 Wi-Fi",
+          "tailscale": "Tailscale",
+          "vpn": "VPN"
+        },
+        "row": {
+          "syncing_other": "正在同步 {{count}} 项更改",
+          "behind_other": "离线 · 落后 {{count}} 项更改",
+          "offlineOk": "离线 · 已是最新",
+          "seenBehind_other": "上次在线 {{when}} · 落后 {{count}} 项",
+          "seenOk": "上次在线 {{when}} · 已是最新",
+          "paused": "已暂停",
+          "keyChanged": "无法验证此设备 · 重新配对以验证",
+          "moved": "已迁移到 Voltius 账号 — 请在那里登录以继续同步"
+        },
+        "catchUp": "下次两台设备都在线并能互相连接时，更改就会同步过去。",
+        "upsell": "即使设备不同时在线，Voltius Cloud 也能让它们保持同步。",
+        "tooltip": "正在与附近设备同步",
+        "toast": {
+          "lan": "{{name}} 就在附近 · 通过 Wi-Fi 同步",
+          "tailscale": "{{name}} 就在附近 · 通过 Tailscale 同步",
+          "vpn": "{{name}} 就在附近 · 通过 VPN 同步"
+        },
+        "pair": {
+          "title": "配对设备",
+          "searching": "在另一台设备上也打开“配对设备”。请让两台设备保持在同一网络。",
+          "signedInHint": "另一台设备已登录 Voltius 账号吗？请改在这里用同一账号登录。",
+          "compare": "请确认两个屏幕显示的是同一个代码",
+          "confirm": "代码一致",
+          "cancel": "取消",
+          "peerConfirmed": "{{name}} 已确认",
+          "combine": "合并两者",
+          "useTheirs": "使用 {{name}} 的数据",
+          "done": "已与 {{name}} 配对",
+          "close": "关闭",
+          "tryAgain": "重试",
+          "joining": "正在配对…",
+          "hasData": "此设备已有数据。可与 {{name}} 的数据合并，或改用 {{name}} 的数据。",
+          "replaces": "这将替换 {{name}}"
+        },
+        "forget": {
+          "label": "忘记",
+          "aria": "忘记 {{name}}",
+          "account": "在此设备上停止通过本地网络与 {{name}} 同步。如需彻底移除，请在那台设备上退出登录。",
+          "group": "从你的设备中移除 {{name}}。它会保留已有的内容，在你重新配对之前不会收到新内容。",
+          "keyChanged": "此设备的身份已更改。重新配对即可用验证码确认新身份，但仅在你认得这台设备时才这样做。",
+          "failed": "无法忘记 {{name}}，请重试。"
+        },
+        "leave": {
+          "label": "退出此组",
+          "prompt": "此设备将停止通过本地网络与你的其他设备同步。它会保留已有的内容，其他设备会将它从列表中移除。之后你可以重新配对。",
+          "confirm": "退出",
+          "failed": "无法退出该组，请重试。"
+        }
+      },
       "status": {
         "syncing": "正在同步…",
         "synced": "已同步",
@@ -252,10 +327,6 @@
         "closeTab_other": "关闭标签页（{{count}} 个会话）"
       },
       "plan": {
-        "proTrial": "Pro 试用——剩余 {{daysLeft}} 天",
-        "teams": "Teams",
-        "business": "Business",
-        "pro": "Pro",
         "upgradeTrial": "升级 · 14 天免费试用",
         "upgrade": "升级"
       },
@@ -318,6 +389,18 @@
       "promptReason": "解锁 Voltius",
       "sealReason": "确认以将保险库密钥保存在此设备上",
       "bindingLost": "设备登录方式已更改。请输入主密码。"
+    },
+    "deviceFiles": {
+      "title": "{{name}} 想要打开你的文件",
+      "subtitle": "你的设备 · {{route}}",
+      "newDevice": "新设备",
+      "folders": "它将看到你在 设置 › 设备 中共享的文件夹：{{folders}}。",
+      "readWrite": "它可以在其中复制、重命名和删除文件。",
+      "readOnly": "它可以从中复制文件。",
+      "deny": "拒绝",
+      "once": "允许一次",
+      "always": "始终允许",
+      "sessionToast": "{{name}} 打开了你的文件"
     }
   }
 }

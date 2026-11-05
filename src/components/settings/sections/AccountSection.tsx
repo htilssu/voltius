@@ -9,8 +9,8 @@ import { useSecurityStore } from "@/stores/securityStore";
 import { ActionItem, FormButtons, SettingsInput } from "./shared";
 import { VaultBackups } from "@/components/shared/VaultBackups";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
+import { usePlanDisplay } from "@/services/planDisplay";
 import { openPortal } from "@/utils/billing";
-import { useServerBillingEnabled } from "@/services/serverCapabilities";
 import { useSeatReadout } from "@/hooks/useSeatReadout";
 import { seatsUsedText } from "@/services/seatMath";
 import { openBillingCheckout } from "@/services/billingCheckout";
@@ -25,6 +25,8 @@ import { SessionSecuritySettings } from "./SessionSecuritySettings";
 import ChangeMasterPasswordModal from "./ChangeMasterPasswordModal";
 import { TwoFactorSettings } from "./TwoFactorSettings";
 import { formatOptionalDate, SHORT_DATE } from "@/utils/localeFormat";
+import { DeleteAccountModal } from "@/components/shared/DeleteAccountModal";
+import { runsLocalSync, usePlatform } from "@/utils/platform";
 
 type AccountStep = "idle" | "set-password" | "loading" | "confirm-wipe";
 
@@ -77,6 +79,8 @@ const PLAN_FEATURES = [
   { id: "localVault",       free: true,  pro: true,  teams: true,  business: true  },
   { id: "auditLogs",        free: true,  pro: true,  teams: true,  business: true  },
   { id: "gistSync",         free: true,  pro: true,  teams: true,  business: true  },
+  { id: "localSync",        free: true,  pro: true,  teams: true,  business: true, lan: true },
+  { id: "deviceFiles",      free: true,  pro: true,  teams: true,  business: true, lan: true },
   { id: "realtimeSync",     free: false, pro: true,  teams: true,  business: true  },
   { id: "unlimitedVaults",  free: false, pro: true,  teams: true,  business: true  },
   { id: "terminalSharing",  free: false, pro: true,  teams: true,  business: true  },
@@ -119,6 +123,7 @@ export default function AccountSection() {
   const [showEditEmail, setShowEditEmail] = useState(false);
   const { requestSignOut, signOutConfirm } = useSignOutConfirm((e) => setError(e instanceof Error ? e.message : String(e)));
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [handle, setHandle] = useState<string | null>(null);
   const [handleIsCustom, setHandleIsCustom] = useState(false);
   const [handleManaged, setHandleManaged] = useState(false);
@@ -290,7 +295,7 @@ export default function AccountSection() {
                   type="button"
                   disabled={!emailVerified || handleManaged}
                   onClick={() => handleField.start(handleIsCustom ? (handle ?? "") : "")}
-                  className="text-xs px-2.5 py-1 rounded-md font-medium bg-(--t-accent) text-white hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50"
+                  className="text-xs px-2.5 py-1 rounded-md font-medium bg-(--t-accent) text-(--t-on-accent) hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50"
                 >
                   {handleIsCustom ? t("settings.account.handle.change") : t("settings.account.handle.choose")}
                 </button>
@@ -390,6 +395,18 @@ export default function AccountSection() {
               }}
             />
           )}
+          {mode === "server" && (
+            <ActionItem
+              icon="lucide:user-x"
+              label={t("shared.deleteAccount.action")}
+              sub={t("shared.deleteAccount.actionSub")}
+              danger
+              onClick={() => {
+                setError("");
+                setShowDeleteAccount(true);
+              }}
+            />
+          )}
           <ActionItem
             icon="lucide:trash-2"
             label={t("settings.account.wipeData.label")}
@@ -413,6 +430,10 @@ export default function AccountSection() {
       )}
 
       {signOutConfirm}
+
+      {showDeleteAccount && (
+        <DeleteAccountModal onCancel={() => setShowDeleteAccount(false)} onDeleted={() => window.location.reload()} />
+      )}
 
       {showEditEmail && currentEmail && (
         <EditEmailModal
@@ -492,25 +513,22 @@ export default function AccountSection() {
 
 // ─── Plans section ────────────────────────────────────────────────────────────
 
-function PlansSection() {
+export function PlansSection() {
   const { t } = useTranslation();
-  const { tier, trialEndsAt, isTrialActive, isPro, isTeams, isBusiness, subscriptionStatus, subscriptionCancelled, renewsAt, endsAt } = useSubscriptionStore();
-  const billingEnabled = useServerBillingEnabled();
+  const plan = usePlanDisplay();
+  const { ownsTeamsPlan, subscriptionStatus, subscriptionCancelled, renewsAt, endsAt } = useSubscriptionStore();
   const seatsText = seatsUsedText(t, useSeatReadout(), "settings.account.plan.seatsUsed");
+  const features = runsLocalSync(usePlatform()) ? PLAN_FEATURES : PLAN_FEATURES.filter((f) => !("lan" in f));
 
-  const daysLeft = trialEndsAt
-    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86_400_000))
-    : 0;
-
-  const badgeLabel =
-    isBusiness ? t("settings.account.plan.badge.business") :
-    isTeams ? t("settings.account.plan.badge.teams") :
-    isTrialActive ? t("settings.account.plan.badge.proTrial", { daysLeft }) :
-    tier === "pro" ? t("settings.account.plan.badge.pro") : t("settings.account.plan.badge.free");
-
-  const isPaidPro = isPro && !isTrialActive && billingEnabled;
-
-  const badgeColor = isPro ? "#f59e0b" : "var(--t-text-muted)";
+  const manageBilling = plan.showManageBilling && (
+    <button
+      onClick={() => openPortal()}
+      className="text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
+    >
+      {t("settings.account.plan.manageBilling")}
+    </button>
+  );
+  const badgeColor = plan.premium ? "#f59e0b" : "var(--t-text-muted)";
   const renewalDate = formatOptionalDate(renewsAt, SHORT_DATE);
   const cancellationDate = formatOptionalDate(endsAt ?? renewsAt, SHORT_DATE);
 
@@ -524,25 +542,23 @@ function PlansSection() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon
-              icon={isPro ? "lucide:crown" : "lucide:circle-fading-arrow-up"}
+              icon={plan.icon}
               width={14}
               style={{ color: badgeColor }}
             />
-            <span className="text-sm font-medium text-(--t-text-primary)">{badgeLabel}</span>
+            <span data-plan-line className="text-sm font-medium text-(--t-text-primary)">{plan.line}</span>
           </div>
-          <div className="flex items-center gap-2">
-            {isPaidPro && (
-              <button
-                onClick={() => openPortal()}
-                className="text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
-              >
-                {t("settings.account.plan.manageBilling")}
-              </button>
-            )}
-          </div>
+          {!plan.ownLine && <div className="flex items-center gap-2">{manageBilling}</div>}
         </div>
 
-        {isPaidPro && (
+        {plan.ownLine && (
+          <div className="flex items-center justify-between text-xs">
+            <span data-plan-own-line className="text-(--t-text-secondary)">{plan.ownLine}</span>
+            {manageBilling}
+          </div>
+        )}
+
+        {plan.ownBilled && (
           <div className="rounded-md px-3 py-2 bg-(--t-bg-input) text-xs text-(--t-text-muted)">
             {subscriptionCancelled ? (
               <span>
@@ -558,7 +574,7 @@ function PlansSection() {
           </div>
         )}
 
-        {isTeams && seatsText && (
+        {ownsTeamsPlan && seatsText && (
           <div className="flex items-center justify-between text-xs py-0.5">
             <span style={{ color: "var(--t-text-secondary)" }}>{t("settings.account.plan.seats")}</span>
             <span style={{ color: "var(--t-text-primary)", fontVariantNumeric: "tabular-nums" }}>
@@ -567,7 +583,7 @@ function PlansSection() {
           </div>
         )}
 
-        {!isPro && (
+        {plan.showUpgrade && (
           <UpgradeStrip
             label={t("settings.account.plan.upgradeToPro")}
             buttonLabel={t("settings.account.plan.upgrade")}
@@ -575,7 +591,7 @@ function PlansSection() {
           />
         )}
 
-        {isPro && !isTeams && (
+        {plan.upgradeTo === "teams" && (
           <UpgradeStrip
             variant="neutral"
             label={t("settings.account.plan.upgradeToTeams", { days: TEAMS_TRIAL_DAYS })}
@@ -586,8 +602,8 @@ function PlansSection() {
 
         {/* Feature comparison */}
         <div className="border-t border-(--t-border) pt-3 space-y-1.5">
-          {PLAN_FEATURES.map(({ id, free, pro, teams: teamsFlag, business }) => {
-            const active = isBusiness ? business : isTeams ? teamsFlag : isPro ? pro : free;
+          {features.map(({ id, ...byPlan }) => {
+            const active = byPlan[plan.plan];
             return (
               <div key={id} className="flex items-center justify-between">
                 <span className="text-xs" style={{ color: active ? "var(--t-text-primary)" : "var(--t-text-muted)" }}>
@@ -603,7 +619,7 @@ function PlansSection() {
           })}
         </div>
 
-        {billingEnabled && (
+        {plan.showAllPlans && (
           <button
             onClick={() => openPortal()}
             className="text-xs w-full text-center text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors pt-1"

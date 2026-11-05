@@ -1,6 +1,7 @@
 import type { PluginManifest, SettingsPage, SyncProviderAvailability, SyncProviderSummary } from "@/plugins/api";
 import type { MarketplacePlugin } from "@/stores/marketplaceStore";
 import { attributePage } from "@/plugins/attributePage";
+import { uninstalledEntries } from "@/plugins/uninstalledEntries";
 import type { SyncStatus } from "./sync";
 import {
   NOT_CONFIGURED_SYNC_STATE,
@@ -45,6 +46,7 @@ export interface VoltiusSyncInput {
   state: { status: SyncStatus; lastSync: Date | null; error: string | null; blobSizeBytes: number | null };
   accountMode: string | null;
   isPro: boolean;
+  canUpgrade: boolean;
   paused: boolean;
   syncNow: () => Promise<void>;
 }
@@ -63,6 +65,7 @@ export interface EffectiveSync {
   lastSync: Date | null;
   error: string | null;
   errorSource: string | null;
+  nearby: number;
 }
 
 const STATUS_RANK: Record<SyncStatus, number> = { idle: 0, success: 1, syncing: 2, offline: 3, error: 4 };
@@ -89,7 +92,7 @@ function voltiusProvider(v: VoltiusSyncInput): SyncProviderView {
     availability,
     state: { ...v.state, configured: active },
     syncNow: active || availability === "paused" ? v.syncNow : null,
-    action: VOLTIUS_ACTIONS[availability] ?? null,
+    action: availability === "needs_upgrade" && !v.canUpgrade ? null : VOLTIUS_ACTIONS[availability] ?? null,
     pauseToggle: VOLTIUS_PAUSE_TOGGLES[availability] ?? null,
   };
 }
@@ -131,11 +134,20 @@ export function buildSyncProviders(inputs: SyncProviderInputs): SyncProviderView
   return [voltiusProvider(inputs.voltius), ...plugins];
 }
 
-export function aggregateSyncStatus(providers: SyncProviderView[]): EffectiveSync {
+export function splitCloudProvider(providers: SyncProviderView[]): { cloud?: SyncProviderView; others: SyncProviderView[] } {
+  return { cloud: providers.find((p) => p.id === VOLTIUS_PROVIDER_ID), others: providers.filter((p) => p.id !== VOLTIUS_PROVIDER_ID) };
+}
+
+export function isNearbyOnly(sync: EffectiveSync): boolean {
+  return sync.nearby > 0 && sync.status !== "error" && (!sync.configured || sync.status === "offline");
+}
+
+export function aggregateSyncStatus(providers: SyncProviderView[], nearby = 0): EffectiveSync {
   const active = providers.filter((p) => p.availability === "active");
   if (active.length === 0) {
     const voltius = providers.find((p) => p.id === VOLTIUS_PROVIDER_ID);
-    const fallback = voltius?.state ?? NOT_CONFIGURED_SYNC_STATE;
+    // A free account's login sync ends in a 402; that is the plan, not a sync failure.
+    const fallback = voltius && voltius.availability !== "needs_upgrade" ? voltius.state : NOT_CONFIGURED_SYNC_STATE;
     return {
       configured: false,
       paused: voltius?.availability === "paused",
@@ -143,6 +155,7 @@ export function aggregateSyncStatus(providers: SyncProviderView[]): EffectiveSyn
       lastSync: fallback.lastSync,
       error: fallback.error,
       errorSource: null,
+      nearby,
     };
   }
   const worst = active.reduce((w, p) => (STATUS_RANK[p.state.status] > STATUS_RANK[w.state.status] ? p : w));
@@ -158,16 +171,12 @@ export function aggregateSyncStatus(providers: SyncProviderView[]): EffectiveSyn
     lastSync,
     error: failing || worst.state.status === "offline" ? worst.state.error : null,
     errorSource: failing ? worst.label : null,
+    nearby,
   };
 }
 
 export function availableCatalogProviders(catalog: MarketplacePlugin[], installedIds: ReadonlySet<string>): MarketplacePlugin[] {
-  const seen = new Set<string>();
-  return catalog.filter((p) => {
-    if (seen.has(p.id)) return false;
-    seen.add(p.id);
-    return !installedIds.has(p.id) && Boolean(p.permissions?.includes(SYNC_PROVIDER_PERMISSION));
-  });
+  return uninstalledEntries(catalog, installedIds).filter((p) => Boolean(p.permissions?.includes(SYNC_PROVIDER_PERMISSION)));
 }
 
 export function toSyncProviderSummary(p: SyncProviderView): SyncProviderSummary {

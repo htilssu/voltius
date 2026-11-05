@@ -8,16 +8,19 @@ import {
   authenticateServerAccount, getAccountMode, getCurrentUserEmail, linkToCloud, login, setMasterPassword, signInToCloud,
 } from "@/services/account";
 import { addAccount } from "@/services/savedAccounts";
-import { startRealtimeSync, syncNow, syncOnLogin, syncOnLoginReplace } from "@/services/sync";
+import { syncNow, syncOnLogin, syncOnLoginReplace } from "@/services/sync";
+import { leaveLanGroup, startSessionSync } from "@/services/lanSync";
 import { ServerUrlField } from "@/components/shared/ServerUrlField";
 import { TwoFactorStep, useTwoFactorChallenge } from "@/components/shared/TwoFactorStep";
 import { lastServerUrl } from "@/utils/serverInstance";
+import { localSyncContext, usePlatform } from "@/utils/platform";
 
 const AUTH_INPUT_CLASS =
   "w-full px-3 py-2.5 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary) placeholder:text-(--t-text-muted) focus:border-(--t-accent)";
 
 export default function CloudAuthModal() {
   const { t } = useTranslation();
+  const lanContext = localSyncContext(usePlatform());
   const open = useUIStore((s) => s.cloudAuthOpen);
   const purpose = useUIStore((s) => s.cloudAuthPurpose);
   const isAdd = purpose === "add";
@@ -74,8 +77,7 @@ export default function CloudAuthModal() {
     }
 
     const connected = async (firstSync: () => Promise<void>) => {
-      firstSync().catch(() => {});
-      startRealtimeSync();
+      startSessionSync(firstSync().catch(() => {}));
       await reloadSubscription().catch(() => {});
       onClose();
       setEmail("");
@@ -99,10 +101,13 @@ export default function CloudAuthModal() {
         );
       } else if (isRegister) {
         if (isLocalNoPassword) await setMasterPassword(password);
-        await linkToCloud(email, normalizedUrl);
+        await linkToCloud(email, normalizedUrl, leaveLanGroup);
         await connected(syncOnLogin);
       } else {
-        await twoFactor.run(() => signInToCloud(email, password, normalizedUrl), () => connected(syncOnLoginReplace));
+        await twoFactor.run(
+          () => signInToCloud(email, password, normalizedUrl, leaveLanGroup),
+          () => connected(syncOnLoginReplace),
+        );
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -134,7 +139,7 @@ export default function CloudAuthModal() {
                 ? t("layout.cloudAuthModal.reauthDesc")
                 : isAdd
                   ? t("layout.cloudAuthModal.addDesc")
-                  : isRegister ? t("layout.cloudAuthModal.registerDesc") : t("layout.cloudAuthModal.signinDesc")}
+                  : isRegister ? t("layout.cloudAuthModal.registerDesc", { context: lanContext }) : t("layout.cloudAuthModal.signinDesc", { context: lanContext })}
             </p>
           </div>
         </div>
@@ -156,7 +161,7 @@ export default function CloudAuthModal() {
                 type="button"
                 onClick={() => switchMode(next)}
                 className="flex-1 py-1.5 text-xs font-medium transition-colors"
-                style={{ background: active ? "var(--t-accent)" : "var(--t-bg-elevated)", color: active ? "#fff" : "var(--t-text-muted)" }}
+                style={{ background: active ? "var(--t-accent)" : "var(--t-bg-elevated)", color: active ? "var(--t-on-accent)" : "var(--t-text-muted)" }}
               >
                 {next === "signin" ? t("layout.auth.signIn") : t("layout.auth.createAccount")}
               </button>

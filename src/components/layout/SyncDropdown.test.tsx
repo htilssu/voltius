@@ -19,7 +19,12 @@ vi.mock("@/hooks/useAvailableSyncProviders", () => ({
   useAvailableSyncProviders: () => ({ available: available.list, appVersion: "0.36.0" }),
 }));
 
+const lanRows = vi.hoisted(() => ({ list: [] as unknown[] }));
+vi.mock("@/hooks/useLanDeviceRows", () => ({ useLanDeviceRows: () => lanRows.list }));
+vi.mock("@/services/lanSync", () => ({ setLanSyncPaused: vi.fn(async () => {}), inLanGroup: async () => false }));
+
 import { SyncDropdown } from "./SyncDropdown";
+import { useLanSyncStore } from "@/stores/lanSyncStore";
 
 const view = (over: Partial<SyncProviderView>): SyncProviderView => ({
   id: "x", label: "X", icon: "lucide:cloud", availability: "active",
@@ -27,7 +32,12 @@ const view = (over: Partial<SyncProviderView>): SyncProviderView => ({
   syncNow: vi.fn(async () => {}), action: null, pauseToggle: null, ...over,
 });
 
-afterEach(() => { cleanup(); runAction.mockReset(); });
+afterEach(() => {
+  cleanup();
+  runAction.mockReset();
+  lanRows.list = [];
+  useLanSyncStore.setState({ status: "stopped" });
+});
 
 describe("SyncDropdown", () => {
   const installer = { busy: new Set<string>(), startInstall: vi.fn() };
@@ -58,22 +68,22 @@ describe("SyncDropdown", () => {
 
   test("Sync now calls the provider's syncNow", () => {
     const syncNow = vi.fn(async () => {});
-    const { getByText } = render(
+    const { getByTitle } = render(
       <SyncDropdown anchorRef={createRef()} open onClose={() => {}} providers={[view({ id: "plugin-gist-sync", syncNow })]} installer={installer} />,
     );
-    fireEvent.click(getByText("layout.sync.syncNow"));
+    fireEvent.click(getByTitle("layout.sync.syncNow"));
     expect(syncNow).toHaveBeenCalled();
   });
 
   test("a paused provider still syncs on demand and resumes from its row", () => {
     const syncNow = vi.fn(async () => {});
-    const { getByText } = render(
+    const { getByText, getByTitle } = render(
       <SyncDropdown anchorRef={createRef()} open onClose={() => {}} providers={[
         view({ id: "voltius", availability: "paused", syncNow, action: { kind: "resume" } }),
       ]} installer={installer} />,
     );
     expect(getByText("layout.sync.paused")).toBeTruthy();
-    fireEvent.click(getByText("layout.sync.syncNow"));
+    fireEvent.click(getByTitle("layout.sync.syncNow"));
     expect(syncNow).toHaveBeenCalled();
     fireEvent.click(getByText("layout.sync.resumeArrow"));
     expect(runAction).toHaveBeenCalledWith({ kind: "resume" });
@@ -131,5 +141,16 @@ describe("SyncDropdown", () => {
     fireEvent.click(getByText("settings.plugins.browse.install"));
     expect(installer.startInstall).toHaveBeenCalledWith(cloudflare);
     available.list = [];
+  });
+
+  test("Voltius Cloud comes first, then the local network, then plugin providers", () => {
+    useLanSyncStore.setState({ status: "running" });
+    lanRows.list = [{ deviceId: "d1", name: "Desktop", platform: "linux", nearby: true, route: "lan", dot: "live", behind: 0, lastSeen: null }];
+    const { container } = render(
+      <SyncDropdown anchorRef={createRef()} open onClose={() => {}} providers={[view({ id: "plugin-gist-sync" }), view({ id: "voltius" })]} installer={installer} />,
+    );
+    const order = [...container.querySelectorAll("[data-sync-provider], [data-lan-section]")]
+      .map((e) => e.getAttribute("data-sync-provider") ?? "lan");
+    expect(order).toEqual(["voltius", "lan", "plugin-gist-sync"]);
   });
 });

@@ -1,10 +1,13 @@
 import { invoke } from "@/lib/invoke";
 import i18n from "@/i18n";
 import { logFailure } from "@/lib/logger";
+import { createSerialQueue } from "@/lib/serialQueue";
+import { forgetMergedRemoteBlobs, settledBlobs } from "@/services/settledBlobs";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { getJwt, getServerUrl, isJwtExpiredOrExpiring, refreshAccessToken } from "@/services/authTokens";
 import { fetchAuthRateLimited } from "@/services/authFetch";
 import { getVaultKey, unlockVaultIfNeeded } from "@/services/vault";
+import { isServerMode } from "@/services/account";
 import { buildUserDataBundle, mergeUserDataBundle, applyUserDataBundle } from "@/services/user-data/registry";
 import type { UserDataBundle } from "@/services/user-data/formats";
 import { useConnectionStore } from "@/stores/connectionStore";
@@ -13,12 +16,14 @@ import { useKeyStore } from "@/stores/keyStore";
 import { usePluginRegistryStore } from "@/stores/pluginRegistryStore";
 import { useFolderStore } from "@/stores/folderStore";
 import { useTeamStore } from "@/stores/teamStore";
+import { seatTeamName } from "@/services/planDisplay";
 import { useSnippetStore } from "@/stores/snippetStore";
 import { useSnippetFolderStore } from "@/stores/snippetFolderStore";
 import { usePortForwardingStore } from "@/stores/portForwardingStore";
 import { entitiesDiffer, mergeEntities, mergeSecrets, secretsDiffer, type TimestampedEntity } from "@/services/crdt";
 import { filterRemoteExcluded, filterSecrets, collectExcludedIds, type SecretMaps } from "./syncExclusion";
 import { deviceScopedSecretIds } from "@/services/deviceScopedSecrets";
+import { LAN_GROUP_FILE, LAN_GROUP_SECRET_PREFIX } from "@/services/lanGroupFiles";
 import { filterIncoming, filterOutgoing, restoreLocal } from "@/services/user-data/syncFilter";
 import { useSyncPrefsStore } from "@/stores/syncPrefsStore";
 import { useVaultKeysStore } from "@/stores/vaultKeysStore";
@@ -30,14 +35,15 @@ import { handleMembershipChangedEvent, parseMembershipChangedEvent } from "@/ser
 import * as teamService from "@/services/teamService";
 import { SseDataLineParser } from "@/services/realtimeSseEvents";
 import { connectNativeSse } from "@/services/nativeSseStream";
-import { sseRetryDelay } from "@/services/syncRetry";
-import { isUnreachable, reachableFetch } from "@/services/reachability";
+import { SSE_RETRY_GATEWAY_MAX_MS, sseRetryDelay } from "@/services/syncRetry";
+import { isProxyAnswer, isUnreachable, reachableFetch } from "@/services/reachability";
 import { createWakeableSleeps } from "@/lib/wakeableSleep";
 import { onForeground, onNetworkBack } from "@/lib/networkSignals";
 import { useCrossDeviceSessionsStore } from "@/stores/crossDeviceSessionsStore";
 import { parseUsingEvent } from "@/services/presenceEvent";
 import { bytesToBase64, base64ToByteArray } from "@/services/teamVaultSyncCore";
 import { applyRemoteSshConfigState } from "@/services/sshConfig/state";
+import { getPlatformSync, localSyncContext } from "@/utils/platform";
 
 export interface BlobPayload {
   files: Record<string, string>;
@@ -61,6 +67,7 @@ export const ENTITY_FILES = [
   "snippets.json",
   "snippet_folders.json",
   "port_forwarding_rules.json",
+  LAN_GROUP_FILE,
 ] as const;
 
 export type SyncStatus = "idle" | "syncing" | "success" | "error" | "offline";
@@ -69,7 +76,7 @@ export type SyncStatus = "idle" | "syncing" | "success" | "error" | "offline";
 
 let _status: SyncStatus = "idle";
 let _syncInFlight = false;
-// Calls within this long of a sync's start are still dropped; the status no longer waits for it.
+// A sync stays in flight at least this long, so calls just after it run once more; the status does not wait for it.
 const SYNC_HOLD_MS = 600;
 let _lastSync: Date | null = null;
 let _error: string | null = null;
@@ -84,6 +91,8 @@ let _blobSizeBytes: number | null = null;
 // A local change, or the launch sync, that an unreachable server left undone.
 let _pushOwed = false;
 let _loginSyncOwed = false;
+// Asked for while a sync ran; runs once that sync succeeds.
+let _syncOwed = false;
 const _listeners = new Set<() => void>();
 
 export function getSyncState() {
@@ -110,7 +119,7 @@ function reportFailure(e: unknown): void {
   }
   setState("offline", msg);
   // The stream cannot be healthy if a request just failed to reach the server.
-  _dropStream?.();
+  _dropStream?.(e);
 }
 
 async function applyRemoteSettings(remotePayload: BlobPayload): Promise<void> {
@@ -147,8 +156,27 @@ function applyRemoteLiveSessions(remoteDeviceId: string, remotePayload: BlobPayl
 
 export { getServerUrl };
 
+const SEAT_REFRESH_DEBOUNCE_MS = 1_000;
+// Spreads a whole team's refreshes so one office IP stays under the per-IP auth limit.
+const SEAT_REFRESH_JITTER_MS = 3_000;
+let seatRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingSeatName: string | null = null;
+
+function scheduleSeatRefresh(): void {
+  const { seatTeam } = useSubscriptionStore.getState();
+  pendingSeatName ??= seatTeamName(useTeamStore.getState().teams, seatTeam);
+  if (seatRefreshTimer) clearTimeout(seatRefreshTimer);
+  seatRefreshTimer = setTimeout(() => {
+    seatRefreshTimer = null;
+    tryRefreshJwt().catch(logFailure("seat change: tryRefreshJwt"));
+  }, SEAT_REFRESH_DEBOUNCE_MS + Math.floor(Math.random() * SEAT_REFRESH_JITTER_MS));
+}
+
 /** Try to refresh the access token using the stored refresh_token. Returns new JWT or null. */
 async function tryRefreshJwt(): Promise<string | null> {
+  const before = useSubscriptionStore.getState();
+  const lostSeatName = seatTeamName(useTeamStore.getState().teams, before.seatTeam) ?? pendingSeatName;
+  pendingSeatName = null;
   const outcome = await refreshAccessToken({ fetchImpl: reachableFetch });
   if (typeof outcome === "string") return null;
   const jwt_token = outcome.jwt;
@@ -170,7 +198,9 @@ async function tryRefreshJwt(): Promise<string | null> {
     useNotificationStore.getState().addToast({
       source: APP_SOURCE,
       type: "toast",
-      message: i18n.t("common.toast.proSubscriptionEnded"),
+      message: before.seatTeam && lostSeatName
+        ? i18n.t("common.toast.seatEnded", { team: lostSeatName, context: localSyncContext(getPlatformSync()) })
+        : i18n.t("common.toast.proSubscriptionEnded", { context: localSyncContext(getPlatformSync()) }),
       severity: "warning",
       duration: 0,
       action: {
@@ -261,7 +291,7 @@ class BlobDecryptError extends Error {
  * and dek when vaultKeysStore is populated (set by interactive login and — once it
  * adopts dek — autoLogin). A bare autoLogin session before that holds only one key.
  */
-function sessionBlobKeys(): number[][] {
+export function sessionBlobKeys(): number[][] {
   const { kek, dek } = useVaultKeysStore.getState();
   return buildDecryptKeyCandidates(getVaultKey(), kek, dek);
 }
@@ -397,29 +427,37 @@ function outgoingSettings(): UserDataBundle {
   return filterOutgoing(buildUserDataBundle());
 }
 
-/** Export local data and upload to server. */
-export async function push({ signal }: { signal?: AbortSignal } = {}): Promise<void> {
+/** Vault-key-encrypted export of local data, honouring sync exclusions. */
+export async function exportLocalBlob({ lanGroup = false }: { lanGroup?: boolean } = {}): Promise<number[]> {
   assertNotHalted();
   const encKey = await getEncKey();
-  const [serverUrl, deviceId, accountId] = await Promise.all([
-    getServerUrl(),
+  const [deviceId, accountId] = await Promise.all([
     getDeviceId(),
     invoke<string | null>("keychain_get", { key: "account_id" }),
   ]);
-
-  if (!serverUrl || !accountId) throw new Error(i18n.t("common.error.notConnectedToServer"));
+  if (!accountId) throw new Error(i18n.t("common.error.notConnectedToServer"));
 
   await unlockVaultIfNeeded();
-
   await writeFilteredSettings();
 
-  const blob: number[] = await invoke("backup_export", {
+  const groupState = lanGroup ? { files: [], secretPrefixes: [] } : { files: [LAN_GROUP_FILE], secretPrefixes: [LAN_GROUP_SECRET_PREFIX] };
+  return invoke<number[]>("backup_export", {
     encKey,
     accountId,
     deviceId,
     excludedIds: getExcludedObjectIds(),
-    skipFiles: getSkippedSyncFiles(),
+    skipFiles: [...getSkippedSyncFiles(), ...groupState.files],
+    skipSecretPrefixes: groupState.secretPrefixes,
   });
+}
+
+/** Export local data and upload to server. */
+export async function push({ signal }: { signal?: AbortSignal } = {}): Promise<void> {
+  assertNotHalted();
+  const [serverUrl, deviceId] = await Promise.all([getServerUrl(), getDeviceId()]);
+  if (!serverUrl) throw new Error(i18n.t("common.error.notConnectedToServer"));
+
+  const blob = await exportLocalBlob();
 
   const res = await fetchWithAuth(`${serverUrl}/v1/sync/blob`, {
     method: "PUT",
@@ -448,7 +486,7 @@ async function listDevices(): Promise<DeviceInfo[]> {
 }
 
 /** Reload all in-memory stores from disk after a merge. */
-async function reloadAllStores(): Promise<void> {
+export async function reloadAllStores(): Promise<void> {
   await Promise.all([
     useConnectionStore.getState().loadConnections(),
     useIdentityStore.getState().loadIdentities(),
@@ -514,9 +552,16 @@ async function completeTeamLoginSetup(): Promise<void> {
 
 type MergedPayload = Required<BlobPayload>;
 
-function parseEntities(json: string | undefined): TimestampedEntity[] {
-  try { return JSON.parse(json ?? "[]"); }
-  catch { return []; }
+// `state_import` rewrites whole files: every read-merge-write of local state runs here, one at a time.
+export const serialMerge = createSerialQueue();
+
+export function parseEntities(json: string | undefined): TimestampedEntity[] {
+  try {
+    const parsed: unknown = JSON.parse(json ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 /** Merge one remote payload into `base`; `changed` is whether the result differs from `base`. */
@@ -563,51 +608,112 @@ async function pullRemotePayload(serverUrl: string, remoteDeviceId: string): Pro
   if (!res.ok) return null; // skip unreachable devices
 
   const { blob: blobB64 } = await res.json();
-  const remotePayload = await openRemoteBlob(sessionBlobKeys(), base64ToByteArray(blobB64));
+  return openRemoteBlob(sessionBlobKeys(), base64ToByteArray(blobB64));
+}
 
+async function applyRemoteExtras(remoteDeviceId: string, remotePayload: BlobPayload): Promise<void> {
   await applyRemoteSettings(remotePayload);
   applyRemoteLiveSessions(remoteDeviceId, remotePayload);
-  return remotePayload;
 }
 
 const applyRemoteSshConfig = (payload: BlobPayload) => applyRemoteSshConfigState(payload.files["ssh-config.json"]).catch(() => {});
 
-/** Run `step` per remote blob source; a failing source is skipped and returned, never thrown. */
+/** Run `step` per remote blob source, up to `concurrency` at once; a failing source is skipped and returned, never thrown. */
 export async function forEachRemoteBlob<T>(
   sources: T[],
   label: (source: T) => string,
   step: (source: T) => Promise<void>,
+  concurrency = 1,
 ): Promise<Array<{ source: T; error: unknown }>> {
   const failed: Array<{ source: T; error: unknown }> = [];
-  for (const source of sources) {
-    try {
-      await step(source);
-    } catch (error) {
-      failed.push({ source, error });
-      const kind = error instanceof BlobDecryptError ? "undecryptable blob" : "non-decrypt error";
-      console.debug(`[sync] ${kind} from ${label(source)}:`, error);
+  let next = 0;
+  const worker = async () => {
+    while (next < sources.length) {
+      const source = sources[next++];
+      try {
+        await step(source);
+      } catch (error) {
+        failed.push({ source, error });
+        const kind = error instanceof BlobDecryptError ? "undecryptable blob" : "non-decrypt error";
+        console.debug(`[sync] ${kind} from ${label(source)}:`, error);
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, sources.length) }, worker));
   return failed;
 }
 
 const deviceLabel = (device: DeviceInfo) => `device ${device.device_id}`;
 
-/**
- * Fetch a remote device's blob, decrypt it, CRDT-merge with local state, and write to disk.
- * Returns true if the merge changed local state.
- * Errors for individual devices are swallowed so one offline device doesn't abort the sync.
- */
-async function pullAndMerge(remoteDeviceId: string): Promise<boolean> {
+const PULL_CONCURRENCY = 4;
+
+/** Download and decrypt each device's blob, a few at once, in `devices` order; a device that fails is skipped. */
+async function pullRemotePayloads(devices: DeviceInfo[]): Promise<Array<[DeviceInfo, BlobPayload]>> {
+  if (devices.length === 0) return [];
   const serverUrl = await getServerUrl();
-  if (!serverUrl) return false;
+  if (!serverUrl) throw new Error(i18n.t("common.error.notConnectedToServer"));
+  const pulled = new Array<BlobPayload | null>(devices.length).fill(null);
+  const indexed = devices.map((device, i) => ({ device, i }));
+  await forEachRemoteBlob(indexed, ({ device }) => deviceLabel(device), async ({ device, i }) => {
+    try {
+      pulled[i] = await pullRemotePayload(serverUrl, device.device_id);
+    } catch (e) {
+      if (e instanceof BlobDecryptError) settledBlobs.add(device);
+      throw e;
+    }
+  }, PULL_CONCURRENCY);
+  return devices.flatMap((device, i) => (pulled[i] ? [[device, pulled[i]] as [DeviceInfo, BlobPayload]] : []));
+}
 
-  const remotePayload = await pullRemotePayload(serverUrl, remoteDeviceId);
-  if (!remotePayload) return false;
+/** Merge every payload into `base` in one read-merge-write of local state. Returns true if the merge changed `base`. */
+async function mergePayloadsInto(
+  readBase: () => Promise<BlobPayload>,
+  pulled: Array<[string, BlobPayload]>,
+  { alwaysWrite = false } = {},
+): Promise<boolean> {
+  for (const [deviceId, payload] of pulled) await applyRemoteExtras(deviceId, payload);
+  const changed = await serialMerge(async () => {
+    let merged = await readBase();
+    let anyChanged = false;
+    for (const [, payload] of pulled) {
+      const step = mergeBlobPayload(merged, payload);
+      merged = step.payload;
+      anyChanged ||= step.changed;
+    }
+    if (anyChanged || alwaysWrite) await importMergedPayload(merged);
+    return anyChanged;
+  });
+  for (const [deviceId, payload] of pulled) {
+    await applyRemoteSshConfig(payload);
+    notifyRemotePayloadMerged(deviceId, payload);
+  }
+  return changed;
+}
 
-  const { payload, changed } = mergeBlobPayload(await invoke<BlobPayload>("state_export_raw"), remotePayload);
-  if (changed) await importMergedPayload(payload);
-  await applyRemoteSshConfig(remotePayload);
+/** CRDT-merge decrypted remote payloads into local state. Returns true if local state changed. */
+export function mergeRemotePayloads(pulled: Array<[string, BlobPayload]>): Promise<boolean> {
+  if (pulled.length === 0) return Promise.resolve(false);
+  return mergePayloadsInto(() => invoke<BlobPayload>("state_export_raw"), pulled);
+}
+
+export const mergeRemotePayload = (remoteDeviceId: string, remotePayload: BlobPayload): Promise<boolean> =>
+  mergeRemotePayloads([[remoteDeviceId, remotePayload]]);
+
+function settledBlobsForCurrentInputs(): typeof settledBlobs {
+  const { syncTypes, syncSettingDomains, settingSyncOverrides } = useSyncPrefsStore.getState();
+  const { kek, dek } = useVaultKeysStore.getState();
+  settledBlobs.useInputs(
+    JSON.stringify([syncTypes, syncSettingDomains, settingSyncOverrides, getExcludedObjectIds()]),
+    [getVaultKey(), kek, dek],
+  );
+  return settledBlobs;
+}
+
+/** Fetch, decrypt and merge the given devices' blobs. Returns true if the merge changed local state. */
+async function pullAndMerge(devices: DeviceInfo[]): Promise<boolean> {
+  const pulled = await pullRemotePayloads(devices);
+  const changed = await mergeRemotePayloads(pulled.map(([device, payload]) => [device.device_id, payload]));
+  for (const [device] of pulled) settledBlobs.add(device);
   return changed;
 }
 
@@ -620,14 +726,22 @@ async function pullAndMerge(remoteDeviceId: string): Promise<boolean> {
  *                   data actually changed local state, preventing infinite loops.
  */
 export async function syncNow(forcePush = false): Promise<void> {
-  if (_syncInFlight || _halted) return;
+  if (_halted) return;
+  if (_syncInFlight) {
+    _syncOwed = true;
+    _pushOwed ||= forcePush;
+    return;
+  }
 
   // Personal blob sync is a Pro feature — free-tier accounts have no blob quota.
   if (!useSubscriptionStore.getState().isPro) return;
 
   _syncInFlight = true;
   const mustPush = forcePush || _pushOwed;
+  _pushOwed = false;
+  let succeeded = false;
   const holdUntil = Date.now() + SYNC_HOLD_MS;
+  const wasOffline = _status === "offline";
   setState("syncing");
 
   try {
@@ -639,14 +753,12 @@ export async function syncNow(forcePush = false): Promise<void> {
 
     const [devices, localDeviceId] = await Promise.all([listDevices(), getDeviceId()]);
 
-    // Pull and merge each remote device sequentially (each merge feeds the next).
-    // Per-device errors are non-fatal: skip corrupted/mismatched blobs rather than
-    // surfacing a confusing "decryption failed" to the user.
-    let anyPersonalChanged = false;
-    const remoteDevices = devices.filter((d) => d.device_id !== localDeviceId);
-    await forEachRemoteBlob(remoteDevices, deviceLabel, async (device) => {
-      if (await pullAndMerge(device.device_id)) anyPersonalChanged = true;
-    });
+    // A blob that fails to download or decrypt is skipped rather than surfacing a
+    // confusing "decryption failed" to the user.
+    const settled = settledBlobsForCurrentInputs();
+    const anyPersonalChanged = await pullAndMerge(
+      devices.filter((d) => d.device_id !== localDeviceId && !settled.has(d)),
+    );
 
     if (anyPersonalChanged) {
       await reloadAllStores();
@@ -658,21 +770,25 @@ export async function syncNow(forcePush = false): Promise<void> {
       await push();
     }
 
-    _pushOwed = false;
+    succeeded = true;
     setState("success");
+    if (wasOffline) wakeSseRetry();
   } catch (e) {
     if (isPaymentRequired(e) && await loadTeamsForCurrentUser()) {
       await completeTeamLoginSetup();
       setState("success");
       return;
     }
-    _pushOwed = mustPush;
+    _pushOwed ||= mustPush;
     reportFailure(e);
     throw e;
   } finally {
     const wait = holdUntil - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     _syncInFlight = false;
+    const owed = _syncOwed && succeeded;
+    _syncOwed = false;
+    if (owed) syncInBackground().catch(logFailure("sync asked for during the previous one"));
   }
 }
 
@@ -683,6 +799,20 @@ async function readDeviceSecrets(): Promise<SecretMaps> {
   if (ids.size === 0) return noSecrets();
   const local = await invoke<BlobPayload>("state_export_raw");
   return filterSecrets(local, (id) => id != null && ids.has(id));
+}
+
+/**
+ * Local state becomes the merge of `pulled` alone, starting from empty: local disk
+ * is never read except for the device-scoped secrets, which no blob carries.
+ */
+export async function replaceWithPayloads(pulled: Array<[string, BlobPayload]>): Promise<void> {
+  forgetMergedRemoteBlobs();
+  const empty: BlobPayload = {
+    files: Object.fromEntries(ENTITY_FILES.map((f) => [f, "[]"])),
+    ...(await readDeviceSecrets()),
+  };
+  await mergePayloadsInto(async () => empty, pulled, { alwaysWrite: true });
+  await reloadAllStores();
 }
 
 /**
@@ -707,28 +837,10 @@ export async function syncOnLoginReplace(): Promise<void> {
       return;
     }
 
-    const serverUrl = await getServerUrl();
-    if (!serverUrl) throw new Error(i18n.t("common.error.notConnectedToServer"));
+    if (!(await getServerUrl())) throw new Error(i18n.t("common.error.notConnectedToServer"));
 
-    const devices = await listDevices();
-
-    // Accumulate remote state starting from empty — local disk never touched
-    let merged: MergedPayload = {
-      files: Object.fromEntries(ENTITY_FILES.map((f) => [f, "[]"])),
-      ...(await readDeviceSecrets()),
-    };
-
-    const pulled: BlobPayload[] = [];
-    await forEachRemoteBlob(devices, deviceLabel, async (device) => {
-      const remotePayload = await pullRemotePayload(serverUrl, device.device_id);
-      if (!remotePayload) return;
-      merged = mergeBlobPayload(merged, remotePayload).payload;
-      pulled.push(remotePayload);
-    });
-
-    await importMergedPayload(merged);
-    for (const remotePayload of pulled) await applyRemoteSshConfig(remotePayload);
-    await reloadAllStores();
+    const pulled = await pullRemotePayloads(await listDevices());
+    await replaceWithPayloads(pulled.map(([device, payload]) => [device.device_id, payload]));
     await push();
     await completeTeamLoginSetup();
 
@@ -761,7 +873,8 @@ export async function syncOnLogin(): Promise<void> {
     // CRDT merge is idempotent so pulling own blob on normal login is safe.
     const devices = await listDevices();
 
-    await forEachRemoteBlob(devices, deviceLabel, async (device) => { await pullAndMerge(device.device_id); });
+    settledBlobsForCurrentInputs();
+    await pullAndMerge(devices);
 
     await reloadAllStores();
     await push();
@@ -795,6 +908,7 @@ export function syncInBackground(forcePush = false): Promise<void> {
   if (isSyncPaused()) return Promise.resolve();
   if (awaitingServer()) {
     _pushOwed ||= forcePush;
+    if (forcePush) wakeSseRetry();
     return Promise.resolve();
   }
   return syncNow(forcePush);
@@ -820,30 +934,67 @@ export function setSyncPaused(paused: boolean): void {
 
 // ─── Debounced sync on mutations ──────────────────────────────────────────────
 
+function createListeners<A extends unknown[]>() {
+  const fns = new Set<(...args: A) => void>();
+  return {
+    subscribe(fn: (...args: A) => void): () => void {
+      fns.add(fn);
+      return () => { fns.delete(fn); };
+    },
+    emit(...args: A) {
+      for (const fn of fns) {
+        try { fn(...args); } catch (e) { logFailure("sync listener")(e); }
+      }
+    },
+  };
+}
+
+const localMutationListeners = createListeners<[]>();
+const remoteMergedListeners = createListeners<[deviceId: string, payload: BlobPayload]>();
+
+export const onLocalMutation = localMutationListeners.subscribe;
+export const onRemotePayloadMerged = remoteMergedListeners.subscribe;
+
+export function notifyRemotePayloadMerged(deviceId: string, payload: BlobPayload): void {
+  remoteMergedListeners.emit(deviceId, payload);
+}
+
+export function blobDeviceId(blob: number[]): string | null {
+  if (blob.length < 4) return null;
+  const len = new DataView(Uint8Array.from(blob.slice(0, 4)).buffer).getUint32(0, true);
+  if (blob.length < 4 + len) return null;
+  try {
+    const id = (JSON.parse(new TextDecoder().decode(Uint8Array.from(blob.slice(4, 4 + len)))) as { device_id?: unknown }).device_id;
+    return typeof id === "string" ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 let _syncTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** Schedule a sync 2 s after the last mutation (debounced). */
+/** Tells local-network sync about a local mutation; a signed-in device also pushes 2 s after the last one. */
 export function scheduleSync() {
+  localMutationListeners.emit();
   if (!useSubscriptionStore.getState().isPro || isSyncPaused() || _halted) return;
   if (_syncTimer) clearTimeout(_syncTimer);
   _syncTimer = setTimeout(() => {
     _syncTimer = null;
-    syncInBackground(true).catch(logFailure("forced push after local mutation")); // forcePush: local mutation must be uploaded
+    isServerMode()
+      .then((server) => (server ? syncInBackground(true) : undefined))
+      .catch(logFailure("forced push after local mutation"));
   }, 2000);
 }
 
 // ─── Real-time SSE sync ───────────────────────────────────────────────────────
 
-const _teamEventListeners = new Set<(teamId: string) => void>();
+const teamEventListeners = createListeners<[teamId: string]>();
 
-export function onTeamSseEvent(fn: (teamId: string) => void): () => void {
-  _teamEventListeners.add(fn);
-  return () => { _teamEventListeners.delete(fn); };
-}
+export const onTeamSseEvent = teamEventListeners.subscribe;
 
 let _sseAbort: AbortController | null = null;
 // Set while a stream is open: ends that one connection so the loop reconnects.
-let _dropStream: (() => void) | null = null;
+let _dropStream: ((reason?: unknown) => void) | null = null;
 // The server sends a heartbeat every 30 s; a stream silent this long is dead.
 const STREAM_QUIET_MS = 75_000;
 
@@ -878,6 +1029,8 @@ export function stopRealtimeSync(): void {
 /** Stop the stream and the debounce timer, and refuse every later local write or upload until `resumeSync`. */
 export function haltSync(): void {
   _halted = true;
+  forgetMergedRemoteBlobs();
+  _syncOwed = false;
   stopRealtimeSync();
   if (_syncTimer) clearTimeout(_syncTimer);
   _syncTimer = null;
@@ -897,15 +1050,16 @@ async function _sseLoop(signal: AbortSignal): Promise<void> {
     signal.addEventListener("abort", end, { once: true });
     let healthy = false;
     let quiet: ReturnType<typeof setTimeout> | undefined;
-    const drop = () => {
+    let failure: unknown;
+    const drop = (reason?: unknown) => {
       healthy = false;
+      failure = reason;
       end();
     };
     const heard = () => {
       clearTimeout(quiet);
       quiet = setTimeout(drop, STREAM_QUIET_MS);
     };
-    let failure: unknown;
     try {
       await _sseConnect(attempt.signal, {
         onOpen: () => {
@@ -925,7 +1079,7 @@ async function _sseLoop(signal: AbortSignal): Promise<void> {
     if (signal.aborted) return;
     if (isUnreachable(failure) && !_syncInFlight) setState("offline", failure.message);
     failures = healthy ? 0 : failures + 1;
-    await _sseSleeps.sleep(SSE_RETRY, sseRetryDelay(failures));
+    await _sseSleeps.sleep(SSE_RETRY, sseRetryDelay(failures, isProxyAnswer(failure) ? SSE_RETRY_GATEWAY_MAX_MS : undefined));
   }
 }
 
@@ -1045,7 +1199,7 @@ async function offboardFromTeam(tid: string, teamName: string): Promise<void> {
 export async function handleRealtimeEvent(eventData: string, myDeviceId: string): Promise<void> {
   if (eventData.startsWith("team:")) {
     const teamId = eventData.slice(5);
-    _teamEventListeners.forEach((fn) => fn(teamId));
+    teamEventListeners.emit(teamId);
     const { fetchTeamData } = await import("@/services/teamVaultSync");
     fetchTeamData(teamId, { background: true }).catch(logFailure(`team event: fetchTeamData team=${teamId}`));
   } else if (eventData.startsWith("team_members:")) {
@@ -1075,6 +1229,7 @@ export async function handleRealtimeEvent(eventData: string, myDeviceId: string)
     useTeamStore.getState().loadMyPendingInvitations().catch(logFailure("pending_invitations_changed: loadMyPendingInvitations"));
   } else if (eventData.startsWith("membership_changed:")) {
     const parsed = parseMembershipChangedEvent(eventData);
+    scheduleSeatRefresh();
     if (!parsed) return;
     if (parsed.kind === "added") {
       await useTeamStore.getState().loadTeams();
@@ -1084,6 +1239,7 @@ export async function handleRealtimeEvent(eventData: string, myDeviceId: string)
       await offboardFromTeam(parsed.teamId, teamName);
     }
   } else if (eventData === "membership_changed") {
+    scheduleSeatRefresh();
     // Compat: bare event from a server pod on an older build, carrying neither
     // a team id nor an added/removed kind — diff against the current team list
     // instead. Also fired at every recipient of a freshly wrapped vault key on
@@ -1121,6 +1277,8 @@ export async function handleRealtimeEvent(eventData: string, myDeviceId: string)
       if (parsed.inUse) store.addUser(parsed.connectionId, parsed.userId);
       else store.removeUser(parsed.connectionId, parsed.userId);
     }
+  } else if (eventData === "plan_changed") {
+    scheduleSeatRefresh();
   } else if (eventData === "token_invalidated") {
     tryRefreshJwt().catch(logFailure("token_invalidated: tryRefreshJwt"));
   } else if (eventData.startsWith("session_shared:") || eventData.startsWith("session_ended:")) {

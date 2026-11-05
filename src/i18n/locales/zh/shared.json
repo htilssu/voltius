@@ -6,13 +6,30 @@
       "unsynced": "同步已暂停或无法连接服务器，此设备上最近的更改可能尚未保存到服务器。退出登录将清除此设备上的副本。",
       "confirm": "清除并退出登录"
     },
+    "deleteAccount": {
+      "action": "删除账户",
+      "actionSub": "永久删除你的 Voltius 云账户及其数据",
+      "title": "删除你的 Voltius 账户？",
+      "message": "此操作将从 Voltius 服务器永久删除你的云账户、加密保险库以及所有云同步数据。你也会退出所加入的所有团队。此操作无法撤销。",
+      "deviceNote": "随后本设备将退出登录，并像退出登录时一样清除本地保存的主机、密钥和代码片段副本。你其他设备上的副本不会被远程删除。",
+      "subscriptionNote": "你的订阅会随账户一并取消：不会再续订，也不会再向你扣费。",
+      "typeToConfirm": "输入 {{target}} 以确认",
+      "confirm": "删除账户",
+      "deleting": "正在删除…",
+      "deletedTitle": "账户已删除",
+      "deleted": "你的 Voltius 账户已被删除。",
+      "failed": "无法删除你的账户（错误 {{status}}）。请稍后重试，或联系支持。",
+      "ownsTeamWithMembers": "您是一个仍有其他成员的团队的唯一所有者（{{teams}}）。请将其他成员设为所有者、移除成员或删除该团队，然后重试。",
+      "subscriptionCancelFailed": "无法取消你的订阅，因此账户未被删除。请几分钟后重试，或联系支持。"
+    },
     "errorBanner": {
       "dismiss": "关闭"
     },
     "trialExpiredModal": {
       "title": "您的 Pro 试用已结束",
       "subtitle": "以下三项功能今天起停止工作：",
-      "freeNote": "本地保险库、审计日志和 GitHub Gist 同步永久免费。",
+      "freeNote": "本地保险库、审计日志、本地网络同步、设备间文件传输和 GitHub Gist 同步永久免费。",
+      "freeNote_ios": "本地保险库、审计日志和 GitHub Gist 同步永久免费。",
       "teamsPrompt": "与他人协作？免费试用 Teams {{days}} 天（需绑定银行卡）。",
       "upgradeButton": "升级到 Pro",
       "laterButton": "稍后再说"
@@ -179,6 +196,7 @@
       "memberLine": "按成员的权限需要 Business 套餐。",
       "objectLine": "按对象的权限需要 Business 套餐。",
       "removeOverrides": "移除覆盖设置"
-    }
+    },
+    "availableWith": "{{plan}} 可用"
   }
 }

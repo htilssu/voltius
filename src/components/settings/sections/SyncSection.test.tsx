@@ -16,7 +16,12 @@ vi.mock("@/services/sync", () => ({
   syncNow: vi.fn(),
   scheduleSync: vi.fn(),
   setSyncPaused: vi.fn(),
+  getDeviceId: async () => "self",
+  onRemotePayloadMerged: () => () => {},
 }));
+const { setLanSyncPaused } = vi.hoisted(() => ({ setLanSyncPaused: vi.fn(async () => {}) }));
+vi.mock("@/services/lanSync", () => ({ setLanSyncPaused }));
+vi.mock("@/hooks/useLanDeviceRows", () => ({ useLanDeviceRows: () => [] }));
 const { view, defaultProviders, useSyncProvidersMock, resetProvidersMock } = vi.hoisted(() => {
   type ProviderOverride = Record<string, unknown>;
   const view = (over: ProviderOverride) => ({
@@ -43,10 +48,15 @@ vi.mock("@/hooks/useAvailableSyncProviders", () => ({ useAvailableSyncProviders:
 vi.mock("@/components/settings/usePluginInstaller", () => ({
   usePluginInstaller: () => ({ busy: new Set(), startInstall: vi.fn(), startUpdate: vi.fn(), modal: null }),
 }));
+const { noAccount } = vi.hoisted(() => ({ noAccount: { value: true } }));
+vi.mock("@/hooks/useNoAccountInstall", () => ({ useCanPairDevices: () => noAccount.value }));
+const { openDialog } = vi.hoisted(() => ({ openDialog: vi.fn() }));
+vi.mock("@/stores/pairDeviceDialogStore", () => ({ openPairDeviceDialog: openDialog }));
 const { runAction } = vi.hoisted(() => ({ runAction: vi.fn() }));
 vi.mock("@/services/syncProviderAction", () => ({ runSyncProviderAction: runAction }));
 
 import { scheduleSync, setSyncPaused } from "@/services/sync";
+import { useLanSyncStore } from "@/stores/lanSyncStore";
 import SyncSection from "./SyncSection";
 
 const toggleFor = (c: HTMLElement, domain: string) =>
@@ -150,6 +160,16 @@ describe("SyncSection Voltius group", () => {
     const { getByText } = render(<SyncSection />);
     fireEvent.click(getByText("settings.sync.requiresPro.upgrade"));
     expect(runAction).toHaveBeenCalledWith({ kind: "upgrade" });
+  });
+
+  test("with no upgrade on offer the requires-Pro row has no upgrade button", () => {
+    useSyncProvidersMock.mockImplementation(() => ({
+      providers: [view({ id: "voltius", label: "Voltius Sync", availability: "needs_upgrade", action: null })],
+      effective: { configured: false, status: "idle", lastSync: null, error: null, errorSource: null },
+    }));
+    const { getByText, queryByText } = render(<SyncSection />);
+    expect(getByText("settings.sync.requiresPro.title")).toBeTruthy();
+    expect(queryByText("settings.sync.requiresPro.upgrade")).toBeNull();
   });
 
   test("a signed-out user's sign-in button routes through the shared provider action", () => {
@@ -272,5 +292,47 @@ describe("SyncSection plugin providers", () => {
     } finally {
       availableCatalog.list = [];
     }
+  });
+});
+
+describe("Local network group", () => {
+  afterEach(() => {
+    cleanup();
+    noAccount.value = true;
+    openDialog.mockClear();
+    setLanSyncPaused.mockClear();
+    useLanSyncStore.setState({ status: "stopped", paused: false });
+  });
+
+  test("a no-account install can open Pair a device", () => {
+    const { container } = render(<SyncSection />);
+    fireEvent.click(container.querySelector("[data-sync-pair]")!);
+    expect(openDialog).toHaveBeenCalled();
+  });
+
+  test("an account install shows local sync status and pause, but no pairing", () => {
+    noAccount.value = false;
+    useLanSyncStore.setState({ status: "running", paused: false });
+    const { container, getByText } = render(<SyncSection />);
+    expect(container.querySelector("[data-lan-status]")).not.toBeNull();
+    expect(getByText("layout.sync.local.status.none")).toBeTruthy();
+    expect(container.querySelector("[data-sync-pair]")).toBeNull();
+    fireEvent.click(toggleFor(container, "lanPause")!);
+    expect(setLanSyncPaused).toHaveBeenCalledWith(true);
+  });
+
+  test("a paused local sync reads as paused and resumes from the same toggle", () => {
+    noAccount.value = false;
+    useLanSyncStore.setState({ status: "paused", paused: true });
+    const { container, getByText } = render(<SyncSection />);
+    expect(getByText("layout.sync.local.status.paused")).toBeTruthy();
+    fireEvent.click(toggleFor(container, "lanPause")!);
+    expect(setLanSyncPaused).toHaveBeenCalledWith(false);
+  });
+
+  test("an account install whose local sync never started shows no Local network group", () => {
+    noAccount.value = false;
+    const { container } = render(<SyncSection />);
+    expect(container.querySelector("[data-lan-status]")).toBeNull();
   });
 });

@@ -6,13 +6,30 @@
       "unsynced": "La synchronisation est en pause ou n'a pas pu joindre le serveur : les modifications récentes de cet appareil n'y sont peut-être pas enregistrées. La déconnexion efface la copie de cet appareil.",
       "confirm": "Effacer et se déconnecter"
     },
+    "deleteAccount": {
+      "action": "Supprimer le compte",
+      "actionSub": "Supprime définitivement votre compte cloud Voltius et ses données",
+      "title": "Supprimer votre compte Voltius ?",
+      "message": "Cette action supprime définitivement votre compte cloud, votre coffre chiffré et toutes les données de synchronisation du serveur Voltius. Vous quittez aussi les équipes dont vous êtes membre. Cette action est irréversible.",
+      "deviceNote": "Cet appareil est ensuite déconnecté et sa copie locale de vos hôtes, clés et snippets est effacée, comme lors d'une déconnexion. Les copies sur vos autres appareils ne sont pas supprimées à distance.",
+      "subscriptionNote": "Votre abonnement est annulé avec votre compte : il ne sera pas renouvelé et vous ne serez plus prélevé.",
+      "typeToConfirm": "Saisissez {{target}} pour confirmer",
+      "confirm": "Supprimer le compte",
+      "deleting": "Suppression…",
+      "deletedTitle": "Compte supprimé",
+      "deleted": "Votre compte Voltius a été supprimé.",
+      "failed": "Impossible de supprimer votre compte (erreur {{status}}). Réessayez plus tard ou contactez le support.",
+      "ownsTeamWithMembers": "Vous êtes le seul propriétaire d'une équipe qui a encore d'autres membres ({{teams}}). Nommez un autre membre propriétaire, retirez les membres ou supprimez l'équipe, puis réessayez.",
+      "subscriptionCancelFailed": "Votre abonnement n'a pas pu être annulé, votre compte n'a donc pas été supprimé. Réessayez dans quelques minutes ou contactez le support."
+    },
     "errorBanner": {
       "dismiss": "ignorer"
     },
     "trialExpiredModal": {
       "title": "Votre essai Pro est terminé",
       "subtitle": "Ces trois fonctionnalités s'arrêtent aujourd'hui :",
-      "freeNote": "Le coffre-fort local, les journaux d'audit et la synchronisation GitHub Gist restent gratuits, pour toujours.",
+      "freeNote": "Le coffre-fort local, les journaux d'audit, la synchronisation sur le réseau local, le transfert de fichiers entre vos appareils et la synchronisation GitHub Gist restent gratuits, pour toujours.",
+      "freeNote_ios": "Le coffre-fort local, les journaux d'audit et la synchronisation GitHub Gist restent gratuits, pour toujours.",
       "teamsPrompt": "Vous travaillez à plusieurs ? Essayez Teams gratuitement pendant {{days}} jours (carte bancaire requise).",
       "upgradeButton": "Passer à Pro",
       "laterButton": "Plus tard"
@@ -184,6 +201,7 @@
       "memberLine": "Les permissions par membre nécessitent le forfait Business.",
       "objectLine": "Les permissions par objet nécessitent le forfait Business.",
       "removeOverrides": "Supprimer les dérogations"
-    }
+    },
+    "availableWith": "Disponible avec {{plan}}"
   }
 }

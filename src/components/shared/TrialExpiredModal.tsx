@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { Modal, ModalCard } from "@/components/shared/Modal";
 import { UpgradeStrip } from "@/components/shared/UpgradeStrip";
-import { useSubscriptionStore } from "@/stores/subscriptionStore";
+import { usePlanDisplay } from "@/services/planDisplay";
 import { openBillingCheckout } from "@/services/billingCheckout";
 import { TEAMS_TRIAL_DAYS } from "@/services/billingTrial";
+import { AvailableWithPlan } from "@/components/shared/AvailableWithPlan";
+import { localSyncContext, usePlatform } from "@/utils/platform";
 
 const STORAGE_KEY = "voltius_trial_expired_shown";
 
@@ -17,21 +19,17 @@ const PRO_PERKS = [
 
 export function TrialExpiredModal() {
   const { t } = useTranslation();
-  const { tier, trialEndsAt, trialUsed } = useSubscriptionStore();
+  const lanContext = localSyncContext(usePlatform());
+  const { showTrialEnded, showUpgrade } = usePlanDisplay();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // The server clears trial_ends_at once a trial lapses, so a past date is a
-    // bonus signal, never a precondition — requiring it hid this modal from
-    // every expired account.
-    if (!trialUsed) return;
-    if (tier !== "free") return;
-    if (trialEndsAt && trialEndsAt > new Date()) return;
+    if (!showTrialEnded) return;
     if (localStorage.getItem(STORAGE_KEY)) return;
 
     localStorage.setItem(STORAGE_KEY, "1");
     setVisible(true);
-  }, [tier, trialEndsAt, trialUsed]);
+  }, [showTrialEnded]);
 
   if (!visible) return null;
 
@@ -62,23 +60,27 @@ export function TrialExpiredModal() {
         </ul>
 
         <p className="text-xs text-(--t-text-muted) leading-relaxed">
-          {t("shared.trialExpiredModal.freeNote")}
+          {t("shared.trialExpiredModal.freeNote", { context: lanContext })}
         </p>
 
+        {showUpgrade && (
         <UpgradeStrip
           variant="neutral"
           label={t("shared.trialExpiredModal.teamsPrompt", { days: TEAMS_TRIAL_DAYS })}
           buttonLabel={t("settings.account.plan.teamsButton")}
           onClick={() => upgrade("teams")}
         />
+        )}
 
         <div className="flex items-center justify-between gap-3">
+          {showUpgrade ? (
           <button
             onClick={() => upgrade("pro")}
             className="btn btn-primary px-4 py-2 rounded-lg text-sm font-semibold"
           >
             {t("shared.trialExpiredModal.upgradeButton")}
           </button>
+          ) : <AvailableWithPlan plan="Pro" className="text-left" />}
           <button
             onClick={() => setVisible(false)}
             className="text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
