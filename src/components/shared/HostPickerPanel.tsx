@@ -35,9 +35,10 @@ interface Props {
   showWsl?: boolean;
   terminalOnly?: boolean;
   devices?: boolean;
+  excludeId?: string;
 }
 
-export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, terminalOnly, vaultId, showRecents = true, showWsl = true, devices = false }: Props) {
+export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, terminalOnly, vaultId, showRecents = true, showWsl = true, devices = false, excludeId }: Props) {
   const { t } = useTranslation();
   const loadConnections = useConnectionStore((s) => s.loadConnections);
   const loadFolders = useFolderStore((s) => s.loadFolders);
@@ -52,7 +53,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, termi
   const searchRef = useRef<HTMLInputElement>(null);
   useFilterShortcut(searchRef);
 
-  const { rows, recent, vaults, vaultFilter, setVaultFilter, toggleFolder, hasHosts } = useHostPicker({ query: search, sortMode, sshOnly, terminalOnly, vaultId });
+  const { rows, recent, vaults, vaultFilter, setVaultFilter, toggleFolder, hasHosts } = useHostPicker({ query: search, sortMode, sshOnly, terminalOnly, vaultId, excludeId });
   const matchesQuery = searchMatcher(search);
 
   return (

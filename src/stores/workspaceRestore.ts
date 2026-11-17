@@ -6,11 +6,10 @@ import {
 import { getToggle } from "./toggleSettingsStore";
 import { resolveRemoteSessions } from "./liveSessionManifestCore";
 import { useCrossDeviceSessionsStore } from "./crossDeviceSessionsStore";
-import { useSessionStore } from "./sessionStore";
+import { useSessionStore, settleLocalSpawn, spawnLocalSession } from "./sessionStore";
 import { resumeIfStranded } from "./reconnectBackoff";
 import { useLayoutStore, getPaneSessionIds, type SplitTab } from "./layoutStore";
 import { useUIStore } from "./uiStore";
-import { localConnect } from "@/services/local";
 import { isReplaceSyncPending, whenLoginSyncSettled } from "@/services/loginSyncGate";
 import { setRestoreScrollOffset } from "@/hooks/useTerminal";
 import type { SerialConnectParams, TerminalSession } from "@/types";
@@ -30,6 +29,7 @@ function toTerminalSession(s: SnapshotSession): TerminalSession {
     encoding: s.encoding,
     localShell: s.localShell,
     serialConfig: s.serialConfig as SerialConnectParams | undefined,
+    locked: s.locked,
   };
 }
 
@@ -74,6 +74,7 @@ export async function restoreWorkspaceOnLaunch(): Promise<void> {
     activeSplitTabId: snapshot.layout.activeSplitTabId,
     splitTabActive: snapshot.layout.splitTabActive,
     titlebarOrder: snapshot.layout.titlebarOrder,
+    pinnedKeys: snapshot.layout.pinnedKeys,
   });
 
   // Prune layout leaves whose sessions weren't snapshotable (e.g. a
@@ -104,7 +105,7 @@ export async function restoreWorkspaceOnLaunch(): Promise<void> {
   // (same session id → same key) and replays history (restore flag). Vault
   // unlock happens lazily inside credential resolution; failures land in the
   // existing per-session error overlay (retry affordances included).
-  const { reconnect, markConnected, markError } = useSessionStore.getState();
+  const { reconnect } = useSessionStore.getState();
   for (const s of snapshot.sessions) {
     if (s.scrollLinesFromBottom) setRestoreScrollOffset(s.id, s.scrollLinesFromBottom);
   }
@@ -130,12 +131,7 @@ export async function restoreWorkspaceOnLaunch(): Promise<void> {
         // Launched offline, the `online` event may never come: the loop must own the retry.
         resumeIfStranded(s.id, { restore: s.persist });
       } else {
-        try {
-          await localConnect(s.id, 80, 24, s.localShell, s.cwd, getToggle("shell-integration"));
-          markConnected(s.id);
-        } catch (err) {
-          markError(s.id, err instanceof Error ? err.message : String(err));
-        }
+        await settleLocalSpawn(s.id, spawnLocalSession(s.id, s.localShell, s.cwd, getToggle("shell-integration")));
       }
     }),
   );

@@ -5,14 +5,16 @@ import { getVersion } from "@tauri-apps/api/app";
 import { loadPlugin, unloadPlugin, getLoadedPlugins } from "@/plugins/runtime";
 import { importPluginModule, pluginRegisterOf, injectPluginStyle, type PluginModule } from "@/plugins/importPluginModule";
 import type { PluginManifest } from "@/plugins/api";
-import { usePluginRegistryStore } from "@/stores/pluginRegistryStore";
+import { installAllowed, usePluginRegistryStore } from "@/stores/pluginRegistryStore";
 import { appFetch } from "@/services/http";
 import { PluginHashMismatchError, resolveVerifiedHash } from "@/plugins/integrity";
 import { assertValidPluginId } from "@/plugins/pluginId";
 import { isRetiredPlugin } from "@/plugins/retired";
-import { PluginInstallInProgressError } from "@/plugins/installErrors";
+import { PluginInstallInProgressError, PluginInstallManagedError } from "@/plugins/installErrors";
 import { satisfiesMinAppVersion, MinAppVersionError, beatsSeededVersion, isParsableVersion } from "@/plugins/version";
 import { useSeededTombstoneStore, loadSeededEntries } from "@/stores/seededTombstoneStore";
+
+export { PluginInstallManagedError };
 
 // ─── Types ────────────────────────────────────────────────────────────────
 
@@ -37,6 +39,8 @@ export interface MarketplacePlugin {
   /** Iconify name for the entry, e.g. `simple-icons:cloudflare`. */
   icon?: string;
   theme: boolean;
+  preview?: unknown;
+  desktopOnly?: boolean;
   sourceId: string;
   hash?: string;
   cssHash?: string;
@@ -287,6 +291,7 @@ interface MarketplaceState {
   catalog: MarketplacePlugin[];
   catalogLoading: boolean;
   catalogError: string | null;
+  sourceErrors: Record<string, string>;
   fetchCatalog: () => Promise<void>;
 
   // Installed externally (not bundled)
@@ -369,15 +374,17 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
   catalog: [],
   catalogLoading: false,
   catalogError: null,
+  sourceErrors: {},
 
   async fetchCatalog() {
     const { sources } = get();
     set({ catalogLoading: true, catalogError: null });
     const results: MarketplacePlugin[] = [];
+    const sourceErrors: Record<string, string> = {};
     for (const source of sources.filter((s) => s.enabled)) {
       try {
         const res = await appFetch(source.url);
-        if (!res.ok) continue;
+        if (!res.ok) { sourceErrors[source.id] = `HTTP ${res.status}`; continue; }
         const data = await res.json();
         const list: MarketplacePlugin[] = Array.isArray(data) ? data : (data.plugins ?? []);
         // `builtin` is never trusted from a remote source — it routes installPlugin
@@ -388,9 +395,10 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
         results.push(...plugins.filter((p) => !isRetiredPlugin(p.id)));
       } catch (e) {
         console.warn(`[marketplace] Failed to fetch source "${source.id}":`, e);
+        sourceErrors[source.id] = String(e);
       }
     }
-    set({ catalog: results, catalogLoading: false });
+    set({ catalog: results, catalogLoading: false, sourceErrors });
   },
 
   // ── Installed meta ────────────────────────────────────────────────────
@@ -427,6 +435,8 @@ export const useMarketplaceStore = create<MarketplaceState>((set, get) => ({
     assertValidPluginId(plugin.id);
     if (isRetiredPlugin(plugin.id)) throw new Error(`Plugin "${plugin.id}" is retired`);
     const { installing, installedMeta } = get();
+    const alreadyInstalled = installedMeta.some((m) => m.id === plugin.id) || getLoadedPlugins().some((m) => m.id === plugin.id);
+    if (!installAllowed(plugin.id, alreadyInstalled)) throw new PluginInstallManagedError(plugin.id);
     // Refused, not silently skipped: resolving here told every caller the install
     // succeeded — a deep-link confirm sheet accepted while the Settings tab was
     // installing the same id closed reporting success having written nothing.
