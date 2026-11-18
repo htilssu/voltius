@@ -17,12 +17,15 @@ import { APP_SOURCE, useNotificationStore } from "@/stores/notificationStore";
 import { connectionDisplayName } from "@/utils/connectionDisplayName";
 import { writeClipboard } from "@/utils/clipboard";
 import { buildMoveTargets } from "@/components/mobile/folders/mobileFolderCore";
-import { moveConnectionToVault } from "@/services/connectionDuplicate";
+import VaultTransferSheet from "./VaultTransferSheet";
 import { compareStrings } from "@/utils/localeFormat";
 import MoveToFolderSheet from "./MoveToFolderSheet";
 import { SheetActionRow, type SheetAction } from "./SheetActionRow";
 import { copyingRulesOf } from "@/services/ruleSetIntent";
 import { isFileOnlyProtocol } from "@/utils/connectionType";
+import { SFTP_ICON } from "@/lib/conceptIcons";
+import { connectionTarget } from "@/services/previewGuard";
+import { previewGuarded } from "./previewGuardedActions";
 
 type Mode = "menu" | "confirm-delete" | "move" | "move-folder";
 
@@ -75,15 +78,8 @@ export default function HostActionsSheet({ hostId, fromEditor = false }: { hostI
 
   if (mode === "move") {
     return (
-      <BottomSheet title={t("mobile.sheets.shared.moveToVault")} onClose={closeSheet}>
-        {moveTargets.map((v) => (
-          <Row key={v.id} it={{ icon: "lucide:vault", label: v.name, onTap: () => {
-            void moveConnectionToVault(conn, v.id, updateConnection);
-            closeSheet();
-          } }} />
-        ))}
-        <Row it={{ icon: "lucide:arrow-left", label: t("mobile.sheets.shared.back"), slug: "back", onTap: () => setMode("menu") }} />
-      </BottomSheet>
+      <VaultTransferSheet tab="hosts" ids={[hostId]} mode="cut" targets={moveTargets} attr="host-action"
+        onBack={() => setMode("menu")} onClose={closeSheet} />
     );
   }
 
@@ -98,11 +94,11 @@ export default function HostActionsSheet({ hostId, fromEditor = false }: { hostI
     );
   }
 
-  const items: SheetAction[] = [
+  const items: SheetAction[] = previewGuarded([
     ...(canConnect && !isSerial && !fileOnly ? [{ icon: "lucide:terminal", label: t("common.action.connect"), slug: "connect", onTap: () => { closeSheet(); void connect(hostId).catch(console.error); setTab("terminal"); } }] : []),
     ...(canEdit ? [{ icon: "lucide:pencil", label: t("common.action.edit"), slug: "edit", onTap: () => { closeSheet(); push({ kind: "host-edit", hostId }); } }] : []),
-    ...(canConnect && !isSerial ? [{ icon: "lucide:folder-open", label: fileOnly ? t("mobile.sheets.hostActions.openFiles") : t("mobile.panelItems.sftp"), slug: fileOnly ? "open-files" : "sftp", onTap: () => { closeSheet(); push({ kind: "panel-sftp", connectionId: hostId }); } }] : []),
-    ...(conn.host ? [{ icon: "lucide:clipboard-copy", label: t("mobile.sheets.hostActions.copyAddress"), slug: "copy-address", onTap: () => {
+    ...(canConnect && !isSerial ? [{ icon: SFTP_ICON, label: fileOnly ? t("mobile.sheets.hostActions.openFiles") : t("mobile.panelItems.sftp"), slug: fileOnly ? "open-files" : "sftp", onTap: () => { closeSheet(); push({ kind: "panel-sftp", connectionId: hostId }); } }] : []),
+    ...(conn.host ? [{ icon: "lucide:clipboard-copy", label: t("mobile.sheets.hostActions.copyAddress"), slug: "copy-address", reads: true, onTap: () => {
       void writeClipboard(conn.host);
       useNotificationStore.getState().addToast({ source: APP_SOURCE, type: "toast", message: t("mobile.sheets.hostActions.copiedAddress", { host: conn.host }), severity: "success", duration: 2000 });
       closeSheet();
@@ -125,7 +121,7 @@ export default function HostActionsSheet({ hostId, fromEditor = false }: { hostI
         void updateConnection(hostId, { ...connectionToFormData(conn), ping_disabled: !conn.ping_disabled });
       } }] : []),
     ...(canEdit ? [{ icon: "lucide:trash-2", label: t("common.action.delete"), danger: true, slug: "delete", onTap: () => setMode("confirm-delete") }] : []),
-  ];
+  ], connectionTarget(hostId), closeSheet);
 
   return (
     <BottomSheet title={name} onClose={closeSheet}>

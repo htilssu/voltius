@@ -8,10 +8,16 @@ import OmniSearch from "@/components/omni/OmniSearch";
 import GlobalPanelHost from "@/components/layout/GlobalPanelHost";
 import RightPanel from "@/components/terminal/RightPanel";
 import { EmailVerificationBanner } from "@/components/notifications/EmailVerificationBanner";
+import { PreviewContentScope } from "@/components/preview/PreviewScope";
+import { ViewAsBanner } from "@/components/preview/ViewAsBanner";
+import { ViewAsPill } from "@/components/preview/ViewAsPill";
+import { ViewAsSidePanel } from "@/components/preview/ViewAsSidePanel";
 import { useUIStore } from "@/stores/uiStore";
 import { useStatusBarStore } from "@/stores/statusBarStore";
+import { usePreviewStore } from "@/stores/previewStore";
 
 export default function DesktopShell() {
+  const previewing = usePreviewStore((s) => s.session !== null);
   const omniOpen = useUIStore((s) => s.omniOpen);
   const setOmniOpen = useUIStore((s) => s.setOmniOpen);
   const homeView = useUIStore((s) => s.homeView);
@@ -36,20 +42,27 @@ export default function DesktopShell() {
         >
           {showVaultChrome && (
             <div className="shrink-0 relative z-10" style={{ background: "var(--t-bg-chrome)" }}>
-              <VaultHeader />
-              <NavBar />
+              <PreviewContentScope>
+                <VaultHeader />
+                <NavBar />
+              </PreviewContentScope>
+              {previewing && <ViewAsBanner />}
             </div>
           )}
           <div className="flex flex-col flex-1 overflow-hidden" style={{ paddingRight: dockedPanelWidth || undefined }}>
             <div className="flex flex-1 overflow-hidden" data-shell-content>
               <HostSessionsPanel />
-              <MainPanel />
+              <PreviewContentScope>
+                <MainPanel />
+              </PreviewContentScope>
+              {previewing && <ViewAsSidePanel />}
               <RightPanel />
             </div>
             <div ref={setStatusBarSlot} className="flex flex-col shrink-0" data-status-bar-slot />
           </div>
         </div>
       </div>
+      {previewing && <ViewAsPill />}
       {omniOpen && <OmniSearch onClose={() => setOmniOpen(false)} />}
       <GlobalPanelHost />
     </>

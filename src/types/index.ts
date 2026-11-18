@@ -4,6 +4,12 @@ import type { IdentityPickIssue } from "@/services/credentialPlan";
 
 export type AuthType = "password" | "key";
 
+/** Where a new vault object starts: a folder and the vault that holds it. */
+export interface NewObjectPlacement {
+  folderId: string;
+  vaultId: string;
+}
+
 export interface Folder {
   id: string;
   name: string;
@@ -282,6 +288,7 @@ export interface TerminalSession {
   /** Serial only: port typed at quick-connect time, prefilled into the config overlay. */
   initialSerialPort?: string;
   containerExec?: ContainerExec;
+  locked?: boolean;
 }
 
 export type ContainerExec =
