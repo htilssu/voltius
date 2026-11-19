@@ -44,7 +44,33 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'push' && !inputs.tag }}
 
 jobs:
+  # Skips the channel with a warning, rather than failing, when its credentials
+  # were never set up (forks). Secrets can't be read in a job-level `if`.
+  configured:
+    runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - id: check
+        uses: ./.github/actions/secrets-configured
+        with:
+          channel: iOS App Store build
+          names: IOS_CERTIFICATE IOS_CERTIFICATE_PASSWORD IOS_MOBILE_PROVISION APPLE_API_KEY APPLE_API_ISSUER APPLE_API_KEY_P8 APPLE_TEAM_ID
+        env:
+          IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
   ipa:
+    needs: configured
+    if: needs.configured.outputs.ok == 'true'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
