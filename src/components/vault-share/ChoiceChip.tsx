@@ -15,7 +15,7 @@ export function ChoiceChip({
       aria-pressed={selected}
       disabled={!!disabledReason}
       title={disabledReason}
-      className="px-2.5 py-1 rounded-lg text-[11px] border disabled:opacity-50 disabled:cursor-not-allowed"
+      className="px-2.5 py-1 rounded-lg text-2xs border disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
       style={{
         background: selected ? "color-mix(in srgb, var(--t-accent) 10%, transparent)" : "var(--t-bg-elevated)",
         borderColor: selected ? "var(--t-accent)" : "transparent",

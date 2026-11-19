@@ -57,7 +57,7 @@ export function PromoFooter({ cta, onCta, busy = false, note, secondary, onSecon
         onClick={onCta}
         disabled={busy}
         aria-busy={busy}
-        className="btn btn-primary min-h-11 px-4 rounded-[var(--r-md)] text-[15px] font-semibold flex items-center justify-center gap-2"
+        className="btn btn-primary min-h-11 px-4 rounded-[var(--r-md)] text-sm font-semibold flex items-center justify-center gap-2"
       >
         {busy && <Icon icon="lucide:loader-circle" width={16} className="animate-spin" />}
         {cta}
@@ -69,7 +69,7 @@ export function PromoFooter({ cta, onCta, busy = false, note, secondary, onSecon
             <button
               type="button"
               onClick={onSecondary}
-              className="min-h-11 px-1 text-[13px] font-medium text-(--t-text-secondary) hover:text-(--t-text-primary) transition-colors focus-ring rounded-[var(--r-sm)]"
+              className="min-h-11 px-1 text-xs font-medium text-(--t-text-secondary) hover:text-(--t-text-primary) transition-colors focus-ring rounded-[var(--r-sm)]"
             >
               {secondary}
             </button>
@@ -78,7 +78,7 @@ export function PromoFooter({ cta, onCta, busy = false, note, secondary, onSecon
             <button
               type="button"
               onClick={link.onClick}
-              className="min-h-11 px-1 text-[13px] font-medium text-right text-(--t-accent) hover:text-(--t-accent-hover) transition-colors focus-ring rounded-[var(--r-sm)]"
+              className="min-h-11 px-1 text-xs font-medium text-right text-(--t-accent) hover:text-(--t-accent-hover) transition-colors focus-ring rounded-[var(--r-sm)]"
             >
               {link.label}
             </button>
@@ -91,7 +91,7 @@ export function PromoFooter({ cta, onCta, busy = false, note, secondary, onSecon
 
 export function PromoTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="m-0 pr-8 text-2xl leading-tight font-bold tracking-[-0.01em] text-(--t-text-bright)">
+    <h2 className="m-0 pr-8 text-lg leading-tight font-semibold text-(--t-text-bright)">
       {children}
     </h2>
   );

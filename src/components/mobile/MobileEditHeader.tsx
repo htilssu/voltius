@@ -41,7 +41,7 @@ export default function MobileEditHeader({
           {...{ [`data-${primary.attr}`]: true }}
           onClick={primary.onClick}
           disabled={primary.disabled}
-          className="h-10 px-3 mr-1 rounded-full text-sm font-medium text-(--t-accent) disabled:opacity-40"
+          className="h-10 px-3 mr-1 rounded-full text-sm font-medium text-(--t-accent) disabled:opacity-(--disabled-opacity)"
         >
           {primary.label}
         </button>

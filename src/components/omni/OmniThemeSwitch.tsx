@@ -93,7 +93,7 @@ export default function OmniThemeSwitch({ query, onBack, onClose }: { query: str
   const Swatches = ({ th }: { th: AppTheme }) => (
     <div className="flex gap-1 shrink-0">
       {[th.ui.bgTerminal, th.ui.accent, th.ui.tabActiveText, th.ui.statusConnected].map((c, i) => (
-        <span key={i} className="w-4 h-4 rounded-sm" style={{ background: c, border: "1px solid rgba(255,255,255,0.08)" }} />
+        <span key={i} className="w-4 h-4 rounded-sm border border-(--t-border)" style={{ background: c }} />
       ))}
     </div>
   );

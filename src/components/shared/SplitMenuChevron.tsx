@@ -17,16 +17,13 @@ export function SplitMenuChevron({ label, children }: { label: string; children:
         ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         onPointerDown={createRipple}
-        className="flex items-center justify-center w-8 h-8 transition-colors relative overflow-hidden rounded-tr-[0.533rem] rounded-br-[0.533rem]"
-        style={{ background: "var(--t-accent)" }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-accent-hover)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-accent)")}
+        className="flex items-center justify-center w-8 h-8 transition-colors relative overflow-hidden rounded-tr-lg rounded-br-lg bg-(--t-accent) hover:bg-(--t-accent-hover)"
         type="button"
         aria-label={label}
       >
         {rippleEls}
         <span className="[&_path]:stroke-3">
-          <Icon icon="lucide:chevron-down" width={20} color="var(--t-bg-terminal)" style={chevronRotateStyle(open)} />
+          <Icon icon="lucide:chevron-down" width={20} color="var(--t-on-accent)" style={chevronRotateStyle(open)} />
         </span>
       </button>
 

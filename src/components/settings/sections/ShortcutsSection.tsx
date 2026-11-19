@@ -150,9 +150,7 @@ export default function ShortcutsSection() {
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-sm text-(--t-text-muted)"
-                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--t-text-bright)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--t-text-muted)"; }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-sm text-(--t-text-muted) hover:text-(--t-text-bright)"
                 title={t("settings.shortcuts.clearSearch")}
               >
                 <Icon icon="lucide:x" width={12} />
@@ -161,15 +159,7 @@ export default function ShortcutsSection() {
           </div>
           <button
             onClick={resetAll}
-            className="px-3 py-2 rounded-lg text-xs transition-colors text-(--t-text-secondary) bg-(--t-bg-input) border border-(--t-border)"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--t-text-bright)";
-              e.currentTarget.style.background = "var(--t-bg-input-hover)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--t-text-secondary)";
-              e.currentTarget.style.background = "var(--t-bg-input)";
-            }}
+            className="px-3 py-2 rounded-lg text-xs transition-colors text-(--t-text-secondary) bg-(--t-bg-input) border border-(--t-border) hover:text-(--t-text-bright) hover:bg-(--t-bg-input-hover)"
             title={t("settings.shortcuts.resetAllTitle")}
           >
             {t("settings.shortcuts.resetAll")}
@@ -203,7 +193,7 @@ export default function ShortcutsSection() {
         ) : (
           grouped.map((group) => (
             <div key={group.id}>
-              <h3 className="text-[11px] font-bold uppercase tracking-widest mb-2 px-1 text-(--t-text-secondary)">
+              <h3 className="text-2xs font-bold uppercase tracking-widest mb-2 px-1 text-(--t-text-secondary)">
                 {t(`settings.shortcuts.group.${group.id}`)}
               </h3>
               <div
@@ -217,17 +207,8 @@ export default function ShortcutsSection() {
                   return (
                     <div
                       key={sc.id}
-                      className="flex items-center gap-3 px-4 py-3 group transition-colors"
-                      style={{
-                        borderTop: idx === 0 ? undefined : "1px solid var(--t-bg-base)",
-                        background: isRecording ? "var(--t-bg-card-hover)" : undefined,
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isRecording) e.currentTarget.style.background = "var(--t-bg-card-hover)";
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isRecording) e.currentTarget.style.background = "";
-                      }}
+                      className={`flex items-center gap-3 px-4 py-3 group transition-colors hover:bg-(--t-bg-card-hover) ${isRecording ? "bg-(--t-bg-card-hover)" : ""}`}
+                      style={{ borderTop: idx === 0 ? undefined : "1px solid var(--t-bg-base)" }}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-(--t-text-bright) truncate">
@@ -247,40 +228,13 @@ export default function ShortcutsSection() {
                             setRecording(isRecording ? null : sc.id);
                             setConflict(null);
                           }}
-                          className="rounded-md text-[11px] font-mono leading-none transition-colors"
-                          style={{
-                            background: isRecording || isConflict
-                              ? "transparent"
-                              : "var(--t-bg-base)",
-                            border: `1px solid ${
-                              isRecording
-                                ? "var(--t-accent)"
-                                : isConflict
-                                  ? "var(--t-status-error)"
-                                  : "var(--t-border)"
-                            }`,
-                            color: isRecording
-                              ? "var(--t-accent)"
+                          className={`rounded-md text-2xs font-mono leading-none transition-colors border px-2.5 py-1.5 min-w-24 text-center tracking-wide ${
+                            isRecording
+                              ? "border-(--t-accent) text-(--t-accent)"
                               : isConflict
-                                ? "var(--t-status-error)"
-                                : "var(--t-text-primary)",
-                            padding: "5px 9px",
-                            minWidth: "92px",
-                            textAlign: "center",
-                            letterSpacing: "0.02em",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isRecording && !isConflict) {
-                              e.currentTarget.style.borderColor = "var(--t-border-hover)";
-                              e.currentTarget.style.color = "var(--t-text-bright)";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isRecording && !isConflict) {
-                              e.currentTarget.style.borderColor = "var(--t-border)";
-                              e.currentTarget.style.color = "var(--t-text-primary)";
-                            }
-                          }}
+                                ? "border-(--t-status-error) text-(--t-status-error)"
+                                : "bg-(--t-bg-base) border-(--t-border) text-(--t-text-primary) hover:border-(--t-border-hover) hover:text-(--t-text-bright)"
+                          }`}
                           title={isRecording ? t("settings.shortcuts.bindingRecordingTitle") : t("settings.shortcuts.bindingIdleTitle")}
                         >
                           {isRecording ? t("settings.shortcuts.pressKey") : isConflict ? t("settings.shortcuts.conflict") : formatShortcut(sc)}
@@ -290,7 +244,7 @@ export default function ShortcutsSection() {
                           <span
                             key={formatShortcut(alias)}
                             title={t("settings.shortcuts.aliasTitle")}
-                            className="rounded-md text-[11px] font-mono leading-none text-(--t-text-muted)"
+                            className="rounded-md text-2xs font-mono leading-none text-(--t-text-muted)"
                             style={{
                               background: "var(--t-bg-base)",
                               border: "1px solid var(--t-border)",

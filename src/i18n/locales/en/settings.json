@@ -913,7 +913,8 @@
         "builtinBadge": "Built-in",
         "dragToReorder": "Drag to reorder",
         "deleteRoleTitle": "Delete role",
-        "clickToConfirm": "Click again to confirm",
+        "deleteRoleConfirm": "Delete “{{name}}”? Members holding it: {{count}}. They lose its permissions; their other roles stay.",
+        "loadFailed": "Couldn't load roles.",
         "failedToDelete": "Failed to delete",
         "editRole": "Edit role",
         "newRole": "New custom role",
@@ -962,6 +963,9 @@
         "update": "Update",
         "updating": "Updating…",
         "updateTitle": "Update to v{{version}}",
+        "confirmUninstall": {
+          "message": "{{name}} will be removed from this device, along with its settings."
+        },
         "confirmUninstallSeeded": {
           "title": "Uninstall {{name}}?",
           "message": "{{name}} is a built-in plugin. Uninstalling removes it from your list — you can reinstall it any time from the Browse tab.",

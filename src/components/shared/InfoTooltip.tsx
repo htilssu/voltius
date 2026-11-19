@@ -62,7 +62,7 @@ export function InfoTooltip({
             top: pos.top,
             left: pos.left,
             transform: placement === "top" ? "translate(-50%, -100%)" : "translateX(-50%)",
-            width: "17.333rem",
+            width: "min(17rem, calc(100vw - 2rem))",
           }}
         >
           {children ?? text}

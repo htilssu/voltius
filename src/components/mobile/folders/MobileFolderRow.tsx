@@ -22,7 +22,8 @@ export default function MobileFolderRow({
           aria-haspopup={onActions ? "menu" : undefined}
           {...press}
         >
-          <AvatarTile icon={folderIcon(folder)} base={folder.color} className="w-10 h-10 rounded-xl text-white" iconSize={20} />
+          {/* text-white: the icon sits on the user-picked folder colour (matches folderAppearance). */}
+          <AvatarTile icon={folderIcon(folder)} base={folder.color} className="w-10 h-10 rounded-lg text-white" iconSize={20} />
           <span className="flex-1 min-w-0 text-base font-medium text-(--t-text-primary) truncate">{folder.name}</span>
           <span className="text-sm text-(--t-text-dim) shrink-0">{count}</span>
           <Icon icon="lucide:chevron-right" width={20} className="text-(--t-text-dim) shrink-0" />

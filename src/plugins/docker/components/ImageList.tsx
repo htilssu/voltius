@@ -6,7 +6,7 @@ import { getDockerApi, useDockerT } from "../runtime";
 import { checkableImage, useImageUpdates } from "../useImageUpdates";
 import { pullAndMaybeRecreate } from "../updateActions";
 import { UpdateBadge } from "./UpdateBadge";
-import { ResourceList, usePrune, useRowAction } from "./resourceList";
+import { ResourceList, RowRemoveButton, usePrune, useRowAction } from "./resourceList";
 
 function fmtSize(bytes: number): string {
   if (bytes <= 0) return "—";
@@ -62,7 +62,7 @@ export function ImageList({ images, sessionId, isRemote, localShell, onRefresh }
           onClick={checkAll}
           disabled={isChecking}
           title={t("checkImageUpdates")}
-          className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-hover) hover:text-(--t-text) disabled:opacity-40"
+          className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
         >
           <Icon icon="lucide:circle-arrow-up" width={10} className={isChecking ? "animate-pulse" : ""} />
           {isChecking ? t("checking") : t("checkUpdates")}
@@ -135,13 +135,13 @@ function ImageRow({
   const outdated = status?.status === "outdated";
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-(--t-border) last:border-0 hover:bg-(--t-bg-hover) group">
+    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-(--t-border) last:border-0 hover:bg-(--t-bg-card-hover) group">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-[12px] text-(--t-text) truncate">{repo}</p>
+          <p className="text-xs text-(--t-text-primary) truncate">{repo}</p>
           <UpdateBadge status={status} checking={checking} />
         </div>
-        <p className="text-[11px] text-(--t-text-muted) font-mono">{ver || "latest"}</p>
+        <p className="text-2xs text-(--t-text-muted) font-mono">{ver || "latest"}</p>
       </div>
 
       {outdated && (
@@ -151,7 +151,7 @@ function ImageRow({
           title={
             recreateAfterPull ? t("pullAndRecreateImage", { image: tag }) : t("pullNewerImageFor", { image: tag })
           }
-          className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-sm bg-[color-mix(in_srgb,var(--t-status-warning)_14%,transparent)] text-(--t-status-warning) hover:bg-[color-mix(in_srgb,var(--t-status-warning)_24%,transparent)] disabled:opacity-40 shrink-0"
+          className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-sm bg-[color-mix(in_srgb,var(--t-status-warning)_14%,transparent)] text-(--t-status-warning) hover:bg-[color-mix(in_srgb,var(--t-status-warning)_24%,transparent)] disabled:opacity-(--disabled-opacity) shrink-0"
         >
           <Icon
             icon={pulling ? "lucide:loader-circle" : "lucide:download"}
@@ -163,17 +163,10 @@ function ImageRow({
       )}
 
       <div className="text-right shrink-0">
-        <p className="text-[11px] text-(--t-text-muted)">{fmtSize(img.size)}</p>
-        <p className="text-[11px] text-(--t-text-muted)">{(img.created && getDockerApi()?.i18n.formatRelativeTime(img.created * 1000)) || "—"}</p>
+        <p className="text-2xs text-(--t-text-muted)">{fmtSize(img.size)}</p>
+        <p className="text-2xs text-(--t-text-muted)">{(img.created && getDockerApi()?.i18n.formatRelativeTime(img.created * 1000)) || "—"}</p>
       </div>
-      <button
-        disabled={busy}
-        onClick={remove}
-        title={t("removeImage")}
-        className="opacity-0 group-hover:opacity-100 p-0.5 text-(--t-status-error) opacity-60 hover:opacity-100 disabled:opacity-40 shrink-0"
-      >
-        <Icon icon="lucide:trash-2" width={11} />
-      </button>
+      <RowRemoveButton busy={busy} onClick={() => void remove()} title={t("removeImage")} />
     </div>
   );
 }

@@ -17,8 +17,8 @@ function Row({ icon, label, value }: { icon: string; label: string; value: strin
   return (
     <div className="flex items-start gap-2 py-1.5">
       <Icon icon={icon} width={13} className="text-(--t-text-dim) mt-0.5 shrink-0" />
-      <span className="text-[11px] text-(--t-text-muted) w-16 shrink-0">{label}</span>
-      <span className="text-[11px] text-(--t-text-primary) leading-snug wrap-break-word min-w-0">{value}</span>
+      <span className="text-2xs text-(--t-text-muted) w-16 shrink-0">{label}</span>
+      <span className="text-2xs text-(--t-text-primary) leading-snug wrap-break-word min-w-0">{value}</span>
     </div>
   );
 }
@@ -59,13 +59,11 @@ export function SystemInfoSection({
     <div className="border-t border-(--t-border) shrink-0">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-2.5 transition-colors"
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        className="w-full flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-(--t-bg-elevated)"
       >
         <div className="flex items-center gap-2">
           <Icon icon="lucide:cpu" width={13} className="text-(--t-text-muted)" />
-          <span className="text-[11px] font-medium text-(--t-text-muted) uppercase tracking-wide">
+          <span className="text-2xs font-medium text-(--t-text-muted) uppercase tracking-wide">
             {t("systemInfo")}
           </span>
         </div>
@@ -79,7 +77,7 @@ export function SystemInfoSection({
       {expanded && (
         <div className="px-4 pb-3">
           {!info ? (
-            <p className="text-[11px] text-(--t-text-dim) py-1">{t("loading")}</p>
+            <p className="text-2xs text-(--t-text-dim) py-1">{t("loading")}</p>
           ) : (
             <>
               {info.cpu_brand && (

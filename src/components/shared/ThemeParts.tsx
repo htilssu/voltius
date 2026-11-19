@@ -22,7 +22,7 @@ export function ThemeTerminalPreview({ colors }: { colors: TerminalColors | null
       style={{
         width: 72, height: 52, borderRadius: 6, flexShrink: 0,
         background: c.background,
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid var(--t-border)",
         padding: "7px 8px",
         display: "flex", flexDirection: "column", gap: 4,
         overflow: "hidden",
@@ -44,7 +44,7 @@ export function ThemeCardSwatches({ colors }: { colors: UiColors | null }) {
   return (
     <div className="flex gap-1.5">
       {[c.bgTerminal, c.accent, c.tabActiveText, c.statusConnected].map((color, i) => (
-        <span key={i} className="w-5 h-5 rounded-md shrink-0" style={{ background: color, border: "1px solid rgba(255,255,255,0.08)" }} />
+        <span key={i} className="w-5 h-5 rounded-md shrink-0" style={{ background: color, border: "1px solid var(--t-border)" }} />
       ))}
     </div>
   );
@@ -62,7 +62,7 @@ export function ThemeGetButton({ busy, disabledReason, onClick }: {
 export function MarketplaceSourceBadge({ sourceName }: { sourceName: string | null }) {
   const { t } = useTranslation();
   if (sourceName === null) return null;
-  return <span className="text-[11px] truncate text-(--t-text-dim)">{t("settings.appearance.marketplace.fromSource", { source: sourceName })}</span>;
+  return <span className="text-2xs truncate text-(--t-text-dim)">{t("settings.appearance.marketplace.fromSource", { source: sourceName })}</span>;
 }
 
 export function MarketplaceThemeStatus({ loading, unreachableCount }: { loading: boolean; unreachableCount: number }) {

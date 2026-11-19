@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.67.1] - 2026-11-19
+
+### Changed
+
+- UI design cleanup across the app. Decorative gradients, glassmorphism blur, glow shadows and oversized rounded tiles are gone; surfaces are flat and use one radius, elevation and type scale (new `text-2xs` size). Hover states are pure CSS (no more inline style mutation), so they follow keyboard focus and theme changes. Primary, secondary and danger buttons, modals, empty states, role chips and tunnel badges are now shared components.
+- The Account page separates routine actions from a Danger zone, and Sign out is no longer styled as destructive.
+
+### Fixed
+
+- Several colours ignored the active theme because they referenced undefined CSS variables (`--t-text`, `--t-error`, `--t-danger`, `--t-accent-rgb`, …), including Docker and Proxmox panels, connection status, and the vault header hover. A test now fails if an undefined theme variable is used.
+- Text on accent-coloured buttons now uses the theme's contrast colour, so it stays readable on light accents.
+- Failed actions no longer fail silently: tunnel, pin, snippet, SFTP, plugin and role actions show an error toast, and the Members and Roles lists show a real error with Retry instead of loading forever.
+- SFTP "Try again" reconnects instead of disconnecting; the Roles drag-reorder rolls back when saving fails; the offboarding dialog stays open on failure.
+- Removing an external plugin, deleting a role, Docker system prune and Proxmox snapshot rollback now ask for confirmation.
+- Hover-only actions (including delete on gist-sync) are now reachable with the keyboard and on touch screens.
+
 ## [0.67.0] - 2026-11-17
 
 Merges upstream Voltius 0.67.0–0.76.0 into this fork.

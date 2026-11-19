@@ -4,7 +4,7 @@ import { touchHeight } from "@/components/mobile/touch";
 
 const LOOKS = {
   plain: { button: "focus-ring flex items-center gap-1 w-full text-xs transition-colors text-(--t-text-dim) hover:text-(--t-text-primary)", icon: 12, iconClass: undefined },
-  compact: { button: "flex items-center gap-1 text-[11px] text-(--t-text-secondary)", icon: 11, iconClass: undefined },
+  compact: { button: "flex items-center gap-1 text-2xs text-(--t-text-secondary)", icon: 11, iconClass: undefined },
   row: { button: "w-full flex items-center gap-1.5 px-3 py-2 text-xs text-(--t-text-secondary)", icon: 12, iconClass: "text-(--t-text-dim)" },
 };
 

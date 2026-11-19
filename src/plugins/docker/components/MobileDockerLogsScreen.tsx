@@ -39,7 +39,7 @@ export function createMobileDockerLogsScreen(api: PluginAPI): FC<MobileScreenPro
             <Icon icon="lucide:chevrons-down" width={18} />
           </button>
         </MobileScreenHeader>
-        <div className="flex-1 overflow-y-auto font-mono text-[11px] leading-4 px-3 py-2 select-text">
+        <div className="flex-1 overflow-y-auto font-mono text-2xs leading-4 px-3 py-2 select-text">
           {lines.length === 0 && (
             <p className="text-(--t-text-dim) opacity-60 mt-2">
               {ready ? t("dockerLogsWaiting") : t("dockerLogsSessionNotConnected")}

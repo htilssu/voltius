@@ -4,7 +4,7 @@ import type { TFunction } from "i18next";
 import type { PendingInvitation, TeamRole } from "@/services/teamService";
 import { MiniAvatar } from "@/components/shared/AvatarStack";
 import { BaseCard } from "@/components/shared/BaseCard";
-import { ROLE_META, roleLabel } from "@/components/members/roleChips";
+import { RolePill } from "@/components/members/roleChips";
 import { RoleChip } from "@/components/members/roleBadges";
 import { useTeamStore } from "@/stores/teamStore";
 import { GREYED_CLASS } from "@/hooks/useGreyedUnless";
@@ -28,10 +28,15 @@ export function inviteExpiry(t: TFunction, inv: PendingInvitation): { isExpired:
   return { isExpired, label };
 }
 
-function InviteActionButton({ title, icon, hoverColor, busy, disabledReason, onClick }: {
+const HOVER_TONE = {
+  accent: "enabled:hover:text-(--t-accent) focus-visible:text-(--t-accent)",
+  danger: "enabled:hover:text-(--t-status-error) focus-visible:text-(--t-status-error)",
+} as const;
+
+function InviteActionButton({ title, icon, tone, busy, disabledReason, onClick }: {
   title: string;
   icon: string;
-  hoverColor: string;
+  tone: keyof typeof HOVER_TONE;
   busy: boolean;
   disabledReason: string | undefined;
   onClick: () => void;
@@ -42,10 +47,7 @@ function InviteActionButton({ title, icon, hoverColor, busy, disabledReason, onC
       title={disabledReason ?? title}
       disabled={disabled}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={`p-1.5 flex rounded-lg transition-colors ${GREYED_CLASS}`}
-      style={{ color: "var(--t-text-dim)", opacity: busy ? 0.4 : undefined }}
-      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.color = hoverColor; }}
-      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-dim)")}
+      className={`p-1.5 flex rounded-lg transition-colors text-(--t-text-dim) ${HOVER_TONE[tone]} ${GREYED_CLASS}`}
     >
       <Icon icon={busy ? "lucide:loader-circle" : icon} width={16} className={busy ? "animate-spin" : undefined} />
     </button>
@@ -71,14 +73,11 @@ export function PendingInviteCard({
     .map((id) => roles.find((r) => r.id === id))
     .filter((r): r is TeamRole => !!r)
     .sort((a, b) => a.position - b.position);
-  const meta = ROLE_META[inv.role] ?? ROLE_META.member;
-  const chipColor = roles.find((r) => r.name === inv.role)?.color ?? meta.color;
-  const chipBg = meta.bg ?? `${chipColor}1a`;
 
   return (
     <BaseCard isList>
       <MiniAvatar name={inviteLabel(inv)} size={28} />
-      <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">{inviteLabel(inv)}</p>
+      <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">{inviteLabel(inv)}</p>
       <p className="text-xs truncate flex-1 min-w-0 text-(--t-text-secondary)">
         {inv.member_name && <><span>{inv.display_name}</span> · </>}
         <span style={{ color: isExpired ? "var(--t-status-error)" : undefined }}>{expiryLabel}</span>
@@ -86,25 +85,21 @@ export function PendingInviteCard({
       </p>
 
       <span
-        className="text-[10px] px-2 py-0.5 rounded-full shrink-0"
+        className="text-2xs px-2 py-0.5 rounded-full shrink-0"
         style={{
           color: isExpired ? "var(--t-status-error)" : "var(--t-text-dim)",
-          background: isExpired ? "rgba(239,68,68,0.1)" : "var(--t-bg-elevated)",
+          background: isExpired ? "color-mix(in srgb, var(--t-status-error) 10%, transparent)" : "var(--t-bg-elevated)",
         }}
       >
         {isExpired ? t("members.invite.expired") : t("members.pendingBadge")}
       </span>
       {invitedRoles.length > 0
         ? <div className="flex flex-wrap justify-end gap-1">{invitedRoles.map((r) => <RoleChip key={r.id} role={r} />)}</div>
-        : (
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0" style={{ color: chipColor, background: chipBg }}>
-            {roleLabel(t, inv.role)}
-          </span>
-        )}
+        : <RolePill name={inv.role} color={roles.find((r) => r.name === inv.role)?.color} fallbackColor="var(--t-text-secondary)" />}
 
-      <InviteActionButton title={t("members.invite.resendTitle")} icon="lucide:send" hoverColor="var(--t-accent)"
+      <InviteActionButton title={t("members.invite.resendTitle")} icon="lucide:send" tone="accent"
         busy={resending} disabledReason={disabledReason} onClick={resend} />
-      <InviteActionButton title={t("members.revokeInvitationTitle")} icon="lucide:x" hoverColor="var(--t-status-error)"
+      <InviteActionButton title={t("members.revokeInvitationTitle")} icon="lucide:x" tone="danger"
         busy={revoking} disabledReason={disabledReason} onClick={revoke} />
     </BaseCard>
   );

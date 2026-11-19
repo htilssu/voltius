@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TeamMember, TeamRole } from "@/stores/teamStore";
 import { avatarColor } from "@/components/shared/AvatarStack";
-import { ROLE_META, RolePermissionTooltip, roleLabel } from "@/components/members/roleChips";
+import { ROLE_META, RolePermissionTooltip, RolePill } from "@/components/members/roleChips";
 
 const INLINE_WRAPPER_CLASS = "inline-flex items-center gap-1";
 
@@ -12,25 +12,22 @@ export function roleColor(role: Pick<TeamRole, "name" | "color">): string {
 }
 
 export function RoleChip({ role }: { role: TeamRole }) {
-  const { t } = useTranslation();
   const [showTip, setShowTip] = useState(false);
   const color = roleColor(role);
-  const bg = ROLE_META[role.name]?.bg ?? `${color}1a`;
 
   return (
-    <span className="relative inline-flex items-center" style={{ verticalAlign: "middle" }}>
-      <span
-        className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 cursor-default"
-        style={{ color, background: bg }}
-        onMouseEnter={() => setShowTip(true)}
-        onMouseLeave={() => setShowTip(false)}
-      >
-        {role.is_builtin
-          ? <Icon icon="lucide:lock" width={8} style={{ opacity: 0.6 }} />
-          : <Icon icon="lucide:sparkles" width={8} style={{ opacity: 0.7 }} />
-        }
-        {roleLabel(t, role.name)}
-      </span>
+    <span
+      className="relative inline-flex items-center cursor-default"
+      style={{ verticalAlign: "middle" }}
+      onMouseEnter={() => setShowTip(true)}
+      onMouseLeave={() => setShowTip(false)}
+    >
+      <RolePill
+        name={role.name}
+        color={role.color}
+        fallbackColor={avatarColor(role.name)}
+        icon={<Icon icon={role.is_builtin ? "lucide:lock" : "lucide:sparkles"} width={8} className="opacity-70" />}
+      />
       {showTip && <RolePermissionTooltip role={role} color={color} />}
     </span>
   );
@@ -75,10 +72,7 @@ export function RoleBadges({
         <span className={INLINE_WRAPPER_CLASS}>
           <button
             onClick={(e) => { e.stopPropagation(); onAddRole(); }}
-            className="text-[10px] transition-colors"
-            style={{ color: "var(--t-text-dim)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-accent)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+            className="text-2xs transition-colors text-(--t-text-dim) hover:text-(--t-accent) focus-visible:text-(--t-accent)"
           >
             {t("members.noRoleAddPrompt")}
           </button>
@@ -88,7 +82,7 @@ export function RoleBadges({
     }
     return (
       <span className={INLINE_WRAPPER_CLASS}>
-        <span className="text-[10px] text-(--t-text-dim)">{t("members.noRole")}</span>
+        <span className="text-2xs text-(--t-text-dim)">{t("members.noRole")}</span>
         {marker}
       </span>
     );

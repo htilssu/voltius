@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import MobilePanelHeader from "../panels/MobilePanelHeader";
+import { MobileButton } from "../MobileButton";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
@@ -78,7 +79,7 @@ export default function MobileAccountPage() {
       <MobilePanelHeader title={t("mobile.account.title")} />
       <div className="flex-1 overflow-y-auto">
         <Row icon="lucide:mail" label={t("mobile.account.email")} value={email ?? (signedIn ? "—" : t("mobile.account.notSignedIn"))} />
-        <Row icon="lucide:badge-check" label={t("mobile.account.plan")} value={plan.via ? plan.label : plan.line} sub={plan.viaLine} valueColor={plan.premium ? "#f59e0b" : undefined} />
+        <Row icon="lucide:badge-check" label={t("mobile.account.plan")} value={plan.via ? plan.label : plan.line} sub={plan.viaLine} valueColor={plan.premium ? "var(--t-status-warning)" : undefined} />
         <Row
           icon={nearbyOnly ? SYNC_NEARBY_ICON : sync.paused ? SYNC_PAUSED_ICON : syncStatusIcon(sync.status)}
           label={t("layout.sync.title")}
@@ -90,7 +91,7 @@ export default function MobileAccountPage() {
         {signedIn && (
           <div className="p-4 flex flex-col gap-3">
             {(plan.ownLine || plan.ownBilled) && (
-              <div data-account-own-plan-card className="rounded-xl px-3 py-2.5 flex flex-col gap-1 bg-(--t-bg-elevated) border border-(--t-border)">
+              <div data-account-own-plan-card className="rounded-lg px-3 py-2.5 flex flex-col gap-1 bg-(--t-bg-elevated) border border-(--t-border)">
                 {plan.ownLine && <span data-account-own-plan className="text-sm text-(--t-text-primary)">{plan.ownLine}</span>}
                 {plan.ownBilled && (
                   <span className="text-xs text-(--t-text-muted)">
@@ -116,92 +117,66 @@ export default function MobileAccountPage() {
             {!plan.premium && !plan.showUpgrade && <AvailableWithPlan plan="Pro" />}
 
             {plan.showUpgrade && (
-              <button
+              <MobileButton
+                block
                 data-account-upgrade-pro
                 disabled={checkoutBusy}
                 onClick={() => void checkout("pro")}
-                className="w-full h-11 rounded-xl text-sm font-semibold disabled:opacity-60"
-                style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
               >
                 {t(plan.trialOffer ? "mobile.account.activateProTrial" : "mobile.account.upgradeToPro")}
-              </button>
+              </MobileButton>
             )}
 
             {(plan.upgradeTo === "teams" || plan.teamsTrialOffer) && (
               <>
-                <button
+                <MobileButton
+                  block
+                  variant="secondary"
                   data-account-upgrade-teams
                   disabled={checkoutBusy}
                   onClick={() => void checkout("teams")}
-                  className="w-full h-11 rounded-xl text-sm font-semibold text-(--t-text-primary) disabled:opacity-60"
-                  style={{ border: "1px solid var(--t-border)" }}
                 >
                   {plan.teamsTrialOffer ? t("mobile.account.upgradeToTeams", { days: TEAMS_TRIAL_DAYS }) : t("mobile.account.upgradeTeamsPlain")}
-                </button>
+                </MobileButton>
                 {plan.teamsTrialOffer && <p className="-mt-1 text-center text-xs text-(--t-text-dim)">{t("mobile.account.teamsTrialNote")}</p>}
               </>
             )}
 
             {(plan.showManageBilling || plan.showAllPlans) && (
-              <button
-                data-account-manage-billing
-                onClick={() => void openPortal()}
-                className="w-full h-11 rounded-xl text-sm font-medium text-(--t-text-primary) flex items-center justify-center gap-2"
-                style={{ border: "1px solid var(--t-border)" }}
-              >
+              <MobileButton block variant="secondary" data-account-manage-billing onClick={() => void openPortal()}>
                 <Icon icon="lucide:external-link" width={16} />
                 {plan.showManageBilling ? t("mobile.account.manageBilling") : t("mobile.account.viewAllPlans")}
-              </button>
+              </MobileButton>
             )}
           </div>
         )}
 
         <div className="p-4 pt-0">
           {!signedIn ? (
-            <button
-              data-account-signin
-              onClick={() => { pop(); openCloudAuth("signin"); }}
-              className="w-full h-11 rounded-xl text-sm font-semibold"
-              style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-            >
+            <MobileButton block data-account-signin onClick={() => { pop(); openCloudAuth("signin"); }}>
               {t("mobile.account.signInToSync")}
-            </button>
+            </MobileButton>
           ) : confirming ? (
             <div className="flex flex-col gap-2">
               <p className="text-sm text-(--t-text-dim)">{t("mobile.account.signOutConfirm")}</p>
-              <button
-                data-account-signout-confirm
-                onClick={requestSignOut}
-                className="w-full h-11 rounded-xl text-sm font-semibold"
-                style={{ background: "var(--t-danger, #e5484d)", color: "#fff" }}
-              >
+              <MobileButton block variant="danger" data-account-signout-confirm onClick={requestSignOut}>
                 {t("mobile.account.signOut")}
-              </button>
-              <button onClick={() => setConfirming(false)} className="w-full h-11 rounded-xl text-sm font-medium text-(--t-text-primary)" style={{ border: "1px solid var(--t-border)" }}>
+              </MobileButton>
+              <MobileButton block variant="secondary" onClick={() => setConfirming(false)}>
                 {t("common.action.cancel")}
-              </button>
+              </MobileButton>
             </div>
           ) : (
-            <button
-              data-account-signout
-              onClick={() => setConfirming(true)}
-              className="w-full h-11 rounded-xl text-sm font-semibold text-(--t-text-primary) flex items-center justify-center gap-2"
-              style={{ border: "1px solid var(--t-border)" }}
-            >
+            <MobileButton block variant="secondary" data-account-signout onClick={() => setConfirming(true)}>
               <Icon icon="lucide:log-out" width={16} />
               {t("mobile.account.signOut")}
-            </button>
+            </MobileButton>
           )}
           {signedIn && !confirming && (
-            <button
-              data-account-delete
-              onClick={() => setDeletingAccount(true)}
-              className="mt-3 w-full h-11 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-              style={{ color: "var(--t-danger, #e5484d)" }}
-            >
+            <MobileButton block variant="danger-ghost" data-account-delete onClick={() => setDeletingAccount(true)} className="mt-3">
               <Icon icon="lucide:user-x" width={16} />
               {t("shared.deleteAccount.action")}
-            </button>
+            </MobileButton>
           )}
         </div>
         {signOutConfirm}

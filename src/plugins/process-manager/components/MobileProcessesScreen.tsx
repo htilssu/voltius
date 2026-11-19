@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Icon, BottomSheet, useT, useSessionById, MobileScreenHeader } from "@voltius/ui";
+import { Icon, BottomSheet, useT, useSessionById, MobileScreenHeader, MobileButton, SheetActionRow } from "@voltius/ui";
 import type { FC } from "react";
 import type { PluginAPI, MobileScreenProps } from "@/plugins/api";
 import { createProcessesService } from "../services";
@@ -99,7 +99,7 @@ export function createMobileProcessesScreen(api: PluginAPI): FC<MobileScreenProp
             {killError && (
               <div className="px-3 py-2 text-xs text-(--t-status-error) border-b border-(--t-border) shrink-0 flex items-center justify-between gap-2">
                 <span className="break-all">{killError}</span>
-                <button onClick={() => setKillError(null)} className="shrink-0 p-1">
+                <button onClick={() => setKillError(null)} aria-label={t("cancel")} className="vt-hit shrink-0 p-1">
                   <Icon icon="lucide:x" width={14} />
                 </button>
               </div>
@@ -124,7 +124,7 @@ export function createMobileProcessesScreen(api: PluginAPI): FC<MobileScreenProp
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-(--t-bg-card) min-w-0"
                       >
-                        <span className="shrink-0 w-12 text-[11px] font-mono text-(--t-text-dim) tabular-nums">
+                        <span className="shrink-0 w-12 text-2xs font-mono text-(--t-text-dim) tabular-nums">
                           {e.pid}
                         </span>
                         <span className="flex flex-col min-w-0 flex-1">
@@ -137,7 +137,7 @@ export function createMobileProcessesScreen(api: PluginAPI): FC<MobileScreenProp
                           >
                             {expanded ? e.command || e.name : e.name}
                           </span>
-                          <span className="text-[11px] text-(--t-text-dim) truncate">{e.user}</span>
+                          <span className="text-2xs text-(--t-text-dim) truncate">{e.user}</span>
                         </span>
                         <span
                           className="shrink-0 w-14 text-right text-xs font-mono tabular-nums"
@@ -176,28 +176,24 @@ export function createMobileProcessesScreen(api: PluginAPI): FC<MobileScreenProp
         {confirm && (
           <BottomSheet title={confirm.force ? t("forceKillConfirmTitle") : t("killConfirmTitle")} onClose={() => setConfirm(null)}>
             <div className="flex flex-col gap-3 px-2 py-1">
-              <p className="text-xs text-(--t-text-dim)">
+              <p className="text-sm text-(--t-text-secondary)">
                 {t("killConfirmBody", {
                   signal: confirm.force ? "SIGKILL" : "SIGTERM",
                   name: confirm.entry.name,
                   pid: confirm.entry.pid,
                 })}
               </p>
-              <button
+              <MobileButton
+                block
+                variant="danger"
                 data-mobile-process-kill-confirm
                 onClick={() => runKill(confirm.entry, confirm.force)}
-                className="w-full rounded-xl py-3 text-sm font-medium"
-                style={{ background: "var(--t-status-error)", color: "#fff" }}
               >
                 {confirm.force ? t("confirmForceKill") : t("confirmKill")}
-              </button>
-              <button
-                onClick={() => setConfirm(null)}
-                className="w-full rounded-xl py-3 text-sm text-(--t-text-primary)"
-                style={{ background: "var(--t-bg-card)" }}
-              >
+              </MobileButton>
+              <MobileButton block variant="secondary" onClick={() => setConfirm(null)}>
                 {t("cancel")}
-              </button>
+              </MobileButton>
             </div>
           </BottomSheet>
         )}
@@ -207,15 +203,5 @@ export function createMobileProcessesScreen(api: PluginAPI): FC<MobileScreenProp
 }
 
 function SheetRow({ icon, label, onClick, danger }: { icon: string; label: string; onClick: () => void; danger?: boolean }) {
-  return (
-    <button
-      data-mobile-process-action={label}
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-3 text-left active:bg-(--t-bg-card)"
-      style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-primary)" }}
-    >
-      <Icon icon={icon} width={18} />
-      <span className="text-sm">{label}</span>
-    </button>
-  );
+  return <SheetActionRow attr="mobile-process-action" it={{ icon, label, slug: label, danger, onTap: onClick }} />;
 }

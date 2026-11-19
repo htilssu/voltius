@@ -132,7 +132,7 @@ export function TerminalSearch({ sessionId }: { sessionId: string }) {
           placeholder={t("terminal.search.placeholder")}
           className="w-full bg-transparent text-sm outline-hidden px-1 py-1 text-(--t-text-primary) placeholder-(--t-text-muted)"
           style={{
-            boxShadow: showError ? "inset 2px 0 0 var(--t-status-error, #ef4444)" : undefined,
+            boxShadow: showError ? "inset 2px 0 0 var(--t-status-error)" : undefined,
           }}
         />
       </div>
@@ -140,7 +140,7 @@ export function TerminalSearch({ sessionId }: { sessionId: string }) {
       <span
         className="text-xs tabular-nums whitespace-nowrap px-1.5 select-none"
         style={{
-          color: showError ? "var(--t-status-error, #ef4444)" : "var(--t-text-dim)",
+          color: showError ? "var(--t-status-error)" : "var(--t-text-dim)",
         }}
       >
         {counter}
@@ -148,18 +148,17 @@ export function TerminalSearch({ sessionId }: { sessionId: string }) {
 
       <div className="flex items-center gap-0.5 pl-1 ml-0.5" style={{ borderLeft: "1px solid var(--t-border)" }}>
         <ToggleChip active={caseSensitive} title={t("terminal.search.matchCase")} onClick={controller.toggleCaseSensitive}>
-          <span className="font-semibold" style={{ fontSize: "11px", letterSpacing: "-0.5px" }}>Aa</span>
+          <span className="font-semibold text-2xs tracking-tight">Aa</span>
         </ToggleChip>
         <ToggleChip active={wholeWord} title={t("terminal.search.matchWholeWord")} onClick={controller.toggleWholeWord}>
           <span
-            className="font-semibold"
-            style={{ fontSize: "11px", letterSpacing: "-0.5px", borderBottom: "1.5px solid currentColor", paddingBottom: 0, lineHeight: 1 }}
+            className="font-semibold text-2xs tracking-tight leading-none border-b-[1.5px] border-current"
           >
             ab
           </span>
         </ToggleChip>
         <ToggleChip active={regex} title={t("terminal.search.useRegex")} onClick={controller.toggleRegex}>
-          <span className="font-semibold" style={{ fontSize: "11px", letterSpacing: "-0.5px" }}>.*</span>
+          <span className="font-semibold text-2xs tracking-tight">.*</span>
         </ToggleChip>
       </div>
 
@@ -201,24 +200,12 @@ function ToggleChip({
       title={title}
       onClick={onClick}
       onMouseDown={(e) => e.preventDefault()}
-      className="rounded-sm transition-colors flex items-center justify-center select-none"
-      style={{
-        width: "22px",
-        height: "22px",
-        background: active ? "var(--t-accent)" : "transparent",
-        color: active ? "var(--t-bg-terminal)" : "var(--t-text-dim)",
-        border: active ? "1px solid var(--t-accent)" : "1px solid transparent",
-      }}
-      onMouseEnter={(e) => {
-        if (active) return;
-        e.currentTarget.style.background = "var(--t-bg-elevated)";
-        e.currentTarget.style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        if (active) return;
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.color = "var(--t-text-dim)";
-      }}
+      aria-pressed={active}
+      className={`size-[22px] rounded-sm border transition-colors flex items-center justify-center select-none ${
+        active
+          ? "bg-(--t-accent) border-(--t-accent) text-(--t-on-accent)"
+          : "border-transparent text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary)"
+      }`}
     >
       {children}
     </button>
@@ -243,25 +230,8 @@ function IconButton({
       onClick={onClick}
       onMouseDown={(e) => e.preventDefault()}
       disabled={disabled}
-      className="rounded-sm transition-colors flex items-center justify-center"
-      style={{
-        width: "22px",
-        height: "22px",
-        background: "transparent",
-        color: "var(--t-text-dim)",
-        opacity: disabled ? 0.4 : 1,
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
-      onMouseEnter={(e) => {
-        if (disabled) return;
-        e.currentTarget.style.background = "var(--t-bg-elevated)";
-        e.currentTarget.style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        if (disabled) return;
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.color = "var(--t-text-dim)";
-      }}
+      aria-label={title}
+      className="size-[22px] rounded-sm transition-colors flex items-center justify-center text-(--t-text-dim) enabled:hover:bg-(--t-bg-elevated) enabled:hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
     >
       <Icon icon={icon} width={14} />
     </button>

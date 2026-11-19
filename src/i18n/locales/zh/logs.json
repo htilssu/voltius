@@ -158,6 +158,8 @@
       "pageOf": "第 {{page}} / {{totalPages}} 页"
     },
     "emptyState": "没有符合筛选条件的事件。",
+
+    "searchNoResults": "本页没有与“{{search}}”匹配的事件。搜索仅覆盖已加载的页面。",
     "error": {
       "retry": "重试"
     }

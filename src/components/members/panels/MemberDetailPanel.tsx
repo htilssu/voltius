@@ -34,8 +34,8 @@ export interface MemberDetailPanelProps {
 }
 
 const PRIMARY_OWNER_LOOK = {
-  desktop: { note: "text-xs", hint: "text-[11px]", button: "px-3 py-2 rounded-lg text-xs", icon: 13 },
-  touch: { note: "text-sm", hint: "text-xs", button: "min-h-12 px-4 rounded-xl text-sm", icon: 16 },
+  desktop: { note: "text-xs", hint: "text-2xs", button: "px-3 py-2 rounded-lg text-xs", icon: 13 },
+  touch: { note: "text-sm", hint: "text-xs", button: "min-h-12 px-4 rounded-lg text-sm", icon: 16 },
 };
 
 export function PrimaryOwnerControl({ primaryOwner, touch = false }: { primaryOwner: MemberDetailModel["primaryOwner"]; touch?: boolean }) {
@@ -121,10 +121,7 @@ export function MemberDetailPanel({ onClose, ...props }: MemberDetailPanelProps)
               onClick={roles.create}
               disabled={model.readOnly.roleBlock !== null}
               title={roles.readOnlyReason ?? undefined}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{ color: "var(--t-accent)", border: "1px dashed var(--t-accent)", background: "transparent", opacity: 0.7 }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.7"; }}
+              className="flex items-center gap-1 px-1 py-1.5 text-xs font-medium transition-colors text-(--t-accent) enabled:hover:underline disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
             >
               <Icon icon="lucide:plus" width={10} />
               {t("members.newRole")}
@@ -145,7 +142,7 @@ export function MemberDetailPanel({ onClose, ...props }: MemberDetailPanelProps)
           {!overrides.lockedEmpty && (
             <>
             {readOnlyReason && (
-              <p className="text-[10px] text-(--t-text-dim) mb-1">{readOnlyReason}</p>
+              <p className="text-2xs text-(--t-text-dim) mb-1">{readOnlyReason}</p>
             )}
             {overrides.rows.length > 6 && (
               <div className="relative mb-2">
@@ -154,8 +151,7 @@ export function MemberDetailPanel({ onClose, ...props }: MemberDetailPanelProps)
                   value={permissionFilter}
                   onChange={(e) => setPermissionFilter(e.target.value)}
                   placeholder={t("members.permissions.filterPlaceholder")}
-                  className="w-full pl-8 pr-7 py-1.5 rounded-lg outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
-                  style={{ fontSize: 12 }}
+                  className="form-input w-full pl-8 pr-7 py-1.5 rounded-lg text-xs outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
                 />
                 {permissionFilter && (
                   <button onClick={() => setPermissionFilter("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70">
@@ -196,7 +192,7 @@ export function MemberDetailPanel({ onClose, ...props }: MemberDetailPanelProps)
         </FormSection>
 
         {remove.leaveBlocked && (
-          <p className="text-[11px] px-1 text-(--t-text-secondary)">{t("members.ownership.leaveBlocked")}</p>
+          <p className="text-2xs px-1 text-(--t-text-secondary)">{t("members.ownership.leaveBlocked")}</p>
         )}
 
         {/* Danger zone */}
@@ -205,14 +201,7 @@ export function MemberDetailPanel({ onClose, ...props }: MemberDetailPanelProps)
             onClick={remove.open}
             disabled={remove.disabled}
             title={remove.title}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-            style={{
-              background: "var(--t-bg-elevated)",
-              color: "var(--t-status-error)",
-              border: "1px solid rgba(239,68,68,0.3)",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; }}
+            className="btn btn-danger-ghost border border-(--t-status-error)/30 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
           >
             <Icon icon={remove.label === "leave" ? "lucide:log-out" : "lucide:user-minus"} width={13} />
             {remove.label === "leave" ? t("members.leaveTeam") : t("members.removeFromTeam")}

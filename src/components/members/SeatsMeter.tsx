@@ -40,14 +40,14 @@ export function SeatsMeter({ teamId, onBuySeats }: { teamId?: string; onBuySeats
           </div>
         )}
         {seats.kind === "unknown" ? (
-          <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>{seatsSummaryText(t, seats)}</p>
+          <p className="text-2xs" style={{ color: "var(--t-text-dim)" }}>{seatsSummaryText(t, seats)}</p>
         ) : (
           <>
-            <p className="text-[11px] tabular-nums" style={{ color: atLimit ? "var(--t-status-error)" : "var(--t-text-dim)" }}>
+            <p className="text-2xs tabular-nums" style={{ color: atLimit ? "var(--t-status-error)" : "var(--t-text-dim)" }}>
               {seatsSummaryText(t, seats)}
             </p>
             {note && (
-              <p className="text-[11px] mt-0.5" style={{ color: "var(--t-text-dim)" }}>{note}</p>
+              <p className="text-2xs mt-0.5" style={{ color: "var(--t-text-dim)" }}>{note}</p>
             )}
           </>
         )}

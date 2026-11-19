@@ -50,8 +50,7 @@ export function PanelShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-panel-shell
-      className="flex flex-col h-full bg-(--t-bg-base)"
-      style={{ boxShadow: "inset 1px 0 0 rgba(255,255,255,0.06), -12px 0 32px -16px rgba(0,0,0,0.55)" }}
+      className="flex flex-col h-full bg-(--t-bg-base) shadow-(--t-slab-shadow)"
     >
       {children}
     </div>
@@ -77,15 +76,7 @@ export function PanelHeaderIconButton({
       disabled={disabled}
       onPointerDown={createRipple}
       title={title}
-      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors text-(--t-text-dim) relative overflow-hidden disabled:opacity-40"
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "var(--t-bg-elevated)";
-        e.currentTarget.style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.color = "var(--t-text-dim)";
-      }}
+      className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors text-(--t-text-dim) relative overflow-hidden hover:enabled:bg-(--t-bg-elevated) hover:enabled:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
     >
       {rippleEls}
       <Icon icon={icon} width={15} />

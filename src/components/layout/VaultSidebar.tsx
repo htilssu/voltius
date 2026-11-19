@@ -13,7 +13,8 @@ import { useRipple } from "@/hooks/useRipple";
 import { SidebarAccountButton } from "./SidebarAccountButton";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { CreateVaultModal } from "@/components/shared/CreateVaultModal";
-import { Modal } from "@/components/shared/Modal";
+import { Modal, ModalCard } from "@/components/shared/Modal";
+import { statusSurface } from "@/components/shared/statusSurface";
 import { VaultLimitModal, useVaultLimitReached } from "@/components/shared/VaultLimitModal";
 import { useUpdaterStatus } from "@/services/updater";
 import { acceptInvitation, declineInvitation } from "@/services/invitationActions";
@@ -239,29 +240,21 @@ export default function VaultSidebar() {
 function PendingInviteButton({ invite, onClick }: { invite: MyPendingInvitation; onClick: () => void }) {
   const { t } = useTranslation();
   const { createRipple, rippleEls } = useRipple();
-  const [hovered, setHovered] = useState(false);
   const initial = invite.team_name.trim().charAt(0).toUpperCase();
   return (
-    <div
-      className="relative flex items-center justify-center w-full"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {hovered && <ActivePip active={false} />}
+    <div className="group relative flex items-center justify-center w-full">
+      <ActivePip active={false} />
       <button
         onClick={onClick}
         onPointerDown={createRipple}
         title={t("layout.vaultSidebar.vaultInviteTitle", { name: invite.team_name })}
-        className="flex items-center justify-center text-base font-bold relative overflow-hidden transition-all"
+        className={`flex items-center justify-center text-base font-bold relative overflow-hidden bg-(--t-bg-elevated) text-(--t-text-dim) group-hover:bg-[color-mix(in_srgb,var(--t-status-warning)_20%,transparent)] group-hover:text-(--t-text-primary) ${RAIL_TRANSITION}`}
         style={{
           width: 44,
           height: 44,
-          background: hovered ? "rgba(245,158,11,0.2)" : "var(--t-bg-elevated)",
-          color: "var(--t-text-dim)",
-          borderRadius: hovered ? "0.75rem" : "1.375rem",
-          border: "2px dashed rgba(245,158,11,0.5)",
+          borderRadius: "1.375rem",
+          border: "2px dashed color-mix(in srgb, var(--t-status-warning) 50%, transparent)",
           opacity: 0.8,
-          transition: "border-radius 200ms, background 200ms",
         }}
       >
         {rippleEls}
@@ -271,7 +264,7 @@ function PendingInviteButton({ invite, onClick }: { invite: MyPendingInvitation;
         className="absolute bottom-0.5 right-0.5 flex items-center justify-center rounded-full pointer-events-none"
         style={{ width: 14, height: 14, background: "var(--t-bg-terminal)" }}
       >
-        <Icon icon="lucide:clock" width={9} style={{ color: "#f59e0b" }} />
+        <Icon icon="lucide:clock" width={9} className="text-(--t-status-warning)" />
       </span>
     </div>
   );
@@ -306,16 +299,13 @@ function PendingInviteModal({
 
   return (
     <Modal onClose={onClose} blur>
-      <div
-        className="flex flex-col gap-5 p-6"
-        style={{ width: "min(22rem, 92vw)", background: "var(--t-bg-base)", border: "1px solid var(--t-border)", borderRadius: "0.933rem", boxShadow: "var(--t-elev-3)" }}
-      >
+      <ModalCard solid className="flex flex-col gap-5 p-6 w-[min(22rem,calc(100vw-2rem))]">
         <div className="flex items-start gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "color-mix(in srgb, var(--t-status-warning) 12%, transparent)" }}
           >
-            <Icon icon="lucide:vault" width={20} style={{ color: "#f59e0b" }} />
+            <Icon icon="lucide:vault" width={20} className="text-(--t-status-warning)" />
           </div>
           <div className="min-w-0">
             <p className="text-base font-semibold text-(--t-text-primary) mb-0.5">{t("layout.vaultSidebar.vaultInvitation")}</p>
@@ -330,7 +320,7 @@ function PendingInviteModal({
         </div>
 
         {error && (
-          <p className="text-xs px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.08)", color: "var(--t-status-error)" }}>
+          <p className="text-xs px-3 py-2 rounded-lg" style={statusSurface("error")}>
             {error}
           </p>
         )}
@@ -339,21 +329,19 @@ function PendingInviteModal({
           <button
             onClick={() => void handle("accept")}
             disabled={!!loading}
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-opacity"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: loading ? 0.6 : 1 }}
+            className="btn btn-primary flex-1 py-2.5 rounded-lg text-sm font-semibold"
           >
             {loading === "accept" ? t("layout.vaultSidebar.accepting") : t("layout.vaultSidebar.accept")}
           </button>
           <button
             onClick={() => void handle("decline")}
             disabled={!!loading}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors"
-            style={{ background: "var(--t-bg-elevated)", color: "var(--t-text-muted)", opacity: loading ? 0.6 : 1 }}
+            className="btn btn-secondary flex-1 py-2.5 rounded-lg text-sm font-medium"
           >
             {loading === "decline" ? t("layout.vaultSidebar.declining") : t("layout.vaultSidebar.decline")}
           </button>
         </div>
-      </div>
+      </ModalCard>
     </Modal>
   );
 }
@@ -400,22 +388,23 @@ function TeamVaultBadge({ teamId }: { teamId: string }) {
         icon={icon}
         width={10}
         className={spin ? "animate-spin" : undefined}
-        style={{ color: spin ? "var(--t-accent)" : isError ? "#f59e0b" : "var(--t-text-dim)" }}
+        style={{ color: spin ? "var(--t-accent)" : isError ? "var(--t-status-warning)" : "var(--t-text-dim)" }}
       />
     </span>
   );
 }
 
+/**
+ * Always mounted so its height animates both ways: 0 idle → 20px on hover of
+ * the enclosing `group` → 40px when active.
+ */
 function ActivePip({ active }: { active: boolean }) {
   return (
     <span
-      className="absolute left-0 rounded-r-full"
-      style={{
-        width: 4,
-        height: active ? 40 : 20,
-        background: "var(--t-text-primary)",
-        transition: "height 150ms ease",
-      }}
+      aria-hidden
+      className={`absolute left-0 w-1 rounded-r-full bg-(--t-text-primary) transition-[height] duration-200 ease-out ${
+        active ? "h-10" : "h-0 group-hover:h-5"
+      }`}
     />
   );
 }
@@ -450,15 +439,10 @@ function VaultRailRow({
 function AppIconButton({ isActive, onClick }: { isActive: boolean; onClick: () => void }) {
   const { t } = useTranslation();
   const { createRipple, rippleEls } = useRipple();
-  const [hovered, setHovered] = useState(false);
-  const borderRadius = isActive || hovered ? "0.75rem" : "1.375rem";
+  const borderRadius = isActive ? "0.75rem" : "1.375rem";
   return (
-    <div
-      className="relative flex items-center justify-center w-full shrink-0"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {(isActive || hovered) && <ActivePip active={isActive} />}
+    <div className="group relative flex items-center justify-center w-full shrink-0">
+      <ActivePip active={isActive} />
       <button
         onClick={onClick}
         onPointerDown={createRipple}
@@ -472,6 +456,9 @@ function AppIconButton({ isActive, onClick }: { isActive: boolean; onClick: () =
     </div>
   );
 }
+
+/** Shared transition for every rail control: one curve, every property that moves. */
+const RAIL_TRANSITION = "transition-[background-color,color,box-shadow,border-radius] duration-200 ease-out";
 
 function VaultButton({
   initial,
@@ -487,46 +474,28 @@ function VaultButton({
   testId?: string;
 }) {
   const { createRipple, rippleEls } = useRipple();
-  const [hovered, setHovered] = useState(false);
+  // Hover is driven purely by CSS (`group-hover`) on the wrapper, so the pip and
+  // the button react to the same hit area and React stays the only style owner.
+  // Hover never changes shape or border — only a soft tint — so it can't be
+  // mistaken for the active (solid accent) state.
   return (
-    <div
-      className="relative flex items-center justify-center w-full"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {(isActive || hovered) && <ActivePip active={isActive} />}
+    <div className="group relative flex items-center justify-center w-full">
+      <ActivePip active={isActive} />
       <button
         data-testid={testId}
         onClick={onClick}
         onPointerDown={createRipple}
         title={label}
-        className="flex items-center justify-center text-base font-bold relative overflow-hidden transition-all"
+        className={`flex items-center justify-center text-base font-bold relative overflow-hidden ${RAIL_TRANSITION} ${
+          isActive
+            ? "bg-(--t-accent) text-(--t-on-accent)"
+            : "bg-(--t-bg-elevated) text-(--t-text-secondary) group-hover:bg-[color-mix(in_srgb,var(--t-accent)_18%,var(--t-bg-elevated))] group-hover:text-(--t-text-primary)"
+        }`}
         style={{
           width: 44,
           height: 44,
-          background: isActive
-            ? "linear-gradient(145deg, color-mix(in srgb, var(--t-accent) 80%, #ffffff 20%) 0%, var(--t-accent) 60%, color-mix(in srgb, var(--t-accent) 85%, #000000 15%) 100%)"
-            : "var(--t-bg-elevated)",
-          color: isActive ? "#fff" : "var(--t-text-secondary)",
           borderRadius: isActive ? "0.75rem" : "1.375rem",
-          boxShadow: isActive
-            ? "var(--t-ring), 0 6px 14px -6px color-mix(in srgb, var(--t-accent) 55%, transparent), var(--t-highlight)"
-            : "var(--t-ring), inset 0 1px 0 rgba(255,255,255,0.05)",
-          transition: "border-radius 200ms, background 200ms",
-        }}
-        onMouseEnter={(e) => {
-          if (!isActive) {
-            (e.currentTarget as HTMLButtonElement).style.borderRadius = "0.75rem";
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--t-accent)";
-            (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isActive) {
-            (e.currentTarget as HTMLButtonElement).style.borderRadius = "1.375rem";
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-          }
+          boxShadow: "var(--t-ring)",
         }}
       >
         {rippleEls}
@@ -536,9 +505,32 @@ function VaultButton({
   );
 }
 
+/** Icon-only rail button (What's new, Settings, Add vault). Hover = tint only. */
+function RailIconButton({
+  title, onClick, className = "", children,
+}: {
+  title: string;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const { createRipple, rippleEls } = useRipple();
+  return (
+    <button
+      onClick={onClick}
+      onPointerDown={createRipple}
+      title={title}
+      className={`flex items-center justify-center relative overflow-hidden shrink-0 bg-transparent text-(--t-text-dim) hover:text-(--t-text-primary) ${RAIL_TRANSITION} ${className}`}
+      style={{ width: 44, height: 44, borderRadius: "1.375rem" }}
+    >
+      {rippleEls}
+      {children}
+    </button>
+  );
+}
+
 function WhatsNewButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation();
-  const { createRipple, rippleEls } = useRipple();
   const updater = useUpdaterStatus();
 
   let icon = "lucide:megaphone";
@@ -565,31 +557,7 @@ function WhatsNewButton({ onClick }: { onClick: () => void }) {
   }
 
   return (
-    <button
-      onClick={onClick}
-      onPointerDown={createRipple}
-      title={title}
-      className="flex items-center justify-center mb-3 relative overflow-hidden transition-all shrink-0"
-      style={{
-        width: 44,
-        height: 44,
-        borderRadius: "1.375rem",
-        background: "transparent",
-        color: "var(--t-text-dim)",
-        transition: "border-radius 200ms, background 200ms, color 200ms",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "0.75rem";
-        (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "1.375rem";
-        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-      }}
-    >
-      {rippleEls}
+    <RailIconButton title={title} onClick={onClick} className="mb-3 hover:bg-(--t-bg-elevated)">
       <Icon icon={icon} width={20} className={iconClass} style={iconStyle} />
       {pending && (
         <span
@@ -597,75 +565,28 @@ function WhatsNewButton({ onClick }: { onClick: () => void }) {
           style={{ top: 8, right: 8, width: 8, height: 8, background: "var(--t-accent)" }}
         />
       )}
-    </button>
+    </RailIconButton>
   );
 }
 
 function SettingsButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation();
-  const { createRipple, rippleEls } = useRipple();
   return (
-    <button
-      onClick={onClick}
-      onPointerDown={createRipple}
-      title={t("layout.vaultSidebar.settings")}
-      className="flex items-center justify-center mb-3 relative overflow-hidden transition-all shrink-0"
-      style={{
-        width: 44,
-        height: 44,
-        borderRadius: "1.375rem",
-        background: "transparent",
-        color: "var(--t-text-dim)",
-        transition: "border-radius 200ms, background 200ms, color 200ms",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "0.75rem";
-        (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "1.375rem";
-        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-      }}
-    >
-      {rippleEls}
+    <RailIconButton title={t("layout.vaultSidebar.settings")} onClick={onClick} className="mb-3 hover:bg-(--t-bg-elevated)">
       <Icon icon="lucide:settings" width={20} />
-    </button>
+    </RailIconButton>
   );
 }
 
 function AddVaultButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation();
-  const { createRipple, rippleEls } = useRipple();
   return (
-    <button
-      onClick={onClick}
-      onPointerDown={createRipple}
+    <RailIconButton
       title={t("layout.vaultSidebar.addVault")}
-      className="flex items-center justify-center relative overflow-hidden transition-all shrink-0"
-      style={{
-        width: 44,
-        height: 44,
-        borderRadius: "1.375rem",
-        border: "2px dashed var(--t-border)",
-        background: "transparent",
-        color: "var(--t-text-dim)",
-        transition: "border-radius 200ms, background 200ms, color 200ms",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "0.75rem";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-accent)";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-accent)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderRadius = "1.375rem";
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-border)";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-      }}
+      onClick={onClick}
+      className="border-2 border-dashed border-(--t-border) hover:bg-[color-mix(in_srgb,var(--t-accent)_12%,transparent)]"
     >
-      {rippleEls}
       <Icon icon="lucide:plus" width={20} />
-    </button>
+    </RailIconButton>
   );
 }

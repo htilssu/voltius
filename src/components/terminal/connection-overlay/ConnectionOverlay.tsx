@@ -73,7 +73,7 @@ export default function ConnectionOverlay({
   return (
     <DismissBlockedContext.Provider value={dismissBlocked}>
       <div className={className ?? "absolute inset-0 z-20 flex items-center justify-center bg-(--t-bg-terminal)"}>
-        <div className="flex flex-col items-center gap-6 w-80 text-center">
+        <div className="flex flex-col items-center gap-6 w-full max-w-80 px-4 text-center">
           <ConnectionHeader
             icon={icon}
             name={name}

@@ -82,7 +82,7 @@ export default function BottomTabBar({ visible = true }: { visible?: boolean }) 
                 <Icon icon={t.icon} width={24} />
                 {t.id === "terminal" && sessionCount > 0 && (
                   <span
-                    className="absolute -top-1.5 -right-2.5 min-w-4 h-4 px-1 rounded-full text-[10px] font-semibold flex items-center justify-center"
+                    className="absolute -top-1.5 -right-2.5 min-w-4 h-4 px-1 rounded-full text-2xs font-semibold flex items-center justify-center"
                     style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
                   >
                     {sessionCount}
@@ -90,7 +90,7 @@ export default function BottomTabBar({ visible = true }: { visible?: boolean }) 
                 )}
               </span>
             </span>
-            <span className={`text-[12px] leading-4 truncate max-w-full px-1 ${active ? "font-semibold" : "font-medium"}`}>{t.label}</span>
+            <span className={`text-xs leading-4 truncate max-w-full px-1 ${active ? "font-semibold" : "font-medium"}`}>{t.label}</span>
           </button>
         );
       })}

@@ -9,6 +9,8 @@ import { getTagColorStyle } from "@/utils/tagColors";
 import { chevronRotateStyle } from "@/utils/icons";
 import { searchMatcher } from "@/utils/search";
 import { usePopoverFade } from "@/hooks/useDelayedUnmount";
+import { toastActionError } from "@/components/shared/actionError";
+import { ConfirmModal } from "./ConfirmModal";
 
 /** Focus a search/filter input when the user presses the `filter` shortcut (Ctrl+F). */
 export function useFilterShortcut(ref: RefObject<HTMLInputElement | null>) {
@@ -184,12 +186,14 @@ function TagFilterButton({
   const [editingTag, setEditingTag] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [deletingTag, setDeletingTag] = useState<string | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!open) return;
+    // The delete confirm is portaled out of `ref`; don't treat clicks in it as outside clicks.
+    if (!open || deletingTag) return;
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
@@ -199,7 +203,7 @@ function TagFilterButton({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, deletingTag]);
 
   useEffect(() => {
     if (editingTag !== null) editInputRef.current?.focus();
@@ -224,24 +228,37 @@ function TagFilterButton({
 
   const commitEdit = async () => {
     const trimmed = editValue.trim();
-    if (trimmed && trimmed !== editingTag && onRenameTag && editingTag) {
-      // Follow the rename in active filter
-      if (tagFilter.includes(editingTag)) {
-        onTagFilterChange(tagFilter.map((tag) => (tag === editingTag ? trimmed : tag)));
-      }
-      await onRenameTag(editingTag, trimmed).catch(() => {});
-    }
+    const from = editingTag;
     setEditingTag(null);
+    if (!trimmed || trimmed === from || !onRenameTag || !from) return;
+    // Follow the rename in the active filter; restore it if the rename fails.
+    const prevFilter = tagFilter;
+    if (tagFilter.includes(from)) {
+      onTagFilterChange(tagFilter.map((tag) => (tag === from ? trimmed : tag)));
+    }
+    try {
+      await onRenameTag(from, trimmed);
+    } catch (e) {
+      onTagFilterChange(prevFilter);
+      toastActionError(e, t);
+    }
   };
 
   const confirmDelete = async () => {
     if (!deletingTag || !onDeleteTag) return;
-    if (tagFilter.includes(deletingTag)) {
-      onTagFilterChange(tagFilter.filter((tag) => tag !== deletingTag));
+    setDeleteBusy(true);
+    try {
+      await onDeleteTag(deletingTag);
+      if (tagFilter.includes(deletingTag)) {
+        onTagFilterChange(tagFilter.filter((tag) => tag !== deletingTag));
+      }
+      setDeletingTag(null);
+      setOpen(false);
+    } catch (e) {
+      toastActionError(e, t);
+    } finally {
+      setDeleteBusy(false);
     }
-    await onDeleteTag(deletingTag).catch(() => {});
-    setDeletingTag(null);
-    setOpen(false);
   };
 
   return (
@@ -250,15 +267,12 @@ function TagFilterButton({
       <button
         onClick={() => { setOpen((o) => !o); if (open) { setEditingTag(null); setTagSearch(""); } }}
         title={t("shared.tagFilter.filterByTag")}
-        className="flex items-center gap-1 px-2 h-8 rounded-lg transition-colors"
-        style={{ color: isActive ? "var(--t-accent)" : "var(--t-text-primary)" }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-tab-active-text)")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = isActive ? "var(--t-accent)" : "var(--t-text-primary)")}
+        className={`flex items-center gap-1 px-2 h-8 rounded-lg transition-colors hover:text-(--t-tab-active-text) ${isActive ? "text-(--t-accent)" : "text-(--t-text-primary)"}`}
       >
         <Icon icon="lucide:tag" width={20} />
         {tagFilter.length > 1 && (
           <span
-            className="text-xs font-bold px-1 rounded-sm bg-(--t-accent) text-(--t-bg-terminal)"
+            className="text-xs font-bold px-1 rounded-sm bg-(--t-accent) text-(--t-on-accent)"
             style={{ lineHeight: "16px" }}
           >
             {tagFilter.length}
@@ -276,24 +290,18 @@ function TagFilterButton({
       {/* Dropdown */}
       {fade.mounted && (
         <div
-          className={`surface-float absolute right-0 top-full mt-1 z-50 flex flex-col overflow-hidden w-[16rem] ${fade.className}`}
+          className={`surface-float absolute right-0 top-full mt-1 z-50 flex flex-col overflow-hidden w-[min(16rem,calc(100vw-2rem))] ${fade.className}`}
           style={fade.style}
         >
           {availableTags.length === 0 ? (
             /* ── Empty state ── */
-            <div
-              className="flex flex-col items-center gap-3 px-6 py-6 text-center"
-              style={{ background: "linear-gradient(135deg, var(--t-bg-elevated) 0%, var(--t-bg-card) 100%)" }}
-            >
-              <div
-                className="flex items-center justify-center rounded-2xl w-[3.2rem] h-[3.2rem] text-(--t-text-dim) border border-(--t-border)"
-                style={{ background: "linear-gradient(135deg, var(--t-bg-card) 0%, var(--t-bg-toolbar) 100%)" }}
-              >
-                <Icon icon="lucide:tag" width={22} />
+            <div className="flex flex-col items-center gap-3 px-6 py-6 text-center">
+              <div className="flex items-center justify-center rounded-lg w-10 h-10 text-(--t-text-dim) bg-(--t-bg-toolbar) border border-(--t-border)">
+                <Icon icon="lucide:tag" width={20} />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-bold text-(--t-text-primary)">{t("shared.tagFilter.emptyTitle")}</span>
-                <span className="text-xs leading-relaxed text-(--t-text-dim)" style={{ maxWidth: "12rem" }}>
+                <span className="text-sm font-semibold text-(--t-text-primary)">{t("shared.tagFilter.emptyTitle")}</span>
+                <span className="text-xs leading-relaxed text-(--t-text-dim) max-w-48">
                   {t("shared.tagFilter.emptyDescription")}
                 </span>
               </div>
@@ -325,9 +333,7 @@ function TagFilterButton({
                 <div className="border-b border-b-(--t-border)">
                   <button
                     onClick={() => onTagFilterChange([])}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors text-left text-(--t-text-muted)"
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs transition-colors text-left text-(--t-text-muted) hover:bg-(--t-bg-elevated)"
                   >
                     <Icon icon="lucide:x" width={14} />
                     {t("shared.tagFilter.clearSelection", { count: tagFilter.length })}
@@ -367,46 +373,15 @@ function TagFilterButton({
         </div>
       )}
 
-      {/* ── Confirm delete modal (inside ref so outside-click doesn't close dropdown) ── */}
       {deletingTag && (
-        <div
-          className="fixed inset-0 z-9999 flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.55)" }}
-          onClick={() => setDeletingTag(null)}
-        >
-          <div
-            className="flex flex-col gap-4 p-5 rounded-2xl bg-(--t-bg-modal) border border-(--t-border-hover) w-[21.333rem]"
-            style={{ boxShadow: "var(--t-elev-3)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex flex-col gap-1.5">
-              <p className="text-sm font-semibold text-(--t-text-primary)">
-                {t("shared.tagFilter.deleteTagTitle", { tag: deletingTag })}
-              </p>
-              <p className="text-xs text-(--t-text-dim)">
-                {t("shared.tagFilter.deleteTagBody", { count: tagCounts?.[deletingTag] ?? 0 })}
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => setDeletingTag(null)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-(--t-bg-elevated) text-(--t-text-primary) border border-(--t-border-hover)"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-border-hover)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-              >
-                {t("common.action.cancel")}
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-[#3D1515] text-[#F87171] border border-[#5C2020]"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#5C2020")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#3D1515")}
-              >
-                {t("common.action.delete")}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title={t("shared.tagFilter.deleteTagTitle", { tag: deletingTag })}
+          message={t("shared.tagFilter.deleteTagBody", { count: tagCounts?.[deletingTag] ?? 0 })}
+          confirmLabel={t("common.action.delete")}
+          busy={deleteBusy}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => { if (!deleteBusy) setDeletingTag(null); }}
+        />
       )}
     </div>
   );
@@ -444,14 +419,10 @@ function TagRow({
   canManage: boolean;
 }) {
   const { t } = useTranslation();
-  const [hovered, setHovered] = useState(false);
 
   return (
     <div
-      className="flex items-center gap-1 px-2 py-1.5 rounded-lg group/row transition-colors"
-      style={{ background: hovered && !isEditing ? "var(--t-bg-elevated)" : "transparent" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className={`flex items-center gap-1 px-2 py-1.5 rounded-lg group/row transition-colors ${isEditing ? "" : "hover:bg-(--t-bg-elevated)"}`}
     >
       {isEditing ? (
         /* ── Inline edit mode ── */
@@ -506,26 +477,26 @@ function TagRow({
               </span>
             )}
           </button>
-          {isSelected && !hovered && (
-            <Icon icon="lucide:check" width={13} className="text-(--t-accent) shrink-0" />
+          {isSelected && (
+            <Icon
+              icon="lucide:check"
+              width={13}
+              className={`text-(--t-accent) shrink-0 ${canManage ? "group-hover/row:hidden group-focus-within/row:hidden [@media(hover:none)]:hidden" : ""}`}
+            />
           )}
-          {canManage && hovered && (
-            <div className="flex items-center gap-0.5 shrink-0">
+          {canManage && (
+            <div className="hidden group-hover/row:flex group-focus-within/row:flex [@media(hover:none)]:flex items-center gap-0.5 shrink-0">
               <button
                 onClick={(e) => { e.stopPropagation(); onStartEdit(); }}
                 title={t("shared.tagFilter.renameTagTitle")}
-                className="p-1 rounded-sm transition-colors text-(--t-text-dim)"
-                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-card)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+                className="p-1 rounded-sm transition-colors text-(--t-text-dim) hover:bg-(--t-bg-card) hover:text-(--t-text-primary)"
               >
                 <Icon icon="lucide:pencil" width={13} />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); onDelete(); }}
                 title={t("shared.tagFilter.deleteTagButtonTitle")}
-                className="p-1 rounded-sm transition-colors text-(--t-text-dim)"
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#3D1515"; e.currentTarget.style.color = "#F87171"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+                className="p-1 rounded-sm transition-colors text-(--t-text-dim) hover:text-(--t-status-error) hover:bg-[color-mix(in_srgb,var(--t-status-error)_12%,transparent)]"
               >
                 <Icon icon="lucide:trash-2" width={13} />
               </button>

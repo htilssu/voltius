@@ -8,7 +8,7 @@ import type { Connection } from "@/types";
 
 export const HOST_PICKER_DENSITY = {
   compact: {
-    heading: "px-2.5 text-[10px]",
+    heading: "px-2.5 text-2xs",
     row: "gap-2.5 px-2.5 py-2 rounded-lg",
     folder: "gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-(--t-text-secondary) hover:bg-(--t-bg-elevated)",
     name: "text-xs",
@@ -17,9 +17,9 @@ export const HOST_PICKER_DENSITY = {
     indentRem: 1.067,
   },
   touch: {
-    heading: "px-3 text-[11px]",
-    row: "gap-3 px-3 py-3 rounded-xl",
-    folder: "gap-2 px-3 py-2.5 min-h-12 rounded-xl text-(--t-text-primary) active:bg-(--t-bg-card)",
+    heading: "px-3 text-2xs",
+    row: "gap-3 px-3 py-3 rounded-lg",
+    folder: "gap-2 px-3 py-2.5 min-h-12 rounded-lg text-(--t-text-primary) active:bg-(--t-bg-card)",
     name: "text-sm",
     chevron: 16,
     glyph: 16,

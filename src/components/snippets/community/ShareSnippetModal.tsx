@@ -92,7 +92,7 @@ export function ShareSnippetModal({ snippets, packName, onClose }: {
             <p className="text-xs text-(--t-text-dim)">{t("snippets.community.secretsIntro")}</p>
             {uniqueFindings.map((f, i) => (
               <div key={i} className="flex items-center gap-2 min-w-0">
-                <span className="text-[10px] px-1.5 py-0.5 rounded shrink-0 text-(--t-text-dim)" style={{ border: "1px solid var(--t-border)" }}>
+                <span className="text-2xs px-1.5 py-0.5 rounded shrink-0 text-(--t-text-dim)" style={{ border: "1px solid var(--t-border)" }}>
                   {t(`snippets.community.secretKind_${f.kind}`)}
                 </span>
                 <span className="text-xs font-mono truncate text-(--t-text-secondary)">{f.match}</span>
@@ -113,7 +113,7 @@ export function ShareSnippetModal({ snippets, packName, onClose }: {
           </p>
         ) : (
           <pre
-            className="flex-1 min-h-0 overflow-auto text-[11px] font-mono p-3 rounded-lg text-(--t-text-secondary)"
+            className="flex-1 min-h-0 overflow-auto text-2xs font-mono p-3 rounded-lg text-(--t-text-secondary)"
             style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}
           >
             {built.json}
@@ -124,16 +124,14 @@ export function ShareSnippetModal({ snippets, packName, onClose }: {
           <button
             onClick={handleCopy}
             disabled={!!built.error}
-            className="px-3 h-8 rounded-lg text-xs font-semibold disabled:opacity-40 text-(--t-text-primary)"
-            style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}
+            className="btn btn-secondary px-3 h-8 rounded-lg text-xs font-semibold"
           >
             {copied ? t("snippets.community.shareCopied") : t("snippets.community.shareCopy")}
           </button>
           <button
             onClick={() => built.entry && void openUrl(githubNewFileUrl(built.entry.id))}
             disabled={!!built.error}
-            className="px-3 h-8 rounded-lg text-xs font-semibold disabled:opacity-40"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary px-3 h-8 rounded-lg text-xs font-semibold"
           >
             {t("snippets.community.shareOpenGithub")}
           </button>

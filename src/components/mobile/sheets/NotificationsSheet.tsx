@@ -58,7 +58,7 @@ function ActionButton({ label, primary, disabled, onClick }: {
       data-notification-action={slugOf(label)}
       disabled={disabled}
       onClick={onClick}
-      className="vt-hit h-10 px-4 rounded-full text-sm font-medium disabled:opacity-50"
+      className="vt-hit h-10 px-4 rounded-full text-sm font-medium disabled:opacity-(--disabled-opacity)"
       style={primary
         ? { background: "color-mix(in srgb, var(--t-accent) 20%, transparent)", color: "var(--t-accent)" }
         : { color: "var(--t-accent)" }}

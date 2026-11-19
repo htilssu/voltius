@@ -24,7 +24,7 @@ export function Layout({ children, onBack }: { children: React.ReactNode; onBack
         <h1 className="text-lg font-bold text-(--t-text-bright)">Voltius</h1>
       </div>
 
-      <div className="w-72">{children}</div>
+      <div className="w-full max-w-72">{children}</div>
     </div>
   );
 }
@@ -37,18 +37,7 @@ export function ActionButton({ icon, label, sub, primary, loading, onClick }: {
     <button
       onClick={onClick}
       disabled={loading}
-      className="focus-ring w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-2 text-left transition-all"
-      style={{
-        background: primary ? "var(--t-accent)" : "var(--t-bg-elevated)",
-        border: `1px solid ${primary ? "var(--t-accent)" : "var(--t-border)"}`,
-        opacity: loading ? 0.7 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!primary) (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-accent)";
-      }}
-      onMouseLeave={(e) => {
-        if (!primary) (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-border)";
-      }}
+      className={`btn ${primary ? "btn-primary" : "btn-secondary"} w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-2 text-left`}
     >
       <Icon icon={loading ? "lucide:loader-circle" : icon} width={18}
         className={`shrink-0 ${loading ? "animate-spin" : ""}`}

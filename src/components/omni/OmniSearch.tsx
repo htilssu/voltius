@@ -728,21 +728,13 @@ export default function OmniSearch({ onClose }: OmniSearchProps) {
             label={item.label}
             detail={item.description}
             trailing={
+              /* Presentational copy of shared Toggle's track: the row (role=option) owns the click,
+                 so a nested switch button would be invalid. */
               <span
                 aria-hidden="true"
-                className="shrink-0 rounded-full transition-colors relative border border-(--t-border)"
-                style={{ width: "2.4rem", height: "1.333rem", background: item.value ? "var(--t-accent)" : "var(--t-bg-input)" }}
+                className={`relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 shadow-(--t-ring) ${item.value ? "bg-(--t-accent)" : "bg-(--t-bg-input)"}`}
               >
-                <span
-                  className="absolute rounded-full bg-white transition-transform"
-                  style={{
-                    width: "1.067rem",
-                    height: "1.067rem",
-                    top: "1px",
-                    left: "0.067rem",
-                    transform: item.value ? "translateX(1.067rem)" : "translateX(0)",
-                  }}
-                />
+                <span className={`absolute top-0.5 left-0.5 size-4 rounded-full transition-[transform,background-color] duration-200 ${item.value ? "translate-x-4 bg-(--t-on-accent)" : "translate-x-0 bg-(--t-text-muted)"}`} />
               </span>
             }
           />
@@ -755,7 +747,7 @@ export default function OmniSearch({ onClose }: OmniSearchProps) {
             leading={
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "color-mix(in srgb, var(--t-accent) 80%, #000)", color: "#fff" }}
+                style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
               >
                 <Icon icon="lucide:radio" width={13} />
               </div>
@@ -847,11 +839,7 @@ export default function OmniSearch({ onClose }: OmniSearchProps) {
     <div
       role="presentation"
       className="fixed inset-0 z-60 flex items-start justify-center pt-[20vh]"
-      style={{
-        background: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(10px) saturate(1.2)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.2)",
-      }}
+      style={{ background: "var(--t-scrim)" }}
       onClick={onClose}
     >
       <div

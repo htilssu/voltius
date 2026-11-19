@@ -36,20 +36,20 @@ export function PluginPermissionList({ permissions, addedPermissions = [], showN
         className="flex flex-col gap-0.5 px-2.5 py-2 rounded-md"
         style={
           d.danger
-            ? { background: "color-mix(in srgb, var(--t-error, #ef4444) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--t-error, #ef4444) 35%, transparent)" }
+            ? { background: "color-mix(in srgb, var(--t-status-error) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--t-status-error) 35%, transparent)" }
             : elevated
               ? { background: "color-mix(in srgb, var(--t-accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--t-accent) 30%, transparent)" }
               : { background: "var(--t-bg-base)" }
         }
       >
-        <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: d.danger ? "var(--t-error, #ef4444)" : elevated ? "var(--t-accent)" : "var(--t-text-bright)" }}>
+        <div className="flex items-center gap-1.5 text-xs font-medium" style={{ color: d.danger ? "var(--t-status-error)" : elevated ? "var(--t-accent)" : "var(--t-text-bright)" }}>
           {d.danger && <Icon icon="lucide:alert-triangle" width={12} />}
           {elevated && <Icon icon="lucide:eye" width={12} />}
           {isNew && <Icon icon="lucide:plus" width={11} />}
           <span>{d.known ? t(d.labelKey) : d.perm}</span>
         </div>
         {d.known && (
-          <p className="text-xs" style={{ color: d.danger ? "color-mix(in srgb, var(--t-error, #ef4444) 85%, var(--t-text-secondary))" : elevated ? "color-mix(in srgb, var(--t-accent) 70%, var(--t-text-secondary))" : "var(--t-text-dim)" }}>
+          <p className="text-xs" style={{ color: d.danger ? "color-mix(in srgb, var(--t-status-error) 85%, var(--t-text-secondary))" : elevated ? "color-mix(in srgb, var(--t-accent) 70%, var(--t-text-secondary))" : "var(--t-text-dim)" }}>
             {t(d.descriptionKey)}
           </p>
         )}
@@ -89,7 +89,7 @@ export function PluginPermissionList({ permissions, addedPermissions = [], showN
       )}
       {danger.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--t-error, #ef4444)" }}>
+          <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--t-status-error)" }}>
             <Icon icon="lucide:alert-triangle" width={13} />
             {t("settings.plugins.permissionModal.permissions.dangerHeading")}
           </div>

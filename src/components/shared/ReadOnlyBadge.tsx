@@ -6,7 +6,7 @@ export function ReadOnlyBadge({ tip, className = "" }: { tip: string; className?
     <span
       data-read-only-badge
       title={tip}
-      className={`px-1.5 py-0.5 rounded text-[0.6875rem] shrink-0 text-(--t-text-muted) bg-(--t-bg-hover) ${className}`}
+      className={`px-1.5 py-0.5 rounded-sm text-2xs shrink-0 text-(--t-text-muted) bg-(--t-bg-card-hover) ${className}`}
     >
       {t("fileTransfer.myDevices.readOnlyBadge")}
     </span>

@@ -71,7 +71,7 @@ function DeviceSyncRow({ row, busy, onRetry, onRemove }: { row: DeviceRow; busy:
           {stateLine(t, row)}
         </p>
         {failing && <p className="text-xs mt-0.5 text-(--t-text-dim)">{t(`${P}.hint.${row.state}`)}</p>}
-        <p className="text-[11px] mt-0.5 text-(--t-text-muted)">{timesLine(t, row)}</p>
+        <p className="text-2xs mt-0.5 text-(--t-text-muted)">{timesLine(t, row)}</p>
       </div>
       <div className="flex gap-2 ml-auto">
         <button

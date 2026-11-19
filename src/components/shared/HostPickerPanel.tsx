@@ -16,7 +16,7 @@ import type { Connection } from "@/types";
 import { connectionDisplayName } from "@/utils/connectionDisplayName";
 import { searchMatcher } from "@/utils/search";
 import { HostPickerTree } from "./HostPickerTree";
-import { HostRow } from "./HostRow";
+import { HostRow, PickTile } from "./HostRow";
 import { MyDevicesGroup } from "./MyDevicesGroup";
 import type { MyDevice } from "@/services/myDevices";
 
@@ -65,9 +65,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, termi
         >
           <button
             onClick={onBack}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 text-(--t-text-dim)"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary)"
           >
             <span className="[&_path]:stroke-3">
               <Icon icon="lucide:arrow-left" width={16} />
@@ -124,13 +122,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, termi
       <div className="flex-1 overflow-y-auto py-1.5 px-2">
         {!isMobile && (
           <HostRow
-            avatar={
-              <div
-                className="rounded-lg flex items-center justify-center shrink-0 w-[1.867rem] h-[1.867rem] bg-(--t-bg-elevated) text-(--t-text-dim)"
-              >
-                <Icon icon="lucide:monitor" width={14} />
-              </div>
-            }
+            avatar={<PickTile icon="lucide:monitor" />}
             name={t("shared.hostPicker.localMachineName")}
             sub={t("shared.pickers.thisComputer")}
             isSelected={false}
@@ -150,7 +142,7 @@ export function HostPickerPanel({ onPick, selectedHostId, onBack, sshOnly, termi
                     base={getConnectionIconColor(d.split(/[-_ ]/)[0]) ?? "var(--t-bg-card-avatar)"}
                     icon={icon}
                     iconSize={14}
-                    className="w-[1.867rem] h-[1.867rem] rounded-lg text-white"
+                    className="w-7 h-7 rounded-lg text-white"
                   />
                 }
                 name={d}
@@ -195,11 +187,7 @@ export function ConnectionHostRow({ connection: c, isSelected, onClick, multiSel
   return (
     <HostRow
       avatar={multiSelect && isSelected
-        ? (
-          <div className="rounded-lg flex items-center justify-center shrink-0 w-[1.867rem] h-[1.867rem]" style={{ background: "var(--t-accent)" }}>
-            <Icon icon="lucide:check" width={13} className="text-white" />
-          </div>
-        )
+        ? <PickTile icon="lucide:check" selected />
         : <ConnectionAvatar connection={c} size={28} />}
       name={connectionDisplayName(c)}
       sub={`${c.username}@${c.host}:${c.port}`}

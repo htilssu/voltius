@@ -55,7 +55,7 @@ export function EntryCard({ entry, layout, onOpen }: {
             {entry.tags.slice(0, 3).map(tag => (
               <span
                 key={tag}
-                className="text-[10px] px-1.5 py-0.5 rounded text-(--t-text-dim)"
+                className="text-2xs px-1.5 py-0.5 rounded text-(--t-text-dim)"
                 style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}
               >
                 {tag}

@@ -3,8 +3,8 @@ import { useDismissBlocked } from "./dismissBlocked";
 
 const toneClasses = {
   warning: {
-    box: "bg-yellow-500/10 border-yellow-500/20",
-    title: "text-yellow-400",
+    box: "bg-(--t-status-warning)/10 border-(--t-status-warning)/25",
+    title: "text-(--t-status-warning)",
   },
   secure: {
     box: "bg-(--t-bg-elevated) border-(--t-border)",

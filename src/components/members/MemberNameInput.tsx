@@ -36,8 +36,8 @@ export function MemberNameField({ name, handle, touch }: { name: MemberDetailMod
           if (e.key === "Escape") name.revert();
         }}
       />
-      {name.error && <p className="text-[11px] mt-1.5" style={{ color: "var(--t-status-error)" }}>{name.error}</p>}
-      <p className="text-[11px] mt-1.5" style={{ color: "var(--t-text-secondary)" }}>{t("members.detail.nameHint")}</p>
+      {name.error && <p className="text-2xs mt-1.5" style={{ color: "var(--t-status-error)" }}>{name.error}</p>}
+      <p className="text-2xs mt-1.5" style={{ color: "var(--t-text-secondary)" }}>{t("members.detail.nameHint")}</p>
     </>
   );
 }

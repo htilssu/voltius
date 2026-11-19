@@ -69,7 +69,7 @@ export default function MobileMoreScreen() {
             onClick={() => push({ kind: "account" })}
           >
             <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: "var(--t-accent)" }}>
-              <Icon icon="lucide:user" width={18} className="text-white" />
+              <Icon icon="lucide:user" width={18} className="text-(--t-on-accent)" />
             </div>
             <span className="flex flex-col min-w-0 flex-1">
               <span className="text-sm font-medium text-(--t-text-primary) truncate">{email ?? t("mobile.account.title")}</span>
@@ -104,7 +104,7 @@ export default function MobileMoreScreen() {
         <div className="mx-4 my-2 border-t" style={{ borderColor: "var(--t-border)" }} />
         <button data-more-page="import-export"
           aria-disabled={readOnly !== null || undefined}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-(--t-bg-card) aria-disabled:opacity-50"
+          className="w-full flex items-center gap-3 px-4 py-3.5 text-left active:bg-(--t-bg-card) aria-disabled:opacity-(--disabled-opacity)"
           onClick={whenWritable(() => useUIStore.getState().openImportExport("import"))}>
           <Icon icon="lucide:arrow-up-down" width={20} className="text-(--t-text-dim)" />
           <span className="flex-1 flex flex-col min-w-0">

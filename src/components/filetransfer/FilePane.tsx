@@ -36,9 +36,9 @@ import { parentDir, joinPath, withDriveRootSep } from "./moveTargetCore";
 import { useDirListing } from "./useDirListing";
 import { compareStrings } from "@/utils/localeFormat";
 import { searchMatcher } from "@/utils/search";
-import { describeError } from "@/services/backendErrors";
 import { refuseReadOnly, useReadOnlyTip } from "@/services/deviceReadOnly";
 import { getShortcutHint, matchShortcut } from "@/stores/shortcutStore";
+import { toastActionError } from "@/components/shared/actionError";
 
 // ── SelectionActionsCtx ───────────────────────────────────────────────────────
 
@@ -72,9 +72,7 @@ export function IconBtn({ icon, title, onClick, disabled }: { icon: string; titl
       onClick={onClick}
       title={title}
       disabled={disabled}
-      className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) disabled:opacity-35"
-      onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+      className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) hover:enabled:bg-(--t-bg-elevated) hover:enabled:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
     >
       <Icon icon={icon} width={13} />
     </button>
@@ -251,7 +249,7 @@ export function FilePane({
       else if (isLocal) await fsTouch(fullPath);
       else if (sftpId) await sftpTouch(sftpId, fullPath);
       onRefresh();
-    } catch (e) { alert(describeError(e, t)); }
+    } catch (e) { toastActionError(e, t); }
   };
 
   const selectedEntries = visibleEntries.filter((f) => selectedIdSet.has(f.path));
@@ -282,7 +280,7 @@ export function FilePane({
       }
       setSelection([]);
       onRefresh();
-    } catch (e) { alert(describeError(e, t)); }
+    } catch (e) { toastActionError(e, t); }
   };
 
   const startRename = (f: FileEntry) => { if (!refuseReadOnly(readOnlyTip)) setRenaming(f.path); };
@@ -294,7 +292,7 @@ export function FilePane({
       if (isLocal) { await fsRename(f.path, newPath); }
       else { await sftpRename(sftpId!, f.path, newPath); }
       onRefresh();
-    } catch (e) { alert(describeError(e, t)); }
+    } catch (e) { toastActionError(e, t); }
     setRenaming(null);
   };
 
@@ -397,7 +395,7 @@ export function FilePane({
       if (isLocal) await fsCompress(file.path, archivePath);
       else if (sftpId) await sftpCompress(sftpId, file.path, archivePath);
       onRefresh();
-    } catch (e) { alert(describeError(e, t)); }
+    } catch (e) { toastActionError(e, t); }
   };
 
   const handleExtract = async (file: FileEntry) => {
@@ -408,7 +406,7 @@ export function FilePane({
       if (isLocal) await fsExtract(file.path, destDir);
       else if (sftpId) await sftpExtract(sftpId, file.path, destDir);
       onRefresh();
-    } catch (e) { alert(describeError(e, t)); }
+    } catch (e) { toastActionError(e, t); }
   };
 
   const handlePickLocal = async () => {
@@ -489,7 +487,7 @@ export function FilePane({
       <DragSelectSurface selectionAreaRef={selectionAreaRef} onMouseDown={handleSelectionAreaMouseDown} dragBox={dragBox} className="flex-1 overflow-hidden"
         onContextMenu={(e) => { e.preventDefault(); setSelection([]); setMenuPos({ x: e.clientX, y: e.clientY }); }}>
         <VirtualFileList
-          entries={visibleEntries} loading={loading} error={error}
+          entries={visibleEntries} loading={loading} error={error} onRetry={onRefresh}
           renaming={renaming} creating={creating}
           onCommitCreate={commitCreate}
           onCancelCreate={() => setCreating(null)}
@@ -518,10 +516,7 @@ export function FilePane({
             )}
           </span>
           <button
-            className="ml-auto text-xs text-(--t-text-dim) transition-colors px-1.5 py-0.5 rounded-sm"
-            style={{ background: "transparent" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-card-hover)"; e.currentTarget.style.color = "var(--t-text-secondary)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+            className="ml-auto text-xs text-(--t-text-dim) transition-colors px-1.5 py-0.5 rounded-sm hover:bg-(--t-bg-card-hover) hover:text-(--t-text-secondary)"
             onClick={() => setSelection([])}
           >
             {t("fileTransfer.pane.selection.clear")}
@@ -606,7 +601,9 @@ export function buildSelectionActions(files: FileEntry[], ctx: SelectionActionsC
         label: t("fileTransfer.pane.menu.moveToTarget", { count: files.length }), icon: "lucide:scissors", disabledReason: ctx.readOnlyTip,
         onClick: async () => {
           ctx.onTransferToTarget?.(files);
-          for (const f of files) await sftpDelete(sid, f.path).catch(() => {});
+          for (const f of files) {
+            await sftpDelete(sid, f.path).catch((e: unknown) => toastActionError(e, t));
+          }
           ctx.setSelection([]);
           ctx.onRefresh();
         },
@@ -780,7 +777,7 @@ function PathBreadcrumb({ cwd, onNavigate, dropFolderPath }: { cwd: string; isLo
         const isRoot = i === 0 && isAbsolute;
         return (
           <Fragment key={crumb.path}>
-            {i > 1 && <span className="shrink-0 mx-0.5 text-(--t-text-dim)" style={{ fontSize: "0.8125rem", flexShrink: 0 }}>/</span>}
+            {i > 1 && <span className="shrink-0 mx-0.5 text-xs text-(--t-text-dim)">/</span>}
             <CrumbSegment
               label={isRoot ? "/" : crumb.label}
               isLast={isLast}
@@ -796,34 +793,18 @@ function PathBreadcrumb({ cwd, onNavigate, dropFolderPath }: { cwd: string; isLo
 }
 
 function CrumbSegment({ label, isLast, isDropTarget, dropPath, onClick }: { label: string; isLast: boolean; isDropTarget?: boolean; dropPath?: string; onClick: (e: React.MouseEvent) => void }) {
-  const [hovered, setHovered] = useState(false);
+  const tone = isLast
+    ? "font-medium cursor-text text-(--t-text-primary) hover:bg-(--t-text-primary)/6"
+    : "cursor-pointer text-(--t-text-dim) hover:text-(--t-accent) hover:bg-(--t-accent)/15 hover:underline decoration-(--t-accent)/55 underline-offset-2";
   return (
     <button
       data-drop-folder={dropPath}
-      className="shrink-0 rounded-sm px-1 py-0.5 font-mono whitespace-nowrap"
-      style={{
-        fontSize: "0.8125rem",
-        fontWeight: isLast ? 500 : 400,
-        color: isLast
-          ? "var(--t-text-primary)"
-          : hovered ? "var(--t-accent)" : "var(--t-text-dim)",
-        background: isDropTarget
-          ? "color-mix(in srgb, var(--t-accent) 35%, transparent)"
-          : hovered
-            ? isLast
-              ? "color-mix(in srgb, var(--t-text-primary) 6%, transparent)"
-              : "color-mix(in srgb, var(--t-accent) 15%, transparent)"
-            : "transparent",
-        boxShadow: isDropTarget ? "0 0 0 1px color-mix(in srgb, var(--t-accent) 70%, transparent)" : undefined,
-        cursor: isLast ? "text" : "pointer",
-        transition: "color 0.1s, background 0.1s",
-        textDecoration: !isLast && hovered ? "underline" : "none",
-        textDecorationColor: "color-mix(in srgb, var(--t-accent) 55%, transparent)",
-        textUnderlineOffset: "2px",
-      }}
+      className={`shrink-0 rounded-sm px-1 py-0.5 font-mono text-xs whitespace-nowrap transition-colors ${tone}`}
+      style={isDropTarget ? {
+        background: "color-mix(in srgb, var(--t-accent) 35%, transparent)",
+        boxShadow: "0 0 0 1px color-mix(in srgb, var(--t-accent) 70%, transparent)",
+      } : undefined}
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       {label}
     </button>
@@ -838,22 +819,19 @@ function CrumbSegment({ label, isLast, isDropTarget, dropPath, onClick }: { labe
 export type Viewport = { scrollLeft: number; gutter: number };
 
 function ResizeHandle({ column, onWidth }: { column: FileColumn; onWidth: (w: number) => void }) {
-  const [hovered, setHovered] = useState(false);
   const { dragging, handlers } = usePointerDrag({
     cursor: "col-resize",
     // Seed from the on-screen width: the name column grows past its stored width to fill the pane.
     begin: (e) => ({ x: e.clientX, width: e.currentTarget.parentElement!.getBoundingClientRect().width }),
     move: (e, start) => onWidth(Math.max(COLUMN_MIN_WIDTHS[column], start.width + (e.clientX - start.x))),
   });
-  const isActive = hovered || dragging;
+  const ACTIVE = "bg-(--t-accent) opacity-100 shadow-[0_0_0_1px_color-mix(in_srgb,var(--t-accent)_22%,transparent)]";
 
   return (
     <div
       {...handlers}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-      className="absolute inset-y-0 right-0 z-10 flex items-center justify-center"
+      className="group/resize absolute inset-y-0 right-0 z-10 flex items-center justify-center"
       style={{
         width: 14,
         marginRight: -7,
@@ -862,15 +840,9 @@ function ResizeHandle({ column, onWidth }: { column: FileColumn; onWidth: (w: nu
       }}
     >
       <div
-        className="h-full transition-colors"
-        style={{
-          width: 2,
-          background: isActive ? "var(--t-accent)" : "var(--t-text-dim)",
-          opacity: isActive ? 1 : 0.9,
-          boxShadow: isActive
-            ? "0 0 0 1px color-mix(in srgb, var(--t-accent) 22%, transparent)"
-            : "0 0 0 1px color-mix(in srgb, var(--t-bg-card) 70%, transparent)",
-        }}
+        className={`h-full w-0.5 transition-colors ${dragging
+          ? ACTIVE
+          : "bg-(--t-text-dim) opacity-90 shadow-[0_0_0_1px_color-mix(in_srgb,var(--t-bg-card)_70%,transparent)] group-hover/resize:bg-(--t-accent) group-hover/resize:opacity-100 group-hover/resize:shadow-[0_0_0_1px_color-mix(in_srgb,var(--t-accent)_22%,transparent)]"}`}
       />
     </div>
   );
@@ -890,11 +862,9 @@ function ColumnHeaders({ sortCol, sortDir, withPermissions, colWidths, visibleCo
 
   const dataColumns = visibleDataColumns(withPermissions, visibleCols);
   const { template, minWidth } = columnGrid(withPermissions, visibleCols, colWidths);
-  const labelStyle: React.CSSProperties = { fontSize: "0.6875rem", fontWeight: 600, letterSpacing: "0.055em", textTransform: "uppercase" };
 
   const headerCell = (col: FileColumn, label: string) => {
     const active = sortCol === (col as SortCol);
-    const color = () => active ? "var(--t-text-secondary)" : "var(--t-text-dim)";
     // Data columns are inset on both sides (rows carry the same inset) so the
     // label starts where its values do and never touches the resize divider
     // sitting on the column edge — the file-manager convention.
@@ -902,12 +872,9 @@ function ColumnHeaders({ sortCol, sortDir, withPermissions, colWidths, visibleCo
       <button
         key={col}
         onClick={() => onSort(col as SortCol)}
-        className={`relative min-w-0 flex h-full items-center gap-0.5 justify-start transition-colors ${col === "name" ? "" : "px-2"}`}
-        style={{ color: color() }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--t-text-secondary)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = color(); }}
+        className={`relative min-w-0 flex h-full items-center gap-0.5 justify-start transition-colors hover:text-(--t-text-secondary) ${active ? "text-(--t-text-secondary)" : "text-(--t-text-dim)"} ${col === "name" ? "" : "px-2"}`}
       >
-        <span className="truncate" style={labelStyle}>{label}</span>
+        <span className="truncate text-2xs font-semibold uppercase tracking-wider">{label}</span>
         {chevron(col as SortCol)}
         {dataColumns.length > 0 && <ResizeHandle column={col} onWidth={(w) => onResize(col, w)} />}
       </button>
@@ -935,7 +902,7 @@ function InlineFileNameRow({ isDir, value, placeholder, onCommit, onCancel }: {
 }) {
   return (
     <div className="flex items-center gap-2 ml-3 mr-1 px-2 py-1.5 rounded-sm border border-(--t-accent) text-sm text-(--t-text-primary)">
-      <Icon icon={isDir ? "lucide:folder" : "lucide:file"} width={15} className="shrink-0" style={{ color: isDir ? "#f0c050" : "var(--t-text-dim)" }} />
+      <Icon icon={isDir ? "lucide:folder" : "lucide:file"} width={15} className={`shrink-0 ${isDir ? "text-(--t-file-folder)" : "text-(--t-text-dim)"}`} />
       <InlineNameEditor
         value={value}
         placeholder={placeholder}
@@ -951,7 +918,7 @@ function InlineFileNameRow({ isDir, value, placeholder, onCommit, onCancel }: {
 // ── VirtualFileList ───────────────────────────────────────────────────────────
 
 function VirtualFileList({
-  entries, loading, error,
+  entries, loading, error, onRetry,
   renaming, creating, onCommitCreate, onCancelCreate,
   selectedIdSet, dropFolderPath,
   focusIndex, itemAreaRef, scrollToIndexRef,
@@ -963,7 +930,7 @@ function VirtualFileList({
   onMoveWithin,
   selectionActionsCtx,
 }: {
-  entries: FileEntry[]; loading: boolean; error: string | null;
+  entries: FileEntry[]; loading: boolean; error: string | null; onRetry: () => void;
   renaming: string | null; creating: "folder" | "file" | null;
   onCommitCreate: (name: string) => void; onCancelCreate: () => void;
   selectedIdSet: Set<string>; dropFolderPath: string | null;
@@ -1021,8 +988,12 @@ function VirtualFileList({
   }
   if (error) {
     return (
-      <div ref={itemAreaRef} data-drag-surface="true" className="h-full overflow-y-auto px-4 py-3 text-xs text-(--t-status-error)">
-        {error}
+      <div ref={itemAreaRef} data-drag-surface="true" className="h-full overflow-y-auto flex flex-col items-center justify-center gap-3 px-6 py-6 text-center">
+        <Icon icon="lucide:circle-alert" width={20} className="text-(--t-status-error)" />
+        <p role="alert" className="text-xs text-(--t-status-error) wrap-break-word max-w-full">{error}</p>
+        <button type="button" onClick={onRetry} className="btn btn-secondary text-xs px-3 py-1.5">
+          {t("common.action.retry")}
+        </button>
       </div>
     );
   }
@@ -1112,26 +1083,25 @@ function FileRow({ file, isSelected, isCut, isDragHover, withPermissions, colWid
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const { pos, open, close } = useContextMenu();
-  const [hovered, setHovered] = useState(false);
   const dimColor = isSelected ? "var(--t-text-secondary)" : "var(--t-text-dim)";
   const dataColumns = visibleDataColumns(withPermissions, visibleCols);
   const { template, minWidth } = columnGrid(withPermissions, visibleCols, colWidths);
 
-  let bg = "transparent";
-  let border = "1px solid transparent";
-  if (isDragHover) { bg = "color-mix(in srgb, var(--t-accent) 35%, transparent)"; border = "1px solid color-mix(in srgb, var(--t-accent) 70%, transparent)"; }
-  else if (isSelected) { bg = "color-mix(in srgb, var(--t-accent) 22%, transparent)"; border = "1px solid color-mix(in srgb, var(--t-accent) 45%, transparent)"; }
-  else if (hovered) { bg = "color-mix(in srgb, var(--t-text-primary) 5%, transparent)"; border = "1px solid color-mix(in srgb, var(--t-text-primary) 6%, transparent)"; }
+  // Selection / drop-target tints are inline; the plain hover tint is a CSS hover so
+  // it costs no re-render per row.
+  const tint = isDragHover ? { bg: 35, border: 70 } : isSelected ? { bg: 22, border: 45 } : null;
+  const tintStyle = tint ? {
+    background: `color-mix(in srgb, var(--t-accent) ${tint.bg}%, transparent)`,
+    borderColor: `color-mix(in srgb, var(--t-accent) ${tint.border}%, transparent)`,
+  } : undefined;
 
   return (
     <div
       data-selectable-id={selectableId}
-      className="grid items-center gap-2 px-2 py-1.5 my-px mr-1 ml-3 rounded-sm transition-colors cursor-default select-none relative"
-      style={{ background: bg, border, opacity: isCut ? 0.5 : undefined, gridTemplateColumns: template, minWidth }}
+      className={`grid items-center gap-2 px-2 py-1.5 my-px mr-1 ml-3 rounded-sm border transition-colors cursor-default select-none relative ${tint ? "" : "border-transparent hover:bg-(--t-text-primary)/5 hover:border-(--t-text-primary)/6"}`}
+      style={{ ...tintStyle, opacity: isCut ? 0.5 : undefined, gridTemplateColumns: template, minWidth }}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       onPointerDown={onPointerDown}
       onContextMenu={(e) => { e.stopPropagation(); if (contextActions?.length) { if (!isSelected) onClick(e); open(e); } else { e.preventDefault(); } }}
     >
@@ -1139,8 +1109,8 @@ function FileRow({ file, isSelected, isCut, isDragHover, withPermissions, colWid
       <span className="flex items-center gap-2 min-w-0">
         <Icon
           icon={file.isSymlink ? "lucide:square-arrow-out-up-right" : file.isDir ? "lucide:folder" : looksLikeImage(file.name) ? "lucide:file-image" : "lucide:file"}
-          width={15} className="shrink-0"
-          style={{ color: file.isDir ? "#f0c050" : file.isSymlink ? "var(--t-accent)" : "var(--t-text-dim)" }}
+          width={15}
+          className={`shrink-0 ${file.isDir ? "text-(--t-file-folder)" : file.isSymlink ? "text-(--t-accent)" : "text-(--t-text-dim)"}`}
         />
         <span className="text-sm truncate text-(--t-text-primary) min-w-0">{file.name}</span>
       </span>

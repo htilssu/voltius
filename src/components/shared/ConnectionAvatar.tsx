@@ -13,7 +13,7 @@ export function ConnectionAvatar({ connection, size }: Props) {
   const iconName = displayIcon ? getConnectionIcon(displayIcon) : null;
   const iconBg = displayIcon ? getConnectionIconColor(displayIcon) : null;
 
-  const base = isSerial ? "var(--t-accent-muted, var(--t-bg-card-avatar))" : (iconBg ?? "var(--t-bg-card-avatar)");
+  const base = isSerial ? "var(--t-bg-card-avatar)" : (iconBg ?? "var(--t-bg-card-avatar)");
 
   return (
     <AvatarTile

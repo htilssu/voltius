@@ -27,7 +27,7 @@ import { greyedTapProps } from "../tapOrExplain";
 import { NavRow } from "./members/MembersRows";
 
 const PAGE = "absolute inset-0 z-30 flex flex-col bg-(--t-bg-base)";
-const ACTION = "min-h-12 flex items-center justify-center gap-2 px-4 rounded-xl text-sm font-medium aria-disabled:opacity-45";
+const ACTION = "min-h-12 flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-medium aria-disabled:opacity-(--disabled-opacity)";
 const KEY_STATES = {
   held: { icon: "lucide:key-round", label: "mobile.members.keyHeld" },
   awaiting: { icon: "lucide:hourglass", label: "mobile.members.keyAwaiting" },

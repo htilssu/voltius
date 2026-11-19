@@ -10,7 +10,7 @@ import { AUDIENCE_HOST, audienceOf, type Audience, type RouteSummary as Summary 
 export function HopCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-(--t-border) bg-(--t-bg-base) p-3 space-y-3">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide text-(--t-text-dim)">
+      <div className="flex items-center gap-2 text-2xs font-semibold uppercase tracking-wider text-(--t-text-dim)">
         <Icon icon={icon} width={13} />
         {title}
       </div>
@@ -21,7 +21,7 @@ export function HopCard({ icon, title, children }: { icon: string; title: string
 
 export function HopArrow({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-(--t-text-dim)">
+    <div className="flex items-center justify-center gap-1.5 py-1.5 text-2xs text-(--t-text-dim)">
       <Icon icon="lucide:arrow-down" width={14} className="text-(--t-accent)" />
       {label}
     </div>
@@ -78,7 +78,7 @@ export function ListenerFields({ side, portLabel, portPlaceholder, port, onPort,
             value={bindHost} onChange={(e) => onBindHost(e.target.value)} inputMode="url" {...formIdentifierProps} />
         )}
         {audience !== "private" && (
-          <p className="mt-1.5 flex gap-1.5 text-[10px] leading-relaxed text-amber-400">
+          <p className="mt-1.5 flex gap-1.5 text-2xs leading-relaxed text-(--t-status-warning)">
             <Icon icon="lucide:triangle-alert" width={12} className="mt-0.5 shrink-0" />
             {t(`portForwarding.ruleForm.sharedWarning.${side}`)}
           </p>
@@ -126,7 +126,7 @@ export function RouteSummary({ summary }: { summary: Summary | null }) {
       </p>
       {summary && (
         <div className="mt-2 flex items-start gap-2 rounded-md bg-(--t-bg-base) px-2 py-1.5">
-          <code className="flex-1 break-all font-mono text-[11px] leading-relaxed text-(--t-text-dim)">{summary.command}</code>
+          <code className="flex-1 break-all font-mono text-2xs leading-relaxed text-(--t-text-dim)">{summary.command}</code>
           <button type="button" title={t("portForwarding.ruleForm.summary.copyCommand")}
             className="mt-0.5 shrink-0 text-(--t-text-muted) hover:text-(--t-text-primary)"
             onClick={() => { void writeClipboard(summary.command).then(() => flash()); }}>

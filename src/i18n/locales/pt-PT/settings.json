@@ -936,7 +936,8 @@
         "builtinBadge": "Nativa",
         "dragToReorder": "Arraste para reordenar",
         "deleteRoleTitle": "Eliminar função",
-        "clickToConfirm": "Clique novamente para confirmar",
+        "deleteRoleConfirm": "Eliminar “{{name}}”? Membros com esta função: {{count}}. Perdem as respetivas permissões; as outras funções mantêm-se.",
+        "loadFailed": "Não foi possível carregar as funções.",
         "failedToDelete": "Falha ao eliminar",
         "editRole": "Editar função",
         "newRole": "Nova função personalizada",
@@ -986,6 +987,9 @@
         "update": "Atualizar",
         "updating": "A atualizar…",
         "updateTitle": "Atualizar para v{{version}}",
+        "confirmUninstall": {
+          "message": "{{name}} será removido deste dispositivo, juntamente com as definições."
+        },
         "confirmUninstallSeeded": {
           "title": "Desinstalar {{name}}?",
           "message": "{{name}} é um plugin incluído. Desinstalá-lo o remove da sua lista — você pode reinstalá-lo a qualquer momento na aba Explorar.",

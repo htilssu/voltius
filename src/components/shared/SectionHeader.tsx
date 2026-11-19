@@ -10,7 +10,7 @@ export function SectionHeader({ label, count, aside, compact, collapsed, onToggl
   onToggle?: () => void;
   className?: string;
 }) {
-  const text = compact ? "text-[10px]" : "text-xs";
+  const text = compact ? "text-2xs" : "text-xs";
   const body = (
     <>
       <span className={`${text} font-bold uppercase tracking-widest text-(--t-text-dim)`}>{label}</span>
@@ -34,7 +34,7 @@ export function SectionHeader({ label, count, aside, compact, collapsed, onToggl
 export function SectionAddButton({ label, onClick, disabledReason }: { label: string; onClick: () => void; disabledReason?: string }) {
   return (
     <button
-      className="flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg text-(--t-text-dim) enabled:hover:text-(--t-text-primary) enabled:hover:bg-(--t-bg-elevated) disabled:opacity-40 disabled:cursor-not-allowed"
+      className="flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg text-(--t-text-dim) enabled:hover:text-(--t-text-primary) enabled:hover:bg-(--t-bg-elevated) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
       onClick={onClick}
       disabled={!!disabledReason}
       title={disabledReason}
@@ -51,5 +51,5 @@ const PILL_TONES = {
 };
 
 export function StatusPill({ tone, children }: { tone: keyof typeof PILL_TONES; children: ReactNode }) {
-  return <span className={`px-1.5 py-0.5 rounded-full text-[10px] leading-none ${PILL_TONES[tone]}`}>{children}</span>;
+  return <span className={`px-1.5 py-0.5 rounded-full text-2xs leading-none ${PILL_TONES[tone]}`}>{children}</span>;
 }

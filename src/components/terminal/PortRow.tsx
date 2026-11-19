@@ -113,9 +113,9 @@ export function PortRow({
             </span>
           )}
           {badge && (
-            <span className={`text-[10px] px-1 py-0.5 rounded font-medium shrink-0 leading-none ${
+            <span className={`text-2xs px-1 py-0.5 rounded font-medium shrink-0 leading-none ${
               badge === "auto"
-                ? "bg-purple-500/20 text-purple-400"
+                ? "bg-(--t-accent)/15 text-(--t-accent)"
                 : "bg-(--t-bg-elevated) text-(--t-text-muted)"
             }`}>
               {badge === "auto" ? t("terminal.ports.badge.auto") : t("terminal.ports.badge.adHoc")}
@@ -124,14 +124,14 @@ export function PortRow({
         </div>
         <div className="flex items-center gap-1.5">
           {error ? (
-            <span title={error} className="text-[10px] text-red-400 truncate leading-tight">{error}</span>
+            <span title={error} className="text-2xs text-(--t-status-error) truncate leading-tight">{error}</span>
           ) : (
-            <span className="text-[10px] font-mono text-(--t-text-muted) truncate leading-tight">
+            <span className="text-2xs font-mono text-(--t-text-muted) truncate leading-tight">
               {portInfo}
             </span>
           )}
           {bytes && (
-            <span className="text-[10px] text-(--t-text-dim) shrink-0 leading-tight">
+            <span className="text-2xs text-(--t-text-dim) shrink-0 leading-tight">
               {bytes}
             </span>
           )}
@@ -144,10 +144,10 @@ export function PortRow({
         disabled={isBusy}
         title={isActive ? t("terminal.ports.pauseForwarding") : t("terminal.ports.resumeForwarding")}
         className={`w-5 h-5 flex items-center justify-center rounded shrink-0 transition-all
-          opacity-0 group-hover:opacity-100
+          opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100
           ${isActive
-            ? "text-(--t-text-muted) hover:text-amber-400 hover:bg-amber-500/10"
-            : "text-(--t-text-muted) hover:text-green-400 hover:bg-green-500/10"
+            ? "text-(--t-text-muted) hover:text-(--t-status-warning) hover:bg-(--t-status-warning)/10"
+            : "text-(--t-text-muted) hover:text-(--t-status-connected) hover:bg-(--t-status-connected)/10"
           }`}
       >
         {isBusy ? (
@@ -165,8 +165,8 @@ export function PortRow({
         disabled={isDeleting}
         title={t("common.action.delete")}
         className="w-5 h-5 flex items-center justify-center rounded shrink-0 transition-all
-          opacity-0 group-hover:opacity-100
-          text-(--t-text-muted) hover:text-red-400 hover:bg-red-500/10"
+          opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100
+          text-(--t-text-muted) hover:text-(--t-status-error) hover:bg-(--t-status-error)/10"
       >
         {isDeleting ? (
           <Icon icon="lucide:loader-circle" width={11} className="animate-spin" />
@@ -182,7 +182,7 @@ export function PortRow({
           disabled={isSaving}
           title={t("terminal.ports.saveAsRule")}
           className="w-5 h-5 flex items-center justify-center rounded shrink-0 transition-all
-            opacity-0 group-hover:opacity-100
+            opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100
             text-(--t-text-muted) hover:text-(--t-accent) hover:bg-(--t-bg-elevated)"
         >
           {isSaving ? (
@@ -202,7 +202,7 @@ export function PortRow({
             text-(--t-text-muted) hover:text-(--t-text-primary) hover:bg-(--t-bg-elevated)"
         >
           <Icon icon={copied ? "lucide:check" : "lucide:copy"} width={11}
-            className={copied ? "text-green-400" : ""} />
+            className={copied ? "text-(--t-status-connected)" : ""} />
         </button>
       )}
 
@@ -212,7 +212,7 @@ export function PortRow({
           onClick={(e) => { e.stopPropagation(); void openUrl(httpUrl); }}
           title={t("terminal.ports.openUrl", { url: httpUrl })}
           className="w-5 h-5 flex items-center justify-center rounded shrink-0 transition-all
-            text-(--t-text-muted) hover:text-blue-400 hover:bg-blue-500/10"
+            text-(--t-text-muted) hover:text-(--t-accent) hover:bg-(--t-bg-elevated)"
         >
           <Icon icon="lucide:globe" width={11} />
         </button>

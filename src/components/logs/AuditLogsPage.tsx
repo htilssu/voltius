@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { onTeamSseEvent } from "@/services/sync";
 import { Icon } from "@iconify/react";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { SkeletonList } from "@/components/placeholder/SkeletonList";
 import { useAuditStore } from "@/stores/auditStore";
 import { usePermissions } from "@/hooks/usePermission";
 import { useSelectedAuditContext } from "@/hooks/useAuditContext";
@@ -36,8 +38,8 @@ function Pagination({
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity"
-        style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
+        type="button"
+        className="btn btn-secondary flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg"
       >
         <Icon icon="lucide:chevron-left" width={14} />
         {t("logs.pagination.prev")}
@@ -48,8 +50,8 @@ function Pagination({
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg disabled:opacity-40 transition-opacity"
-        style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
+        type="button"
+        className="btn btn-secondary flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg"
       >
         {t("logs.pagination.next")}
         <Icon icon="lucide:chevron-right" width={14} />
@@ -128,21 +130,20 @@ export default function AuditLogsPage() {
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           {error ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16">
-              <Icon icon="lucide:triangle-alert" width={28} className="text-(--t-text-dim)" />
-              <span className="text-sm text-(--t-text-dim)">{error}</span>
-              <button
-                onClick={() => { if (auditContext && canFetchAudit) fetchLogs(auditContext); }}
-                className="text-sm px-3 py-1.5 rounded-lg"
-                style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
-              >
-                {t("logs.error.retry")}
-              </button>
-            </div>
+            <EmptyState
+              size="section"
+              icon="lucide:triangle-alert"
+              title={error}
+              action={{ label: t("logs.error.retry"), icon: "lucide:rotate-ccw", onClick: () => { if (auditContext && canFetchAudit) fetchLogs(auditContext); } }}
+            />
           ) : loading && logs.length === 0 ? (
-            <div className="flex items-center justify-center py-16">
-              <Icon icon="lucide:loader-circle" width={24} className="animate-spin text-(--t-text-dim)" />
-            </div>
+            <div className="px-5 py-4"><SkeletonList /></div>
+          ) : visibleLogs.length === 0 ? (
+            <EmptyState
+              size="section"
+              icon={search.trim() ? "lucide:search-x" : "lucide:scroll-text"}
+              title={search.trim() ? t("logs.searchNoResults", { search: search.trim() }) : t("logs.emptyState")}
+            />
           ) : layout === "timeline" ? (
             <AuditTimeline logs={visibleLogs} />
           ) : layout === "horizontal" ? (

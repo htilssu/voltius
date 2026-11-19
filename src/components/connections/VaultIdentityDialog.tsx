@@ -13,7 +13,8 @@ function Choice({ icon, title, subtitle, selected, onClick }: { icon: string; ti
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-left bg-(--t-bg-elevated) border"
+      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-left bg-(--t-bg-elevated) border hover:border-(--t-border-hover)"
+      aria-pressed={selected}
       style={{ borderColor: selected ? "var(--t-accent)" : "var(--t-border)" }}
     >
       <Icon icon={icon} width={14} className={selected ? "shrink-0 text-(--t-accent)" : "shrink-0 text-(--t-text-dim)"} />
@@ -34,15 +35,21 @@ export function VaultIdentityDialog({ teamId, onClose }: { teamId: string; onClo
   const vault = useTeamName(teamId);
   const [selected, setSelected] = useState<string | null>(current);
 
+  const [saving, setSaving] = useState(false);
   const save = () => {
-    void setVaultDefault(teamId, selected).then(onClose, notifyError);
+    if (saving) return;
+    setSaving(true);
+    void setVaultDefault(teamId, selected).then(onClose, (e: unknown) => {
+      setSaving(false);
+      notifyError(e);
+    });
   };
 
   return (
     <Modal onClose={onClose} onEnter={save}>
-      <ModalCard className="p-6 flex flex-col gap-5" style={{ width: "24rem" }}>
+      <ModalCard className="p-6 flex flex-col gap-5 w-[min(24rem,calc(100vw-2rem))]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "color-mix(in srgb, var(--t-accent) 18%, transparent)" }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "color-mix(in srgb, var(--t-accent) 18%, transparent)" }}>
             <Icon icon="lucide:user-round-cog" width={18} className="text-(--t-accent)" />
           </div>
           <div>
@@ -60,7 +67,7 @@ export function VaultIdentityDialog({ teamId, onClose }: { teamId: string; onClo
         </div>
         <div className="flex gap-2 justify-end pt-1">
           <button className="btn btn-secondary px-4 py-2 rounded-lg text-sm font-medium" onClick={onClose}>{t("common.action.cancel")}</button>
-          <button className="btn btn-primary px-4 py-2 rounded-lg text-sm font-medium" onClick={save}>{t("common.action.save")}</button>
+          <button className="btn btn-primary px-4 py-2 rounded-lg text-sm font-medium" onClick={save} disabled={saving}>{t("common.action.save")}</button>
         </div>
       </ModalCard>
     </Modal>

@@ -20,7 +20,7 @@ function PickRow({ c, attr, pingEnabled, onPick }: { c: Connection; attr: string
 
   return (
     <button {...{ [`data-${attr}-pick`]: c.id }} onClick={() => onPick(c.id)}
-      className="w-full flex items-center gap-3 px-3 py-3 text-left rounded-xl active:bg-(--t-bg-card)">
+      className="w-full flex items-center gap-3 px-3 py-3 text-left rounded-lg active:bg-(--t-bg-card)">
       <span className="relative shrink-0">
         <ConnectionAvatar connection={c} size={30} />
         {showPingDot && (

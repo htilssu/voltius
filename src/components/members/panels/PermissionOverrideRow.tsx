@@ -32,7 +32,7 @@ export function PermissionOverrideRow({
     <div className="flex items-center justify-between gap-3 py-1.5">
       <div className="min-w-0">
         <p className="text-xs text-(--t-text-primary) truncate">{shown}</p>
-        <p className={`text-[10px] text-(--t-text-dim) ${toggleSize === "touch" ? "line-clamp-2" : "truncate"}`}>
+        <p className={`text-2xs text-(--t-text-dim) ${toggleSize === "touch" ? "line-clamp-2" : "truncate"}`}>
           {note ?? source}
           {!note && (
             <> · <span className="font-medium" style={{ color: OVERRIDE_STATE_COLOR[granted ? "allow" : "deny"] }}>
@@ -56,7 +56,7 @@ export function PermissionOverrideGroups({ groups, onChange, toggleSize }: {
     <div className="space-y-4">
       {groups.map((g) => (
         <div key={g.key}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-(--t-text-dim) opacity-70 mb-0.5">
+          <p className="text-2xs font-bold uppercase tracking-widest text-(--t-text-dim) opacity-70 mb-0.5">
             {t(`members.permissions.group.${g.key}`)}
           </p>
           {g.rows.map((row) => (

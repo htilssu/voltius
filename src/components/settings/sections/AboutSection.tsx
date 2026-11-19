@@ -137,12 +137,7 @@ export default function AboutSection() {
                 <button
                   onClick={() => checkForUpdate()}
                   disabled={busy}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 bg-(--t-bg-input)"
-                  style={{
-                    color: busy ? "var(--t-text-dim)" : "var(--t-text-primary)",
-                    cursor: busy ? "default" : "pointer",
-                    opacity: busy ? 0.6 : 1,
-                  }}
+                  className="btn btn-secondary flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
                 >
                   <Icon icon="lucide:refresh-cw" width={12} className={busy ? "animate-spin" : ""} />
                   {t("settings.about.checkForUpdate")}
@@ -162,6 +157,7 @@ export default function AboutSection() {
 
             {action && (
               <button
+                // Failures land in updater.status === "error", rendered above.
                 onClick={() => action.run().catch(() => {})}
                 className="btn btn-primary w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium"
               >

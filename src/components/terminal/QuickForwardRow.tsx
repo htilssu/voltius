@@ -61,7 +61,7 @@ export function QuickForwardRow({
         {busy && <Icon icon="lucide:loader-circle" width={12} className="animate-spin text-(--t-text-muted) shrink-0" />}
       </div>
       {error && (
-        <p className="text-[10px] text-red-400 mt-0.5 pl-[18px] leading-tight">{error}</p>
+        <p className="text-2xs text-(--t-status-error) mt-0.5 pl-[18px] leading-tight">{error}</p>
       )}
     </div>
   );

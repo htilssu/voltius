@@ -22,7 +22,7 @@ function SessionCard({ session: a, cards, onActions }: { session: RemoteSession;
       tabIndex={idle ? 0 : undefined}
       data-mobile-remote-session={a.sessionId}
       {...(idle ? press : {})}
-      className="shrink-0 flex items-center gap-4 px-3 py-3 rounded-2xl text-left active:opacity-80"
+      className="shrink-0 flex items-center gap-4 px-3 py-3 rounded-lg text-left active:opacity-80"
       style={{ ...GLASS_CARD_STYLE, minWidth: 220, maxWidth: 280 }}
     >
       <RemoteSessionCardBody

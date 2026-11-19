@@ -17,7 +17,7 @@ const toggle = (props: Partial<Parameters<typeof DisclosureToggle>[0]> = {}) => 
 test.each([
   [{}, "focus-ring flex items-center gap-1 w-full text-xs transition-colors text-(--t-text-dim) hover:text-(--t-text-primary) justify-center"],
   [{ align: "start" as const }, "focus-ring flex items-center gap-1 w-full text-xs transition-colors text-(--t-text-dim) hover:text-(--t-text-primary) text-left"],
-  [{ look: "compact" as const }, "flex items-center gap-1 text-[11px] text-(--t-text-secondary)"],
+  [{ look: "compact" as const }, "flex items-center gap-1 text-2xs text-(--t-text-secondary)"],
   [{ look: "row" as const }, "w-full flex items-center gap-1.5 px-3 py-2 text-xs text-(--t-text-secondary)"],
 ])("desktop_classes_%#_are_unchanged", (props, className) => {
   expect(toggle(props).className).toBe(className);

@@ -4,7 +4,7 @@
  * the copy, the statuses and the recovery actions exist once.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { useTeamStore } from "@/stores/teamStore";
@@ -14,6 +14,9 @@ import { ownerLabel } from "@/services/teamVaultFirstAccess";
 import { checkForUpdate } from "@/services/updater";
 import { isPrimaryOwner } from "@/services/permissions";
 import { useMyUserId } from "@/hooks/useMyUserId";
+import { appToast } from "@/services/appToast";
+import { userFacingReason } from "@/services/errorReason";
+import { StateTile } from "./StateTile";
 
 export default function TeamVaultStatePanel({
   status,
@@ -28,6 +31,17 @@ export default function TeamVaultStatePanel({
   const loadMembers = useTeamStore((s) => s.loadMembers);
   const myUserId = useMyUserId();
   const isOwner = isPrimaryOwner(team, myUserId);
+  const [retrying, setRetrying] = useState(false);
+  const retry = async () => {
+    setRetrying(true);
+    try {
+      await fetchTeamData(teamId);
+    } catch (e) {
+      appToast("error", userFacingReason(e));
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   // The waiting copy names the owner the user is waiting on, so the roster has
   // to be there — this panel replaces the pages that would otherwise load it.
@@ -99,23 +113,14 @@ export default function TeamVaultStatePanel({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-(--t-bg-base)">
-      <div
-        className="flex items-center justify-center rounded-3xl w-[5.333rem] h-[5.333rem] text-(--t-text-dim)"
-        style={{
-          background: "linear-gradient(135deg, var(--t-bg-elevated) 0%, var(--t-bg-card) 100%)",
-          border: "1px solid var(--t-border)",
-        }}
-      >
-        <Icon icon={cfg.icon} width={36} />
-      </div>
+      <StateTile icon={cfg.icon} />
       <div className="flex flex-col items-center gap-1.5 text-center max-w-xs">
         <span className="text-base font-semibold text-(--t-text-primary)">{cfg.title}</span>
-        <span className="text-sm text-(--t-text-dim)">{cfg.body}</span>
+        <span className="text-sm text-(--t-text-secondary)">{cfg.body}</span>
         {status === "payment_required" && isOwner && (
           <button
             onClick={openBilling}
-            className="mt-2 text-sm px-3 py-1.5 rounded-lg"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary mt-2 text-sm px-3 py-1.5 rounded-lg"
           >
             {t("layout.mainPanel.manageSubscription")}
           </button>
@@ -123,18 +128,19 @@ export default function TeamVaultStatePanel({
         {status === "update_required" && (
           <button
             onClick={() => void checkForUpdate()}
-            className="mt-2 text-sm px-3 py-1.5 rounded-lg"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary mt-2 text-sm px-3 py-1.5 rounded-lg"
           >
             {t("layout.mainPanel.checkForUpdates")}
           </button>
         )}
         {(!status || status === "error" || status === "awaiting_key") && (
           <button
-            onClick={() => fetchTeamData(teamId).catch(() => {})}
-            className="mt-2 text-sm px-3 py-1.5 rounded-lg"
-            style={{ background: "var(--t-bg-elevated)", color: "var(--t-text-primary)", border: "1px solid var(--t-border)" }}
+            onClick={() => void retry()}
+            disabled={retrying}
+            aria-busy={retrying}
+            className="btn btn-secondary mt-2 inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg"
           >
+            {retrying && <Icon icon="lucide:loader-circle" width={13} className="animate-spin" />}
             {t("layout.mainPanel.tryAgain")}
           </button>
         )}

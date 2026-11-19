@@ -24,7 +24,7 @@ export default function MoveToFolderSheet({
           <button
             key={target.id ?? "__root__"}
             data-move-target={target.id ?? "root"}
-            className="w-full flex items-center gap-2 px-3 py-3 rounded-xl text-left active:bg-(--t-bg-card)"
+            className="w-full flex items-center gap-2 px-3 py-3 rounded-lg text-left active:bg-(--t-bg-card)"
             style={{ paddingLeft: `${12 + target.depth * 16}px` }}
             onClick={() => { onPick(target.id).catch(reportError); onClose(); }}
           >

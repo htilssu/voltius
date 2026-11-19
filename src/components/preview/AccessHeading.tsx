@@ -8,7 +8,7 @@ export function AccessHeading({ title, subtitleOnDesktop = true }: { title: stri
     <div>
       <p className="text-sm font-semibold text-(--t-text-primary)">{title}</p>
       {(mobile || subtitleOnDesktop) && (
-        <p className="text-[11px] text-(--t-text-dim)">
+        <p className="text-2xs text-(--t-text-dim)">
           {t(mobile ? "mobile.viewAs.accessSubtitle" : "members.viewAs.access.subtitle")}
         </p>
       )}

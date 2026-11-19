@@ -95,10 +95,11 @@ test("onDone is handed through to the service", async () => {
   );
 });
 
-test("a removal that fails entirely still closes the dialog without an unhandled rejection", async () => {
+test("a removal that fails entirely stays open with the reason, without an unhandled rejection", async () => {
   h.depart.mockRejectedValueOnce(new Error("boom"));
   const onClose = vi.fn();
   render(<OffboardingDialog members={members} teamId="t1" mode="remove" onClose={onClose} />);
   fireEvent.click(screen.getByRole("button", { name: "Remove" }));
-  await waitFor(() => expect(onClose).toHaveBeenCalled());
+  expect(await screen.findByRole("alert")).toBeTruthy();
+  expect(onClose).not.toHaveBeenCalled();
 });

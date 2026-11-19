@@ -42,7 +42,7 @@ export function PeopleList({ people, canManage, onRemove, onRevoke, onGrantKey, 
             </span>
 
             {p.state === "pending" && (
-              <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full border border-dashed border-(--t-border) text-(--t-text-dim)">
+              <span className="shrink-0 text-2xs px-2 py-0.5 rounded-full border border-dashed border-(--t-border) text-(--t-text-dim)">
                 {t("members.people.pending")}
               </span>
             )}
@@ -73,13 +73,13 @@ export function PeopleList({ people, canManage, onRemove, onRevoke, onGrantKey, 
 
           {p.state === "awaiting_key" && (
             <div className="flex items-center gap-2 pl-[2.3rem]">
-              <span className="text-[11px] text-(--t-text-secondary) flex-1 min-w-0">
+              <span className="text-2xs text-(--t-text-secondary) flex-1 min-w-0">
                 {t("members.people.awaitingKey")}
               </span>
               {canManage && (
                 <button
                   onClick={() => onGrantKey(p)}
-                  className="shrink-0 px-2.5 py-1 rounded-lg text-[11px] border border-(--t-border) text-(--t-text-secondary)"
+                  className="shrink-0 px-2.5 py-1 rounded-lg text-2xs border border-(--t-border) text-(--t-text-secondary)"
                 >
                   {t("members.people.grantKey")}
                 </button>

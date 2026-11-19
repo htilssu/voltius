@@ -40,10 +40,10 @@ export function LanConfirmPrompt({ kind, variant, icon, label, failed, ready = t
   ];
 
   return (
-    <div {...{ [`data-lan-${kind}-confirm`]: "" }} className={`space-y-1.5 leading-relaxed ${sheet ? "text-xs" : "text-[10px]"} text-(--t-text-dim)`}>
+    <div {...{ [`data-lan-${kind}-confirm`]: "" }} className={`space-y-1.5 leading-relaxed ${sheet ? "text-xs" : "text-2xs"} text-(--t-text-dim)`}>
       {children}
       {error && (
-        <p {...{ [`data-lan-${kind}-error`]: "" }} role="alert" className="text-(--t-danger,#e5484d)">
+        <p {...{ [`data-lan-${kind}-error`]: "" }} role="alert" className="text-(--t-status-error)">
           {failed}
         </p>
       )}

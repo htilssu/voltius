@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { Icon } from "@iconify/react";
-import { useActiveSession } from "@voltius/ui";
+import { ConfirmModal, useActiveSession } from "@voltius/ui";
 import { getDockerApi, useDockerT } from "../runtime";
-import { useDockerList } from "../useDockerList";
+import { isDockerUnreachable, useDockerList } from "../useDockerList";
 import {
   createDockerListService,
   dockerListContainers,
@@ -150,6 +150,7 @@ export function DockerPanel() {
   const [state, dispatch] = useReducer(reducer, initial);
   const [sysPruning, setSysPruning] = useState(false);
   const [sysPruneMsg, setSysPruneMsg] = useState<string | null>(null);
+  const [confirmSysPrune, setConfirmSysPrune] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logsContainerNameRef = useRef<string>("");
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -250,29 +251,15 @@ export function DockerPanel() {
 
   if (!activeSession || activeSession.status !== "connected") {
     return (
-      <div className="flex items-center justify-center h-full opacity-40">
-        <p className="text-sm text-(--t-text-muted)">{t("noActiveSession")}</p>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-(--t-text-dim)">{t("noActiveSession")}</p>
       </div>
     );
   }
 
   // Android sandbox can't exec a local docker CLI; only remote (SSH) docker works.
   if (isAndroid && !isRemote) {
-    return (
-      <div className="flex h-full items-center justify-center px-6 text-center">
-        <div className="max-w-[260px] space-y-2">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-(--t-bg-card) text-(--t-text-muted) border border-(--t-border)">
-            <Icon icon="custom:docker" width={22} />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-(--t-text)">{t("androidLocalTitle")}</h3>
-            <p className="mt-1 text-[12px] leading-4 text-(--t-text-muted)">
-              {t("androidLocalSub")}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <PanelNotice icon="custom:docker" title={t("androidLocalTitle")} sub={t("androidLocalSub")} />;
   }
 
   if (state.view === "logs" && (state.logsContainerId || state.logsStackName)) {
@@ -292,37 +279,19 @@ export function DockerPanel() {
     );
   }
 
-  const isDockerError =
-    state.error &&
-    (state.error.includes("Docker not available") ||
-      state.error.includes("command not found") ||
-      state.error.includes("connect: no such file") ||
-      state.error.includes("client error (Connect)"));
+  const retry = (
+    <button
+      onClick={() => fetchForView(state.view)}
+      disabled={state.loading}
+      className="btn btn-secondary inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
+    >
+      <Icon icon="lucide:refresh-cw" width={12} className={state.loading ? "animate-spin" : ""} />
+      {t("refresh")}
+    </button>
+  );
 
-  if (isDockerError) {
-    return (
-      <div className="flex h-full items-center justify-center px-6 text-center">
-        <div className="max-w-[260px] space-y-2">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-(--t-bg-card) text-(--t-text-muted) border border-(--t-border)">
-            <Icon icon="custom:docker" width={22} />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-(--t-text)">{t("unreachableTitle")}</h3>
-            <p className="mt-1 text-[12px] leading-4 text-(--t-text-muted)">
-              {t("unreachableLocalSub")}
-            </p>
-          </div>
-          <button
-            onClick={() => fetchForView(state.view)}
-            disabled={state.loading}
-            className="inline-flex items-center gap-1.5 rounded-md border border-(--t-border) px-2.5 py-1 text-[12px] text-(--t-text-muted) hover:bg-(--t-bg-hover) hover:text-(--t-text) disabled:opacity-40"
-          >
-            <Icon icon="lucide:refresh-cw" width={12} className={state.loading ? "animate-spin" : ""} />
-            {t("refresh")}
-          </button>
-        </div>
-      </div>
-    );
+  if (state.error && isDockerUnreachable(state.error)) {
+    return <PanelNotice icon="custom:docker" title={t("unreachableTitle")} sub={t("unreachableLocalSub")}>{retry}</PanelNotice>;
   }
 
   const selectStack = async (stackName: string) => {
@@ -360,10 +329,10 @@ export function DockerPanel() {
             key={tab.id}
             onClick={() => dispatch({ type: "SET_VIEW", view: tab.id })}
             title={t(tab.labelKey)}
-            className={`flex-1 flex items-center justify-center py-1.5 text-[11px] gap-1 border-b-2 transition-colors ${
+            className={`flex-1 flex items-center justify-center py-1.5 text-2xs gap-1 border-b-2 transition-colors ${
               state.view === tab.id
-                ? "border-(--t-accent) text-(--t-text)"
-                : "border-transparent text-(--t-text-muted) hover:text-(--t-text)"
+                ? "border-(--t-accent) text-(--t-text-primary)"
+                : "border-transparent text-(--t-text-muted) hover:text-(--t-text-primary)"
             }`}
           >
             <Icon icon={tab.icon} width={12} />
@@ -373,7 +342,7 @@ export function DockerPanel() {
           <button
             onClick={() => dispatch({ type: state.searchOpen ? "CLOSE_SEARCH" : "OPEN_SEARCH" })}
             title={t("search")}
-            className="relative p-1 text-(--t-text-muted) hover:text-(--t-text)"
+            className="relative p-1 text-(--t-text-muted) hover:text-(--t-text-primary)"
             style={{ color: state.searchOpen ? "var(--t-accent)" : undefined }}
           >
             <Icon icon="lucide:search" width={11} />
@@ -385,32 +354,43 @@ export function DockerPanel() {
             onClick={() => fetchForView(state.view)}
             disabled={state.loading}
             title={t("refresh")}
-            className="p-1 text-(--t-text-muted) hover:text-(--t-text) disabled:opacity-40"
+            className="p-1 text-(--t-text-muted) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
           >
             <Icon icon="lucide:refresh-cw" width={11} className={state.loading ? "animate-spin" : ""} />
           </button>
           <button
-            onClick={async () => {
-              setSysPruning(true);
-              setSysPruneMsg(null);
-              try {
-                const msg = await dockerSystemPrune(target);
-                setSysPruneMsg(msg);
-                fetchForView(state.view);
-              } catch (e) {
-                setSysPruneMsg(String(e));
-              } finally {
-                setSysPruning(false);
-              }
-            }}
+            onClick={() => setConfirmSysPrune(true)}
             disabled={sysPruning}
             title={t("systemPrune")}
-            className="p-1 text-(--t-status-warning) opacity-70 hover:opacity-100 disabled:opacity-40"
+            aria-label={t("systemPrune")}
+            className="p-1 text-(--t-status-warning) opacity-70 hover:opacity-100 disabled:opacity-(--disabled-opacity)"
           >
-            <Icon icon="lucide:flame" width={11} />
+            <Icon icon={sysPruning ? "lucide:loader-circle" : "lucide:flame"} width={11} className={sysPruning ? "animate-spin" : undefined} />
           </button>
         </div>
       </div>
+
+      {confirmSysPrune && (
+        <ConfirmModal
+          title={t("systemPrune")}
+          message={t("systemPruneConfirm")}
+          onCancel={() => setConfirmSysPrune(false)}
+          onConfirm={async () => {
+            setConfirmSysPrune(false);
+            setSysPruning(true);
+            setSysPruneMsg(null);
+            try {
+              const msg = await dockerSystemPrune(target);
+              setSysPruneMsg(msg);
+              fetchForView(state.view);
+            } catch (e) {
+              setSysPruneMsg(String(e));
+            } finally {
+              setSysPruning(false);
+            }
+          }}
+        />
+      )}
 
       {state.searchOpen && state.view !== "logs" && (
         <div className="flex items-center gap-2 px-3 py-1.5 border-b border-(--t-border) shrink-0">
@@ -421,15 +401,15 @@ export function DockerPanel() {
             onChange={(e) => dispatch({ type: "SET_FILTER", view: state.view as ListView, query: e.target.value })}
             onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); dispatch({ type: "CLOSE_SEARCH" }); } }}
             placeholder={t("filterPlaceholder")}
-            className="flex-1 bg-transparent text-[12px] text-(--t-text-primary) placeholder:text-(--t-text-dim) outline-hidden"
+            className="flex-1 bg-transparent text-xs text-(--t-text-primary) placeholder:text-(--t-text-dim) outline-hidden"
           />
-          <span className="text-[11px] text-(--t-text-dim) shrink-0 tabular-nums">
+          <span className="text-2xs text-(--t-text-dim) shrink-0 tabular-nums">
             {filterCounts[state.view as ListView].shown}/{filterCounts[state.view as ListView].total}
           </span>
           <button
             onClick={() => dispatch({ type: "CLOSE_SEARCH" })}
             title={t("closeSearch")}
-            className="p-0.5 text-(--t-text-muted) hover:text-(--t-text)"
+            className="p-0.5 text-(--t-text-muted) hover:text-(--t-text-primary)"
           >
             <Icon icon="lucide:x" width={11} />
           </button>
@@ -437,16 +417,14 @@ export function DockerPanel() {
       )}
 
       {sysPruneMsg && (
-        <p className="px-3 py-1 text-[11px] text-(--t-text-muted) border-b border-(--t-border) shrink-0">
+        <p className="px-3 py-1 text-2xs text-(--t-text-muted) border-b border-(--t-border) shrink-0">
           {sysPruneMsg}
         </p>
       )}
 
       {/* Error state */}
       {state.error && (
-        <div className="px-3 py-2 text-[11px] text-(--t-text-muted)">
-          <p className="break-all">{state.error}</p>
-        </div>
+        <PanelNotice icon="lucide:triangle-alert" title={t("loadFailed")} sub={state.error}>{retry}</PanelNotice>
       )}
 
       {/* Content */}
@@ -515,6 +493,22 @@ export function DockerPanel() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/** Centered notice that replaces the panel body: unavailable, unreachable or load-failed, with an optional action. */
+function PanelNotice({ icon, title, sub, children }: { icon: string; title: string; sub: string; children?: ReactNode }) {
+  return (
+    <div className="flex flex-1 h-full items-center justify-center px-6 text-center">
+      <div className="max-w-[260px] flex flex-col items-center gap-2">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-(--t-bg-card) text-(--t-text-muted) border border-(--t-border)">
+          <Icon icon={icon} width={20} />
+        </div>
+        <h3 className="text-sm font-medium text-(--t-text-primary)">{title}</h3>
+        <p className="text-xs text-(--t-text-secondary) break-words">{sub}</p>
+        {children}
+      </div>
     </div>
   );
 }

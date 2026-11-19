@@ -91,7 +91,7 @@ test("an ending trial shows the warning badge", () => {
   seed({ tier: "pro", trial_ends_at: Math.floor(Date.now() / 1000) + 2 * 86_400 - 60 });
   const b = badge();
   expect(b.textContent).toBe("Pro · 2 days left");
-  expect(b.style.color).toBe("var(--t-status-warning)");
+  expect(b.className).toContain("text-(--t-status-warning)");
 });
 
 test("before the team list loads, a seat badge shows the plan name alone", () => {

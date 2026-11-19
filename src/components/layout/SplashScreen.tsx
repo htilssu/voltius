@@ -264,11 +264,11 @@ export default function SplashScreen({ onReady }: Props) {
         <p className="text-xs mt-1 text-(--t-text-secondary)">{t("layout.splash.sshClient")}</p>
       </div>
 
-      <div className="w-64 space-y-2.5">
+      <div className="w-full max-w-64 px-4 space-y-2.5">
         {steps.map((step) => <StepRow key={step.id} step={step} />)}
       </div>
       {keychainHint && (
-        <p className="w-72 mt-6 text-xs text-center text-(--t-text-secondary)">{t("layout.splash.keychainHint")}</p>
+        <p className="w-full max-w-72 px-4 mt-6 text-xs text-center text-(--t-text-secondary)">{t("layout.splash.keychainHint")}</p>
       )}
     </div>
   );
@@ -304,16 +304,16 @@ function StepRow({ step }: { step: Step }) {
 
 function StepIcon({ status }: { status: StepStatus }) {
   if (status === "done") return (
-    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.2)" }}>
-      <svg width="8" height="8" viewBox="0 0 10 8" fill="none" stroke="#22c55e" strokeWidth="2"><polyline points="1,4 4,7 9,1" /></svg>
+    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-(--t-status-connected)" style={{ background: "color-mix(in srgb, var(--t-status-connected) 20%, transparent)" }}>
+      <svg width="8" height="8" viewBox="0 0 10 8" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1,4 4,7 9,1" /></svg>
     </div>
   );
   if (status === "running") return (
     <div className="w-4 h-4 rounded-full shrink-0 animate-spin" style={{ border: "2px solid var(--t-border)", borderTopColor: "var(--t-accent)" }} />
   );
   if (status === "error") return (
-    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(239,68,68,0.2)" }}>
-      <svg width="8" height="8" viewBox="0 0 10 10" stroke="#ef4444" strokeWidth="2"><line x1="2" y1="2" x2="8" y2="8" /><line x1="8" y1="2" x2="2" y2="8" /></svg>
+    <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-(--t-status-error)" style={{ background: "color-mix(in srgb, var(--t-status-error) 20%, transparent)" }}>
+      <svg width="8" height="8" viewBox="0 0 10 10" stroke="currentColor" strokeWidth="2"><line x1="2" y1="2" x2="8" y2="8" /><line x1="8" y1="2" x2="2" y2="8" /></svg>
     </div>
   );
   return <div className="w-4 h-4 rounded-full shrink-0 border border-(--t-border)" />;

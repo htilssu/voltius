@@ -29,7 +29,7 @@ export function StateCard({ icon, color, title, body, actions, children }: {
   return (
     <div className="w-full">
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mx-auto mb-3"
+        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mx-auto mb-3"
         style={{
           background: `color-mix(in srgb, ${color} 12%, transparent)`,
           border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`,

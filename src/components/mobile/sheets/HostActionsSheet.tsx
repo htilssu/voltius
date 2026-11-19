@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import BottomSheet from "./BottomSheet";
+import { toastActionError } from "@/components/shared/actionError";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
 import { useConnectionStore, connectionToFormData } from "@/stores/connectionStore";
 import { useAllConnections } from "@/hooks/useAllConnections";
@@ -111,7 +112,7 @@ export default function HostActionsSheet({ hostId, fromEditor = false }: { hostI
       { icon: "lucide:folder-tree", label: t("mobile.sheets.shared.moveToFolder"), slug: "move-to-folder", onTap: () => setMode("move-folder") },
     ] : []),
     { icon: effectivePinned ? "lucide:pin-off" : "lucide:pin", label: effectivePinned ? t("mobile.sheets.shared.unpin") : t("mobile.sheets.shared.pin"), slug: effectivePinned ? "unpin" : "pin", onTap: () => {
-        pinConnection(hostId, !effectivePinned).catch(() => {});
+        pinConnection(hostId, !effectivePinned).catch((e: unknown) => toastActionError(e, t));
       } },
     ...(canEdit && moveTargets.length > 0 ? [{ icon: "lucide:folder-input", label: t("mobile.sheets.shared.moveToVault"), slug: "move-to-vault", onTap: () => setMode("move") }] : []),
     ...(!isTeamHost ? [{ icon: isSynced ? "lucide:cloud-off" : "lucide:cloud", label: isSynced ? t("common.objectSync.disable") : t("common.objectSync.enable"), slug: isSynced ? "disable-cloud-sync" : "enable-cloud-sync", onTap: () => {

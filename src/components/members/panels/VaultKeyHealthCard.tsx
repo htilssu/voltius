@@ -178,7 +178,7 @@ export function VaultKeyHealthCard({ teamId }: { teamId: string }) {
                     <p className={reason === "undecryptable" || reason === "uploadFailed" ? "text-(--t-status-warning)" : "text-(--t-text-dim)"}>
                       {t(`${P}.reason.${reason}`)}
                       {item.object_id && !item.orphan && !labels.get(item.object_id)?.name && (
-                        <span className="ml-1.5 font-mono text-[11px] text-(--t-text-dim)">{item.object_id.slice(0, 8)}</span>
+                        <span className="ml-1.5 font-mono text-2xs text-(--t-text-dim)">{item.object_id.slice(0, 8)}</span>
                       )}
                     </p>
                   </div>
@@ -187,7 +187,7 @@ export function VaultKeyHealthCard({ teamId }: { teamId: string }) {
                       type="button"
                       disabled={busy}
                       onClick={whenWritable(() => setRemoving(item))}
-                      className="shrink-0 px-2 py-1 text-(--t-status-error) disabled:opacity-40"
+                      className="shrink-0 px-2 py-1 text-(--t-status-error) disabled:opacity-(--disabled-opacity)"
                     >
                       {t(`${P}.remove`)}
                     </button>

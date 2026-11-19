@@ -17,6 +17,7 @@ import { ContextMenu, useContextMenu, type ContextMenuItem } from "@/components/
 import { useCopiedFlash } from "@/hooks/useCopiedFlash";
 import { formatRelative } from "@/utils/localeFormat";
 import { searchMatcher } from "@/utils/search";
+import { toastActionError } from "@/components/shared/actionError";
 
 interface HistoryItem {
   id: string;
@@ -66,7 +67,7 @@ function RowButton({
       disabled={disabled}
       title={title}
       aria-label={title}
-      className={`w-6 h-6 flex items-center justify-center rounded-sm transition-colors disabled:opacity-30 ${color ? "" : hoverClass} ${className}`}
+      className={`w-6 h-6 flex items-center justify-center rounded-sm transition-colors disabled:opacity-(--disabled-opacity) ${color ? "" : hoverClass} ${className}`}
       style={{ color: color ?? "var(--t-text-muted)" }}
     >
       <Icon icon={icon} width={12} className={filled ? "[&_path]:fill-current" : undefined} />
@@ -125,13 +126,13 @@ const HistoryRow = memo(function HistoryRow({
       <div className="flex items-start justify-between gap-1">
         <div className="flex-1 min-w-0">
           <p
-            className="text-[11px] font-mono leading-tight break-all"
+            className="text-2xs font-mono leading-tight break-all"
             style={{ color: "var(--t-text-primary)" }}
             title={item.command}
           >
             {item.command}
           </p>
-          <p className="flex text-[10px] mt-1 min-w-0" style={{ color: "var(--t-text-muted)" }}>
+          <p className="flex text-2xs mt-1 min-w-0" style={{ color: "var(--t-text-muted)" }}>
             <button
               onClick={() => actions.filterHost(item)}
               title={t("terminal.historyPanel.showOnlyHost", { host: hostName })}
@@ -193,7 +194,7 @@ function GroupHeader({ label, count, open, onToggle }: { label: string; count: n
       <span className="font-normal tracking-normal opacity-80">{count}</span>
     </>
   );
-  const className = "w-full flex items-center gap-1 px-3 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-left";
+  const className = "w-full flex items-center gap-1 px-3 pt-2 pb-1 text-2xs font-semibold uppercase tracking-wider text-left";
   const style = { color: "var(--t-text-muted)" };
   return onToggle ? (
     <button onClick={onToggle} aria-expanded={open} className={className} style={style}>{content}</button>
@@ -204,6 +205,7 @@ function GroupHeader({ label, count, open, onToggle }: { label: string; count: n
 
 export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
   const { t } = useTranslation();
+  const toastError = (e: unknown) => toastActionError(e, t);
   const entries = useCommandHistoryStore((s) => s.entries);
   const clear = useCommandHistoryStore((s) => s.clear);
   const remove = useCommandHistoryStore((s) => s.remove);
@@ -287,14 +289,14 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
       await broadcastSnippetInject([activeSession], text, execute);
       onInjected?.();
     } catch (e) {
-      console.error("history inject failed:", e);
+      toastError(e);
     }
   }
 
   function toggleFavorite(item: HistoryItem) {
     const store = useFavoriteCommandStore.getState();
     const done = item.favorite ? store.remove(item.id) : store.add(item.command, item.connectionId, item.sessionName);
-    done.catch((e) => console.error("favorite command update failed:", e));
+    done.catch(toastError);
   }
 
   function removeItem(item: HistoryItem) {
@@ -377,7 +379,7 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
           <Icon icon="lucide:search" width={12} className="shrink-0 pointer-events-none" style={{ color: "var(--t-text-muted)" }} />
           {hostFilter && (
             <span
-              className="flex items-center gap-0.5 min-w-0 max-w-[45%] pl-1.5 pr-0.5 rounded-full text-[10px] shrink-0"
+              className="flex items-center gap-0.5 min-w-0 max-w-[45%] pl-1.5 pr-0.5 rounded-full text-2xs shrink-0"
               style={{ background: "color-mix(in srgb, var(--t-accent) 16%, transparent)", color: "var(--t-accent)" }}
             >
               <span className="truncate">{hostName(hostFilter.id, hostFilter.label)}</span>
@@ -406,7 +408,7 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
           title={filteringCurrent ? t("terminal.historyPanel.showAllConnections") : t("terminal.historyPanel.showCurrentHost")}
           aria-pressed={filteringCurrent}
           disabled={!activeSession}
-          className={`w-7 h-7 flex items-center justify-center rounded-lg shrink-0 disabled:opacity-30 ${filteringCurrent ? "" : "enabled:hover:text-(--t-text-primary)"}`}
+          className={`w-7 h-7 flex items-center justify-center rounded-lg shrink-0 disabled:opacity-(--disabled-opacity) ${filteringCurrent ? "" : "enabled:hover:text-(--t-text-primary)"}`}
           style={{ color: filteringCurrent ? "var(--t-accent)" : "var(--t-text-muted)" }}
         >
           <Icon icon="lucide:filter" width={13} />
@@ -415,7 +417,7 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
           onClick={() => setConfirmClear(true)}
           disabled={unstarred.length === 0}
           title={t("terminal.historyPanel.clearAllTitle")}
-          className="w-7 h-7 flex items-center justify-center rounded-lg shrink-0 disabled:opacity-30 enabled:hover:text-(--t-status-error)"
+          className="w-7 h-7 flex items-center justify-center rounded-lg shrink-0 disabled:opacity-(--disabled-opacity) enabled:hover:text-(--t-status-error)"
           style={{ color: "var(--t-text-muted)" }}
         >
           <Icon icon="lucide:trash-2" width={13} />
@@ -424,7 +426,7 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
 
       {confirmClear && (
         <div
-          className="flex items-center gap-2 px-3 py-2 border-b shrink-0 text-[11px]"
+          className="flex items-center gap-2 px-3 py-2 border-b shrink-0 text-2xs"
           style={{ borderColor: "var(--t-border)", background: "color-mix(in srgb, var(--t-status-error) 8%, transparent)", color: "var(--t-text-primary)" }}
           onKeyDown={(e) => { if (e.key === "Escape") setConfirmClear(false); }}
         >
@@ -434,16 +436,14 @@ export function HistoryPanel({ onInjected }: { onInjected?: () => void } = {}) {
           </p>
           <button
             onClick={() => setConfirmClear(false)}
-            className="h-6 px-2 text-[10px] font-semibold rounded-md border shrink-0"
-            style={{ borderColor: "var(--t-border)", color: "var(--t-text-primary)" }}
+            className="btn btn-secondary h-6 px-2 text-2xs font-semibold shrink-0"
           >
             {t("common.action.cancel")}
           </button>
           <button
             onClick={() => { clear(); setConfirmClear(false); }}
             autoFocus
-            className="h-6 px-2 text-[10px] font-semibold rounded-md shrink-0"
-            style={{ background: "var(--t-status-error)", color: "white" }}
+            className="btn btn-danger h-6 px-2 text-2xs font-semibold shrink-0"
           >
             {t("terminal.historyPanel.clear")}
           </button>

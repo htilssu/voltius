@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "@/i18n";
 import type { Connection } from "@/types";
 import { StatusDot } from "@/components/shared/StatusDot";
+import { toastActionError } from "@/components/shared/actionError";
 import { pingStatusMotion, pingStatusTone } from "@/utils/statusTone";
 import { useHostPingStore } from "@/stores/hostPingStore";
 import { useToggle } from "@/stores/toggleSettingsStore";
@@ -12,7 +13,7 @@ export function useConnectFromHome(): (conn: Connection) => void {
   const connect = useSessionStore((s) => s.connect);
   const setActiveNav = useUIStore((s) => s.setActiveNav);
   return (conn) => {
-    connect(conn.id).catch(() => {});
+    connect(conn.id).catch((e: unknown) => toastActionError(e, i18n.t));
     setActiveNav("terminal");
   };
 }

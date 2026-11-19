@@ -80,7 +80,7 @@ export function VaultAdminDialogs({
     };
     return (
       <Modal onClose={onClose} onEnter={commit}>
-        <ModalCard className="p-6 flex flex-col gap-4 min-w-[21.333rem]">
+        <ModalCard className="p-6 flex flex-col gap-4 min-w-[min(21.333rem,calc(100vw-2rem))] max-w-[calc(100vw-2rem)]">
           <label htmlFor="vault-rename" className="text-xs font-bold uppercase tracking-widest text-(--t-text-dim)">
             {t("settings.vaults.general.vaultNameLabel")}
           </label>
@@ -90,8 +90,7 @@ export function VaultAdminDialogs({
             autoFocus
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className="form-input px-3 py-2 rounded-lg text-sm outline-hidden"
-            style={{ background: "var(--t-bg-input)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
+            className="form-input px-3 py-2 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
           />
           <div className="flex gap-2 justify-end">
             <button onClick={onClose} className="btn btn-secondary px-4 py-2 rounded-lg text-sm font-medium">

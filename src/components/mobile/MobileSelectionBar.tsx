@@ -16,7 +16,7 @@ function BarButton({ action, pressed }: { action: BarAction; pressed?: boolean }
   return (
     <button {...{ [attr]: "" }} {...greyedTapProps(disabledReason, onTap)} aria-label={disabledReason ?? label} title={disabledReason ?? label}
       aria-pressed={pressed}
-      className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full aria-disabled:opacity-35"
+      className="w-12 h-12 shrink-0 flex items-center justify-center rounded-full aria-disabled:opacity-(--disabled-opacity)"
       style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-primary)" }}>
       <Icon icon={icon} width={20} />
     </button>

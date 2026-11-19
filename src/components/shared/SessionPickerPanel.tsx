@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { formatLocalShellTitle } from "@/utils/localShellTitle";
 import { sessionLabel } from "@/utils/sessionLabel";
 import { ConnectionHostRow } from "./HostPickerPanel";
-import { HostRow } from "./HostRow";
+import { HostRow, PickTile } from "./HostRow";
 import { PickerSectionLabel } from "./pickerParts";
 import { RecentHostsGroup } from "./HostPickerTree";
 import { useSnippetTargetPicker } from "@/hooks/useSnippetTargetPicker";
@@ -41,13 +41,11 @@ export function SessionPickerPanel({ mode, onConfirm, onClose }: Props) {
   return createPortal(
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-72 z-50 flex flex-col bg-(--t-bg-base) border-l border-(--t-bg-terminal) shadow-xl">
+      <div className="fixed right-0 top-0 h-full w-72 z-50 flex flex-col bg-(--t-bg-base) border-l border-(--t-bg-terminal) shadow-(--t-elev-3)">
         <div className="flex items-center gap-2 px-3 py-3 shrink-0 bg-(--t-bg-card) border-b border-(--t-bg-terminal)">
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 text-(--t-text-dim)"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors shrink-0 text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary)"
           >
             <Icon icon="lucide:x" width={14} />
           </button>
@@ -80,17 +78,7 @@ export function SessionPickerPanel({ mode, onConfirm, onClose }: Props) {
               {picker.filteredSessions.map((s) => (
                 <HostRow
                   key={s.id}
-                  avatar={
-                    <div
-                      className="rounded-lg flex items-center justify-center shrink-0 w-[1.867rem] h-[1.867rem] transition-colors"
-                      style={{
-                        background: picker.selectedSessionIds.has(s.id) ? "var(--t-accent)" : "var(--t-bg-elevated)",
-                        color: picker.selectedSessionIds.has(s.id) ? "#fff" : "var(--t-text-dim)",
-                      }}
-                    >
-                      <Icon icon={picker.selectedSessionIds.has(s.id) ? "lucide:check" : "lucide:terminal"} width={13} />
-                    </div>
-                  }
+                  avatar={<PickTile icon="lucide:terminal" selected={picker.selectedSessionIds.has(s.id)} />}
                   name={sessionLabel(s)}
                   sub={s.type === "local" ? t("shared.pickers.thisComputer") : t("shared.sessionPicker.sshSessionSub")}
                   isSelected={picker.selectedSessionIds.has(s.id)}
@@ -111,17 +99,7 @@ export function SessionPickerPanel({ mode, onConfirm, onClose }: Props) {
             return (
               <HostRow
                 key={`local-${s.path}`}
-                avatar={
-                  <div
-                    className="rounded-lg flex items-center justify-center shrink-0 w-[1.867rem] h-[1.867rem] transition-colors"
-                    style={{
-                      background: selected ? "var(--t-accent)" : "var(--t-bg-elevated)",
-                      color: selected ? "#fff" : "var(--t-text-dim)",
-                    }}
-                  >
-                    <Icon icon={selected ? "lucide:check" : "lucide:monitor"} width={13} />
-                  </div>
-                }
+                avatar={<PickTile icon="lucide:monitor" selected={selected} />}
                 name={formatLocalShellTitle(s.path) || s.name}
                 sub={t("shared.pickers.thisComputer")}
                 isSelected={selected}
@@ -154,10 +132,7 @@ export function SessionPickerPanel({ mode, onConfirm, onClose }: Props) {
           <div className="shrink-0 px-3 py-3 border-t border-(--t-bg-terminal) bg-(--t-bg-card)">
             <button
               onClick={() => { void picker.confirm(onConfirm).then(() => onClose()); }}
-              className="w-full h-9 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-opacity"
-              style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              className="btn btn-primary w-full h-9 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
             >
               <Icon icon={mode === "insert" ? "lucide:arrow-down-to-line" : "lucide:play"} width={14} />
               {confirmLabel}

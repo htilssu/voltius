@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -8,13 +9,16 @@ import type { TeamMember, TeamRole } from "@/services/teamService";
 import { PERM_BITS, PERM_META, type MemberReadOnlyReason, type Permission, type RuleSubject } from "@/services/permissions";
 import { memberLabel } from "@/services/memberLabel";
 
-export const ROLE_META: Record<string, { color: string; bg: string }> = {
-  owner:          { color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
-  manager:        { color: "#60a5fa", bg: "rgba(96,165,250,0.12)"  },
-  editor:         { color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
+export const ROLE_META: Record<string, { color: string; bg?: string }> = {
+  owner:          { color: "var(--t-role-owner)" },
+  manager:        { color: "var(--t-role-admin)" },
+  editor:         { color: "var(--t-role-member)" },
   member:         { color: "var(--t-text-secondary)", bg: "var(--t-bg-elevated)" },
-  "connect-only": { color: "#f59e0b", bg: "rgba(245,158,11,0.12)"  },
+  "connect-only": { color: "var(--t-role-viewer)" },
 };
+
+/** A translucent fill of `color`, written inline (WebKitGTK drops color-mix stored in a custom property). */
+export const roleTint = (color: string, pct = 12) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 export const READONLY_REASON_KEYS: Record<MemberReadOnlyReason, string> = {
   noManage: "members.permissions.readOnlyNoManage",
@@ -57,23 +61,40 @@ export function ruleSubjectLabel(t: TFunction, s: RuleSubject, roles: TeamRole[]
 
 /**
  * Chip colours for a role: its own colour wins, then the built-in palette,
- * then the caller's fallback.
+ * then the caller's fallback. The fill is a tint of the chosen colour; the
+ * neutral "member" role keeps its flat fill unless recoloured.
  */
 export function roleChipColors(name: string, override?: string | null, fallback = "var(--t-accent)") {
   const meta = ROLE_META[name];
   const color = override ?? meta?.color ?? fallback;
-  return { meta, color, bg: meta?.bg ?? `${color}1a` };
+  const bg = (!override && meta?.bg) || roleTint(color);
+  return { meta, color, bg, border: roleTint(color, 27) };
 }
 
-export function RoleNamePill({ name }: { name: string }) {
+/**
+ * The one read-only role pill. Every surface that shows a role as a coloured
+ * chip (member rows, invites, the owner chip, the role editor's preview)
+ * renders this rather than its own span.
+ */
+export function RolePill({ name, color: override, fallbackColor, icon, children }: {
+  name: string;
+  color?: string | null;
+  fallbackColor?: string;
+  icon?: ReactNode;
+  /** Text in place of the role's translated name (e.g. a live preview). */
+  children?: ReactNode;
+}) {
   const { t } = useTranslation();
-  const { color, bg } = roleChipColors(name);
+  const { color, bg } = roleChipColors(name, override, fallbackColor);
   return (
-    <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full" style={{ color, background: bg }}>
-      {roleLabel(t, name)}
+    <span className="inline-flex items-center gap-1 shrink-0 text-2xs font-medium px-2 py-0.5 rounded-full" style={{ color, background: bg }}>
+      {icon}
+      {children ?? roleLabel(t, name)}
     </span>
   );
 }
+
+export const RoleNamePill = ({ name }: { name: string }) => <RolePill name={name} />;
 
 export function permissionLabel(t: TFunction, permission: Permission): string {
   return t(`members.permission.${permission}`, { defaultValue: PERM_META[permission]?.label ?? permission });
@@ -94,7 +115,7 @@ export function RolePermissionTooltip({ role, color }: { role: TeamRole; color: 
 
   return (
     <div
-      className="absolute bottom-full left-0 mb-1.5 z-50 rounded-lg p-2 text-[10px] min-w-[140px] max-w-[200px] pointer-events-none"
+      className="absolute bottom-full left-0 mb-1.5 z-50 rounded-lg p-2 text-2xs min-w-[140px] max-w-[200px] pointer-events-none"
       style={{
         background: "var(--t-bg-card)",
         boxShadow: "var(--t-ring), var(--t-elev-2)",
@@ -126,11 +147,11 @@ export function RoleBlurb({ name }: { name: string }) {
   const { t } = useTranslation();
   const text = t(`members.roleBlurb.${name}`, { defaultValue: "" });
   if (!text) return null;
-  return <p className="text-[11px]" style={{ color: "var(--t-text-secondary)" }}>{text}</p>;
+  return <p className="text-2xs" style={{ color: "var(--t-text-secondary)" }}>{text}</p>;
 }
 
 const VARIANT_CLASS = {
-  pill: "text-[10px] px-2 py-0.5 rounded-full font-medium transition-all",
+  pill: "text-2xs px-2 py-0.5 rounded-full font-medium transition-all",
   chip: "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
   "chip-sm": "flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all",
 } as const;
@@ -157,18 +178,18 @@ export function RoleToggleChip({
   name, active, onClick, variant = "chip", color: override, fallbackColor, disabled, disabledReason, blurb,
 }: RoleToggleChipProps) {
   const { t } = useTranslation();
-  const { color, bg } = roleChipColors(name, override, fallbackColor);
+  const { color, bg, border } = roleChipColors(name, override, fallbackColor);
 
   const button = (
     <button
       onClick={onClick}
       disabled={disabled || !!disabledReason}
       title={disabledReason}
-      className={`${VARIANT_CLASS[variant]} disabled:opacity-50 disabled:cursor-not-allowed`}
+      className={`${VARIANT_CLASS[variant]} disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed`}
       style={{
         background: active ? bg : "var(--t-bg-elevated)",
         color: active ? color : "var(--t-text-dim)",
-        border: `1px solid ${active ? `${color}44` : "var(--t-border)"}`,
+        border: `1px solid ${active ? border : "var(--t-border)"}`,
       }}
     >
       {variant !== "pill" && active && <Icon icon="lucide:check" width={9} />}

@@ -15,7 +15,7 @@ export function VaultBadge({ vaultId }: { vaultId: string | undefined }) {
   const isPersonal = effectiveId === "personal";
   return (
     <span
-      className="shrink-0 flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded-sm border"
+      className="shrink-0 flex items-center gap-1 text-2xs font-medium px-1.5 py-0.5 rounded-sm border"
       style={isPersonal
         ? { background: "var(--t-bg-elevated)", color: "var(--t-text-dim)", borderColor: "var(--t-border)" }
         : { background: "color-mix(in srgb, var(--t-accent) 12%, transparent)", color: "var(--t-accent)", borderColor: "color-mix(in srgb, var(--t-accent) 30%, transparent)" }}

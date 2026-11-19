@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
+import { ConfirmModal } from "@voltius/ui";
 import { getProxmoxApi, useProxmoxT } from "../runtime";
 import type { LxcSnapshot } from "../types";
 
@@ -33,6 +34,7 @@ export function SnapshotList({
   const t = useProxmoxT();
   const [creating, setCreating] = useState(false);
   const [busySnap, setBusySnap] = useState<string | null>(null);
+  const [confirmSnap, setConfirmSnap] = useState<{ name: string; mode: "rollback" | "delete" } | null>(null);
 
   const create = async () => {
     const name = snapshotInput.trim();
@@ -77,49 +79,48 @@ export function SnapshotList({
       <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-(--t-border) shrink-0">
         <button
           onClick={onBack}
-          className="p-1 text-(--t-text-muted) hover:text-(--t-text) rounded-sm hover:bg-(--t-bg-card-hover)"
+          className="p-1 text-(--t-text-muted) hover:text-(--t-text-primary) rounded-sm hover:bg-(--t-bg-card-hover)"
         >
           <Icon icon="lucide:arrow-left" width={12} />
         </button>
-        <span className="text-[11px] font-medium text-(--t-text) truncate">
+        <span className="text-2xs font-medium text-(--t-text-primary) truncate">
           {t("sheetTitleWithId", { name: vmName, vmid })}
         </span>
       </div>
 
       {/* Create form */}
       <div className="flex flex-col gap-1 px-3 py-2 border-b border-(--t-border) shrink-0">
-        <div className="flex gap-1">
-          <input
-            type="text"
-            value={snapshotInput}
-            onChange={(e) => onSnapshotInputChange(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && create()}
-            placeholder={t("newSnapshotPlaceholder")}
-            className="flex-1 min-w-0 bg-(--t-bg-input) border border-(--t-border) rounded-sm px-2 py-0.5 text-[10px] text-(--t-text) placeholder:text-(--t-text-muted) outline-hidden focus:border-(--t-accent)"
-          />
-          <button
-            onClick={create}
-            disabled={creating || !snapshotInput.trim()}
-            title={t("createSnapshot")}
-            className="px-2 py-0.5 rounded-sm border border-(--t-border) text-[10px] text-(--t-text-muted) hover:bg-(--t-bg-hover) hover:text-(--t-text) disabled:opacity-40"
-          >
-            {creating ? <Icon icon="lucide:loader-circle" width={11} className="animate-spin" /> : "+"}
-          </button>
-        </div>
+        <input
+          type="text"
+          value={snapshotInput}
+          onChange={(e) => onSnapshotInputChange(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && create()}
+          placeholder={t("newSnapshotPlaceholder")}
+          className="form-input w-full min-w-0 bg-(--t-bg-input) border border-(--t-border) rounded-md px-2 py-1 text-xs text-(--t-text-primary) placeholder:text-(--t-text-muted) outline-hidden focus:border-(--t-accent)"
+        />
         <input
           type="text"
           value={snapshotInputDesc}
           onChange={(e) => onSnapshotDescChange(e.target.value)}
           placeholder={t("descriptionPlaceholder")}
-          className="bg-(--t-bg-input) border border-(--t-border) rounded-sm px-2 py-0.5 text-[10px] text-(--t-text) placeholder:text-(--t-text-muted) outline-hidden focus:border-(--t-accent)"
+          className="form-input w-full min-w-0 bg-(--t-bg-input) border border-(--t-border) rounded-md px-2 py-1 text-xs text-(--t-text-primary) placeholder:text-(--t-text-muted) outline-hidden focus:border-(--t-accent)"
         />
+        <button
+          onClick={create}
+          disabled={creating || !snapshotInput.trim()}
+          aria-busy={creating}
+          className="btn btn-secondary self-start inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium"
+        >
+          <Icon icon={creating ? "lucide:loader-circle" : "lucide:plus"} width={12} className={creating ? "animate-spin" : undefined} />
+          {t("createSnapshot")}
+        </button>
       </div>
 
       {/* Snapshot list */}
       <div className="flex-1 overflow-y-auto">
         {snapshots.length === 0 ? (
-          <div className="flex items-center justify-center h-16 opacity-40">
-            <p className="text-[11px] text-(--t-text-muted)">{t("noSnapshots")}</p>
+          <div className="flex items-center justify-center h-16">
+            <p className="text-2xs text-(--t-text-dim)">{t("noSnapshots")}</p>
           </div>
         ) : (
           snapshots.map((snap) => (
@@ -130,36 +131,36 @@ export function SnapshotList({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span
-                    className={`text-[11px] truncate ${snap.is_current ? "font-semibold text-(--t-text)" : "text-(--t-text)"}`}
+                    className={`text-2xs truncate ${snap.is_current ? "font-semibold text-(--t-text-primary)" : "text-(--t-text-primary)"}`}
                   >
                     {snap.name}
                   </span>
                   {snap.is_current && (
-                    <span className="text-[9px] px-1 rounded-sm bg-(--t-accent) text-(--t-on-accent) shrink-0">{t("hereBadge")}</span>
+                    <span className="text-2xs px-1 rounded-sm bg-(--t-accent) text-(--t-on-accent) shrink-0">{t("hereBadge")}</span>
                   )}
                 </div>
                 {snap.timestamp && (
-                  <p className="text-[10px] text-(--t-text-muted) truncate">{snap.timestamp}</p>
+                  <p className="text-2xs text-(--t-text-muted) truncate">{snap.timestamp}</p>
                 )}
                 {snap.description && (
-                  <p className="text-[10px] text-(--t-text-muted) truncate">{snap.description}</p>
+                  <p className="text-2xs text-(--t-text-muted) truncate">{snap.description}</p>
                 )}
               </div>
               {!snap.is_current && (
                 <div className="flex items-center gap-0.5 shrink-0">
                   <button
-                    onClick={() => rollback(snap.name)}
+                    onClick={() => setConfirmSnap({ name: snap.name, mode: "rollback" })}
                     disabled={busySnap !== null}
                     title={t("rollbackToSnapshot")}
-                    className="p-1 rounded-sm hover:bg-(--t-bg-card-hover) text-(--t-text-muted) hover:text-(--t-text) disabled:opacity-40"
+                    className="p-1 rounded-sm hover:bg-(--t-bg-card-hover) text-(--t-text-muted) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
                   >
                     <Icon icon="lucide:history" width={11} />
                   </button>
                   <button
-                    onClick={() => del(snap.name)}
+                    onClick={() => setConfirmSnap({ name: snap.name, mode: "delete" })}
                     disabled={busySnap !== null}
                     title={t("deleteSnapshot")}
-                    className="p-1 rounded-sm hover:bg-(--t-bg-card-hover) text-(--t-status-error) opacity-60 hover:opacity-100 disabled:opacity-40"
+                    className="p-1 rounded-sm hover:bg-(--t-bg-card-hover) text-(--t-status-error) opacity-60 hover:opacity-100 disabled:opacity-(--disabled-opacity)"
                   >
                     <Icon icon="lucide:trash-2" width={11} />
                   </button>
@@ -169,6 +170,22 @@ export function SnapshotList({
           ))
         )}
       </div>
+
+      {confirmSnap && (
+        <ConfirmModal
+          title={confirmSnap.mode === "rollback" ? t("rollbackConfirmTitle") : t("deleteSnapshotConfirmTitle")}
+          message={confirmSnap.mode === "rollback"
+            ? t("rollbackConfirmBody", { name: vmName, snap: confirmSnap.name })
+            : t("deleteSnapshotConfirmBody", { snap: confirmSnap.name })}
+          confirmLabel={confirmSnap.mode === "rollback" ? t("rollbackButton") : t("delete")}
+          onCancel={() => setConfirmSnap(null)}
+          onConfirm={() => {
+            const { name, mode } = confirmSnap;
+            setConfirmSnap(null);
+            void (mode === "rollback" ? rollback(name) : del(name));
+          }}
+        />
+      )}
     </div>
   );
 }

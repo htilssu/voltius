@@ -114,7 +114,7 @@ export default function MobileExtraKeysRow({ keyboardOpen }: { keyboardOpen?: bo
       {k.icon ? <Icon icon={k.icon} width={18} /> : k.label}
       {k.altLabel && (
         <sup data-mobile-key-alt-label aria-hidden
-          className="absolute top-0.5 right-1 text-[10px] leading-none font-medium pointer-events-none"
+          className="absolute top-0.5 right-1 text-2xs leading-none font-medium pointer-events-none"
           style={{ color: altArmed?.key === k ? "var(--t-accent)" : "var(--t-text-secondary)" }}>
           {k.altLabel}
         </sup>
@@ -158,7 +158,7 @@ export default function MobileExtraKeysRow({ keyboardOpen }: { keyboardOpen?: bo
             className={`${KEY_CLASS} font-semibold`}
             style={{
               background: v === "locked" ? "var(--t-accent)" : v === "armed" ? "color-mix(in srgb, var(--t-accent) 35%, var(--t-bg-card))" : "var(--t-bg-card)",
-              color: isActive(v) ? "#fff" : "var(--t-text-primary)", border: "1px solid var(--t-border)",
+              color: v === "locked" ? "var(--t-on-accent)" : "var(--t-text-primary)", border: "1px solid var(--t-border)",
             }}>
             {label}
             {v === "locked" && (
@@ -170,11 +170,11 @@ export default function MobileExtraKeysRow({ keyboardOpen }: { keyboardOpen?: bo
       {EXTRA_KEYS.map(renderKey)}
       {altArmed && createPortal(
         <div data-mobile-key-alt-popup aria-hidden
-          className="fixed z-[1000] pointer-events-none flex items-center justify-center h-14 px-3 rounded-xl text-xl font-semibold shadow-lg"
+          className="fixed z-[1000] pointer-events-none flex items-center justify-center h-14 px-3 rounded-lg text-xl font-semibold"
           style={{
             left: altArmed.rect.left + altArmed.rect.width / 2, top: altArmed.rect.top - 6,
             minWidth: altArmed.rect.width + 8, transform: "translate(-50%, -100%)",
-            background: "var(--t-accent)", color: "var(--t-on-accent)",
+            background: "var(--t-accent)", color: "var(--t-on-accent)", boxShadow: "var(--t-elev-2)",
           }}>
           {altArmed.key.altLabel}
         </div>,

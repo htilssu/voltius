@@ -54,7 +54,7 @@ export function EntryDetail({ entry, onBack, onInstalled }: {
       </button>
 
       <div className="flex items-start gap-3">
-        <AvatarTile icon={isPack ? "lucide:package" : "lucide:code"} iconSize={18} className="w-11 h-11 rounded-xl" />
+        <AvatarTile icon={isPack ? "lucide:package" : "lucide:code"} iconSize={18} className="w-10 h-10 rounded-lg" />
         <div className="flex flex-col gap-1 min-w-0">
           <h2 className="text-base font-bold text-(--t-text-bright)">{entry.name}</h2>
           <p className="text-xs text-(--t-text-muted)">
@@ -87,7 +87,7 @@ export function EntryDetail({ entry, onBack, onInstalled }: {
           return (
             <div
               key={eid}
-              className="rounded-xl p-3 flex flex-col gap-2"
+              className="rounded-[var(--r-lg)] p-3 flex flex-col gap-2"
               style={{
                 background: "var(--t-bg-card)",
                 border: "1px solid var(--t-border)",
@@ -121,8 +121,7 @@ export function EntryDetail({ entry, onBack, onInstalled }: {
       <button
         onClick={handleInstall}
         disabled={installing || selected.length === 0}
-        className="self-start px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
-        style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+        className="btn btn-primary self-start px-4 py-2 rounded-lg text-sm font-semibold"
       >
         {installing
           ? t("snippets.community.installing")

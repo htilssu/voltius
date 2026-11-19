@@ -21,20 +21,20 @@ export function LogsView({ streamKey, displayName, startStream, onBack }: Props)
       <div className="flex items-center gap-2 px-2 py-1.5 border-b border-(--t-border) shrink-0">
         <button
           onClick={onBack}
-          className="p-1 rounded-sm hover:bg-(--t-bg-hover) text-(--t-text-muted)"
+          className="p-1 rounded-sm hover:bg-(--t-bg-card-hover) text-(--t-text-muted)"
         >
           <Icon icon="lucide:arrow-left" width={14} />
         </button>
-        <span className="text-[12px] font-mono text-(--t-text) truncate flex-1">
+        <span className="text-xs font-mono text-(--t-text-primary) truncate flex-1">
           {displayName}
         </span>
         <button
           onClick={() => setAutoScroll((v) => !v)}
           title={autoScroll ? t("disableAutoScroll") : t("enableAutoScroll")}
-          className={`p-1 rounded text-[12px] ${
+          className={`p-1 rounded text-xs ${
             autoScroll
               ? "text-(--t-status-connected)"
-              : "text-(--t-text-muted) hover:bg-(--t-bg-hover)"
+              : "text-(--t-text-muted) hover:bg-(--t-bg-card-hover)"
           }`}
         >
           <Icon icon="lucide:chevrons-down" width={13} />
@@ -42,14 +42,14 @@ export function LogsView({ streamKey, displayName, startStream, onBack }: Props)
       </div>
 
       {/* Log lines */}
-      <div className="flex-1 overflow-y-auto font-mono text-[11px] leading-4 px-2 py-1 select-text">
+      <div className="flex-1 overflow-y-auto font-mono text-2xs leading-4 px-2 py-1 select-text">
         {lines.length === 0 && (
           <p className="text-(--t-text-muted) opacity-50 mt-2">{t("dockerLogsWaiting")}</p>
         )}
         {lines.map((l, i) => (
           <div
             key={i}
-            className={l.stream === "stderr" ? "text-(--t-status-error)" : "text-(--t-text)"}
+            className={l.stream === "stderr" ? "text-(--t-status-error)" : "text-(--t-text-primary)"}
           >
             {stripAnsi(l.line)}
           </div>

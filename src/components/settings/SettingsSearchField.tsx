@@ -82,7 +82,7 @@ export function SettingsSearchField({ variant = "sidebar" }: { variant?: "sideba
           <Icon icon="lucide:x" width={12} />
         </button>
       ) : (
-        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none px-1 rounded-sm text-[10px] border border-(--t-border) text-(--t-text-dim)">/</kbd>
+        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none px-1 rounded-sm text-2xs border border-(--t-border) text-(--t-text-dim)">/</kbd>
       )}
     </div>
   );

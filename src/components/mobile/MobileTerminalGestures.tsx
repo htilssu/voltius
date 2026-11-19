@@ -323,7 +323,7 @@ export default function MobileTerminalGestures({ sessionId, active }: { sessionI
           data-tab-hint
           className="animate-tab-hint rounded-full px-3 py-1 text-sm font-semibold"
           style={{
-            background: "color-mix(in srgb, var(--t-bg-base) 80%, #000 20%)",
+            background: "var(--t-bg-modal)",
             color: "var(--t-text-bright)",
             border: "1px solid var(--t-border)",
           }}

@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
-import { Modal, ModalCard } from "./Modal";
+import { DIALOG_WIDTH, Modal, ModalCard } from "./Modal";
 import type { PendingCascade } from "@/hooks/useCrossVaultPasteConfirm";
 
 interface Props {
@@ -34,7 +34,7 @@ export function VaultCascadeModal({ cascade, onConfirm, onCancel }: Props) {
 
   return (
     <Modal onClose={onCancel} onEnter={onConfirm}>
-      <ModalCard className="p-6 flex flex-col gap-4 min-w-[21.333rem] max-w-[26.667rem]">
+      <ModalCard className={`p-6 flex flex-col gap-4 ${DIALOG_WIDTH}`}>
         <div className="flex items-center gap-3">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"

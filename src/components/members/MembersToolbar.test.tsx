@@ -23,6 +23,7 @@ test("greyed Security, Roles and Invite carry the shared disabled styling", () =
   for (const label of ["members.security.button", "members.roles", "members.toolbar.inviteBtn"]) {
     const button = screen.getByText(label).closest("button")!;
     expect(button.disabled, label).toBe(true);
-    expect(button.className, label).toContain("disabled:opacity-50");
+    // The shared greyed class, or `.btn`, whose :disabled rule applies the same opacity.
+    expect(button.className, label).toMatch(/disabled:opacity-|\bbtn\b/);
   }
 });

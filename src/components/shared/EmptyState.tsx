@@ -1,8 +1,8 @@
 import { Icon } from "@iconify/react";
 
 const SIZES = {
-  page: { wrap: "h-full min-h-[320px] gap-5", tile: "w-16 h-16 rounded-2xl", icon: 28, button: "px-4 py-2 text-sm", plus: 14 },
-  section: { wrap: "py-12 gap-3", tile: "w-12 h-12 rounded-xl", icon: 20, button: "px-3 py-1.5 text-xs", plus: 12 },
+  page: { wrap: "h-full min-h-[320px] gap-5", tile: "w-10 h-10 rounded-lg", icon: 20, button: "px-4 py-2 text-sm", plus: 14 },
+  section: { wrap: "py-12 gap-3", tile: "w-9 h-9 rounded-lg", icon: 18, button: "px-3 py-1.5 text-xs", plus: 12 },
 };
 
 export interface EmptyStateAction { label: string; onClick: () => void; icon?: string }
@@ -25,7 +25,7 @@ export function EmptyState({ icon, title, body, action, primary, links, size = "
       </div>
       <div>
         <p className="text-sm font-medium text-(--t-text-primary)">{title}</p>
-        {body && <p className="text-xs mt-1 max-w-[22rem] text-(--t-text-dim)">{body}</p>}
+        {body && <p className="text-xs mt-1 max-w-88 text-(--t-text-dim)">{body}</p>}
       </div>
       {actions.length > 0 && (
         <div className="flex flex-wrap justify-center gap-2">
@@ -33,7 +33,7 @@ export function EmptyState({ icon, title, body, action, primary, links, size = "
             <button
               key={a.label}
               onClick={a.onClick}
-              className={`flex items-center gap-2 rounded-lg font-medium ${primary ? "btn btn-primary" : "transition-colors bg-(--t-bg-elevated) hover:bg-(--t-border-hover) text-(--t-accent) border border-(--t-border-hover)"} ${s.button}`}
+              className={`flex items-center gap-2 rounded-lg font-medium ${primary ? "btn btn-primary" : "btn btn-secondary"} ${s.button}`}
             >
               <Icon icon={a.icon ?? "lucide:plus"} width={s.plus} />
               {a.label}
@@ -46,7 +46,7 @@ export function EmptyState({ icon, title, body, action, primary, links, size = "
           {links.map((l) => (
             <button key={l.label} type="button" onClick={l.onClick} className="flex items-center gap-1.5 text-xs text-(--t-text-secondary) hover:text-(--t-accent) transition-colors">
               {l.label}
-              {l.hint && <kbd className="text-[10px] px-1 rounded-sm border border-(--t-border) text-(--t-text-dim)">{l.hint}</kbd>}
+              {l.hint && <kbd className="text-2xs px-1 rounded-sm border border-(--t-border) text-(--t-text-dim)">{l.hint}</kbd>}
             </button>
           ))}
         </div>

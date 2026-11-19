@@ -98,15 +98,8 @@ export function MultiplayerBar({ localSessionId }: MultiplayerBarProps) {
       {/* Control actions — hidden when session has ended */}
       {!mpState.ended && !isHost && !iControlHolder && mpState.controlRequester !== myUserId && (
         <button
-          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors"
-          style={{
-            background: "var(--t-bg-elevated)",
-            color: "var(--t-text-secondary)",
-            border: "1px solid var(--t-border)",
-          }}
+          className="btn btn-secondary flex items-center gap-1.5 px-2 py-1 text-xs"
           onClick={() => requestControl(localSessionId)}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)")}
         >
           <Icon icon="lucide:mouse-pointer-click" width={12} />
           {t("terminal.multiplayerBar.requestControl")}
@@ -130,15 +123,13 @@ export function MultiplayerBar({ localSessionId }: MultiplayerBarProps) {
             {t("terminal.multiplayerBar.controlRequested")}
           </span>
           <button
-            className="px-2 py-0.5 rounded-sm text-xs font-medium transition-colors"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary px-2 py-0.5 text-xs font-medium"
             onClick={() => grantControl(localSessionId, mpState.controlRequester!)}
           >
             {t("terminal.multiplayerBar.grant")}
           </button>
           <button
-            className="px-2 py-0.5 rounded-sm text-xs font-medium transition-colors"
-            style={{ background: "var(--t-bg-elevated)", color: "var(--t-text-secondary)", border: "1px solid var(--t-border)" }}
+            className="btn btn-secondary px-2 py-0.5 text-xs font-medium"
             onClick={() => revokeControl(localSessionId)}
           >
             {t("terminal.multiplayerBar.deny")}
@@ -149,15 +140,8 @@ export function MultiplayerBar({ localSessionId }: MultiplayerBarProps) {
       {/* Host: revoke control if someone else has it */}
       {!mpState.ended && isHost && !iControlHolder && mpState.controlHolder !== "" && (
         <button
-          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors"
-          style={{
-            background: "var(--t-bg-elevated)",
-            color: "var(--t-text-secondary)",
-            border: "1px solid var(--t-border)",
-          }}
+          className="btn btn-secondary flex items-center gap-1.5 px-2 py-1 text-xs hover:text-(--t-status-error)"
           onClick={() => revokeControl(localSessionId)}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-status-error)")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)")}
         >
           <Icon icon="lucide:x" width={11} />
           {t("terminal.multiplayerBar.revoke")}
@@ -166,20 +150,9 @@ export function MultiplayerBar({ localSessionId }: MultiplayerBarProps) {
 
       {/* Stop / Leave */}
       <button
-        className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors ml-1 disabled:opacity-40 disabled:pointer-events-none"
-        style={{
-          color: "var(--t-text-dim)",
-        }}
+        className="btn btn-danger-ghost flex items-center gap-1.5 px-2 py-1 text-xs ml-1 text-(--t-text-dim) hover:text-(--t-status-error) disabled:pointer-events-none"
         onClick={() => void handleStopOrLeave()}
         disabled={!isHost && !!leaveBlockedReason}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-status-error)";
-          (e.currentTarget as HTMLButtonElement).style.background = "color-mix(in srgb, var(--t-status-error) 10%, transparent)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-          (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-        }}
         title={isHost ? t("terminal.multiplayerBar.stopSharingTitle") : leaveBlockedReason ?? t("terminal.multiplayerBar.leaveSessionTitle")}
       >
         <Icon icon={isHost ? "lucide:circle-stop" : "lucide:log-out"} width={13} />

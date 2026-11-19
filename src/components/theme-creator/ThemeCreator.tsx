@@ -174,7 +174,7 @@ function FontPicker({
       />
 
       {missing && (
-        <p className="text-[10px] mt-1 text-(--t-status-warning)">
+        <p className="text-2xs mt-1 text-(--t-status-warning)">
           {t("themeCreator.font.notInstalled", { family: selected })}
         </p>
       )}
@@ -252,7 +252,7 @@ function FontPicker({
                 if (e.key === "Escape") { setCustom(false); }
               }}
             />
-            <p className="text-[10px] text-(--t-text-dim) mt-1">{t("themeCreator.font.customHint")}</p>
+            <p className="text-2xs text-(--t-text-dim) mt-1">{t("themeCreator.font.customHint")}</p>
           </div>
         )}
       </PickerSurface>
@@ -263,7 +263,7 @@ function FontPicker({
 // ── Var search overlay ────────────────────────────────────────────────────────
 
 /** Styles the Esc key named inside the overlay hints. */
-const ESC_KBD = <kbd style={{ color: "var(--t-text-primary)" }} />;
+const ESC_KBD = <kbd className="text-(--t-text-primary)" />;
 
 function VarSearchOverlay({ varName, onClose }: { varName: string; onClose: () => void }) {
   const [rects, setRects] = useState<DOMRect[]>([]);
@@ -281,7 +281,7 @@ function VarSearchOverlay({ varName, onClose }: { varName: string; onClose: () =
 
   return createPortal(
     <>
-      <div style={{ position: "fixed", inset: 0, zIndex: 9990, background: "rgba(0,0,0,0.3)" }} onClick={onClose} />
+      <div className="fixed inset-0 z-9990 bg-(--t-scrim)" onClick={onClose} />
       {rects.map((rect, i) => (
         <div key={i} style={{
           position: "fixed",
@@ -292,19 +292,14 @@ function VarSearchOverlay({ varName, onClose }: { varName: string; onClose: () =
           background: "color-mix(in srgb, var(--t-accent) 8%, transparent)",
         }} />
       ))}
-      <div style={{
-        position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
-        zIndex: 9992, background: "var(--t-bg-modal)", border: "1px solid var(--t-border)",
-        borderRadius: 6, padding: "6px 14px", fontSize: 12,
-        color: "var(--t-text-secondary)", pointerEvents: "none", whiteSpace: "nowrap",
-      }}>
+      <OverlayHint>
         <Trans
           i18nKey="themeCreator.varSearch.hint"
           count={rects.length}
           values={{ name: varName }}
-          components={{ var: <code style={{ color: "var(--t-accent)" }} />, kbd: ESC_KBD }}
+          components={{ var: <code className="text-(--t-accent)" />, kbd: ESC_KBD }}
         />
-      </div>
+      </OverlayHint>
     </>,
     document.body
   );
@@ -320,6 +315,9 @@ const PICKED_ROW_STYLE: React.CSSProperties = {
   background: "color-mix(in srgb, var(--t-accent) 12%, transparent)",
 };
 
+/** Pressed state shared by the row icon toggles and the header pipette. */
+const ACTIVE_TOGGLE = "border-(--t-accent) text-(--t-accent) bg-[color-mix(in_srgb,var(--t-accent)_18%,transparent)]";
+
 function RowIconButton({ icon, title, active = false, onClick }: {
   icon: string;
   title: string;
@@ -330,16 +328,7 @@ function RowIconButton({ icon, title, active = false, onClick }: {
     <button
       onClick={onClick}
       title={title}
-      style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        width: 18, height: 18, borderRadius: 4, border: "1px solid",
-        cursor: "pointer", flexShrink: 0,
-        borderColor: active ? "var(--t-accent)" : "transparent",
-        background: active ? "color-mix(in srgb, var(--t-accent) 18%, transparent)" : "transparent",
-        color: active ? "var(--t-accent)" : "var(--t-text-dim)",
-      }}
-      onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = "var(--t-text-muted)"; }}
-      onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = "var(--t-text-dim)"; }}
+      className={`flex items-center justify-center size-4.5 shrink-0 rounded-sm border cursor-pointer transition-colors ${active ? ACTIVE_TOGGLE : "border-transparent text-(--t-text-dim) hover:text-(--t-text-muted)"}`}
     >
       <Icon icon={icon} width={10} />
     </button>
@@ -543,6 +532,15 @@ function ColorEditor({
 
 // ── Pick-mode overlay ─────────────────────────────────────────────────────────
 
+/** The bottom-centred instruction pill shown over the pick and var-search overlays. */
+function OverlayHint({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-9992 max-w-[calc(100vw-2rem)] px-3.5 py-1.5 rounded-md border border-(--t-border) bg-(--t-bg-modal) text-xs text-(--t-text-secondary) pointer-events-none">
+      {children}
+    </div>
+  );
+}
+
 function PickOverlay({ rect }: { rect: DOMRect | null }) {
   if (!rect) return null;
   return createPortal(
@@ -558,24 +556,13 @@ function PickOverlay({ rect }: { rect: DOMRect | null }) {
         zIndex: 9991,
         outline: "2px solid var(--t-accent)",
         borderRadius: 3,
-        boxShadow: "0 0 0 9999px rgba(0,0,0,0.25)",
+        boxShadow: "0 0 0 9999px var(--t-scrim)",
         pointerEvents: "none",
       }} />
       {/* Crosshair cursor hint */}
-      <div style={{
-        position: "fixed", bottom: 24, left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 9992,
-        background: "var(--t-bg-modal)",
-        border: "1px solid var(--t-border)",
-        borderRadius: 6,
-        padding: "6px 14px",
-        fontSize: 12,
-        color: "var(--t-text-secondary)",
-        pointerEvents: "none",
-      }}>
+      <OverlayHint>
         <Trans i18nKey="themeCreator.pickOverlay.hint" components={{ kbd: ESC_KBD }} />
-      </div>
+      </OverlayHint>
     </>,
     document.body
   );
@@ -748,9 +735,8 @@ export default function ThemeCreator() {
 
       <div
         ref={panelRef}
-        className="fixed right-0 top-0 bottom-0 z-200 flex flex-col border-l border-(--t-border) bg-(--t-bg-modal)"
+        className="fixed right-0 top-0 bottom-0 z-200 flex flex-col w-[min(20rem,100vw)] border-l border-(--t-border) bg-(--t-bg-modal)"
         style={{
-          width: 320,
           paddingTop: "var(--vt-safe-top)",
           paddingBottom: "var(--vt-safe-bottom)",
           paddingRight: "var(--vt-safe-right)",
@@ -766,14 +752,8 @@ export default function ThemeCreator() {
           <button
             onClick={() => setPickMode((m) => !m)}
             title={t("themeCreator.header.pickTooltip")}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 28, height: 28, borderRadius: 6, border: "1px solid",
-              cursor: "pointer", transition: "background 0.15s, color 0.15s",
-              borderColor: pickMode ? "var(--t-accent)" : "var(--t-border)",
-              background: pickMode ? "color-mix(in srgb, var(--t-accent) 18%, transparent)" : "var(--t-bg-elevated)",
-              color: pickMode ? "var(--t-accent)" : "var(--t-text-secondary)",
-            }}
+            aria-pressed={pickMode}
+            className={`flex items-center justify-center size-7 rounded-md border cursor-pointer transition-colors ${pickMode ? ACTIVE_TOGGLE : "border-(--t-border) bg-(--t-bg-elevated) text-(--t-text-secondary) hover:text-(--t-text-primary)"}`}
           >
             <Icon icon="lucide:pipette" width={14} />
           </button>

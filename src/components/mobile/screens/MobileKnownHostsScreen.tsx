@@ -41,7 +41,7 @@ export default function MobileKnownHostsScreen() {
         ) : filtered.map((h) => (
           <button key={h.id} data-knownhost-row className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-(--t-bg-card)"
             onClick={() => setSheetHost(h)}>
-            <AvatarTile icon="lucide:fingerprint-pattern" iconSize={18} className="w-10 h-10 rounded-xl shrink-0" />
+            <AvatarTile icon="lucide:fingerprint-pattern" iconSize={18} className="w-10 h-10 rounded-lg shrink-0" />
             <span className="flex flex-col min-w-0 flex-1">
               <span className="text-sm font-medium text-(--t-text-primary) truncate">{h.name ?? `${h.host}:${h.port}`}</span>
               <span className="text-xs text-(--t-text-dim) font-mono truncate">{truncateFp(h.fingerprint)}</span>

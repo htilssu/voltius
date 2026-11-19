@@ -17,10 +17,7 @@ export function HostRow({ avatar, name, sub, isSelected, onClick, disabled = fal
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full flex items-center ${HOST_PICKER_DENSITY[density].row} transition-colors text-left disabled:opacity-60 disabled:cursor-default`}
-      style={{ background: isSelected ? "var(--t-bg-card-hover)" : "transparent" }}
-      onMouseEnter={(e) => { if (!still) e.currentTarget.style.background = "var(--t-bg-elevated)"; }}
-      onMouseLeave={(e) => { if (!still) e.currentTarget.style.background = "transparent"; }}
+      className={`w-full flex items-center ${HOST_PICKER_DENSITY[density].row} transition-colors text-left disabled:opacity-(--disabled-opacity) disabled:cursor-default ${isSelected ? "bg-(--t-bg-card-hover)" : still ? "" : "hover:bg-(--t-bg-elevated)"}`}
     >
       {avatar}
       <div className="flex-1 min-w-0">
@@ -30,5 +27,16 @@ export function HostRow({ avatar, name, sub, isSelected, onClick, disabled = fal
       {trailing}
       {isSelected && <Icon icon="lucide:check" width={14} className="text-(--t-accent) shrink-0" />}
     </button>
+  );
+}
+
+/** Square 28px avatar tile for picker rows; a selected tile fills with the accent and shows a check. */
+export function PickTile({ icon, selected = false }: { icon: string; selected?: boolean }) {
+  return (
+    <div
+      className={`rounded-lg flex items-center justify-center shrink-0 w-7 h-7 transition-colors ${selected ? "bg-(--t-accent) text-(--t-on-accent)" : "bg-(--t-bg-elevated) text-(--t-text-dim)"}`}
+    >
+      <Icon icon={selected ? "lucide:check" : icon} width={selected ? 13 : 14} />
+    </div>
   );
 }

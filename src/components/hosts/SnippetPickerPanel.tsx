@@ -26,6 +26,7 @@ import { SnippetChooserList } from "@/components/snippets/SnippetChooserList";
 import type { Snippet, SnippetFormData } from "@/types";
 import { shouldOpenSnippetTargetsInSplitTab } from "./hostSelection";
 import { refuseWhilePreviewing, snippetTarget } from "@/services/previewGuard";
+import { toastActionError } from "@/components/shared/actionError";
 
 interface PendingInject {
   snippet: Snippet;
@@ -139,7 +140,7 @@ export function SnippetPickerPanel({ connectionIds, onClose }: Props) {
       onClose();
       runSnippetSequence(snippet, targets, useSnippetStore.getState().enqueuePendingSequence).then((r) => {
         if (r !== "prompting") reportSequenceResult(r);
-      }).catch((e) => console.error(e));
+      }).catch((e) => toastActionError(e, t));
       return;
     }
 
@@ -197,10 +198,7 @@ export function SnippetPickerPanel({ connectionIds, onClose }: Props) {
             <button
               title={t("hosts.snippetPicker.newSnippetTitle")}
               onClick={() => setIsCreating(true)}
-              className="flex items-center gap-1 shrink-0 px-2.5 h-8 rounded-lg text-xs font-medium transition-colors whitespace-nowrap"
-              style={{ background: "var(--t-bg-input)", color: "var(--t-text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-input-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-bg-input)")}
+              className="flex items-center gap-1 shrink-0 px-2.5 h-8 rounded-lg text-xs font-medium transition-colors whitespace-nowrap bg-(--t-bg-input) hover:bg-(--t-bg-input-hover) text-(--t-text-primary)"
             >
               <Icon icon="lucide:plus" width={13} />
               {t("hosts.snippetPicker.new")}
@@ -218,8 +216,7 @@ export function SnippetPickerPanel({ connectionIds, onClose }: Props) {
               emptyAction={
                 <button
                   onClick={() => setIsCreating(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-(--t-accent) border border-(--t-border-hover)"
-                  style={{ background: "var(--t-bg-elevated)" }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-(--t-accent) border border-(--t-border-hover) bg-(--t-bg-elevated) hover:bg-(--t-border-hover)"
                 >
                   <Icon icon="lucide:plus" width={12} />
                   {t("hosts.snippetPicker.createSnippet")}
@@ -231,7 +228,7 @@ export function SnippetPickerPanel({ connectionIds, onClose }: Props) {
           {/* Footer */}
           <div className="shrink-0 border-t border-t-(--t-bg-terminal) bg-(--t-bg-status-bar)">
             {error && (
-              <div className="px-4 py-2 text-xs" style={{ color: "var(--t-error, #f87171)" }}>
+              <div className="px-4 py-2 text-xs" style={{ color: "var(--t-status-error)" }}>
                 {error}
               </div>
             )}
@@ -272,25 +269,16 @@ function SnippetRowActions({ snippet, onTrigger }: { snippet: Snippet; onTrigger
       <button
         title={t("hosts.snippetPicker.insert")}
         onClick={() => onTrigger(snippet, false)}
-        className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-text-dim)"
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "var(--t-bg-card-hover)";
-          e.currentTarget.style.color = "var(--t-text-primary)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.color = "var(--t-text-dim)";
-        }}
+        aria-label={t("hosts.snippetPicker.insert")}
+        className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-text-dim) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary)"
       >
         <Icon icon="lucide:arrow-down-to-line" width={12} />
       </button>
       <button
         title={t("hosts.snippetPicker.execute")}
         onClick={() => onTrigger(snippet, true)}
-        className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors"
-        style={{ color: "var(--t-accent)" }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-card-hover)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        aria-label={t("hosts.snippetPicker.execute")}
+        className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-accent) hover:bg-(--t-bg-card-hover)"
       >
         <Icon icon="lucide:play" width={12} />
       </button>

@@ -14,32 +14,33 @@ vi.mock("react-i18next", () => ({
   initReactI18next: { type: "3rdParty", init: () => {} },
 }));
 
-import { ROLE_META, roleChipColors, RoleToggleChip } from "./roleChips";
+import { roleChipColors, roleTint, RoleToggleChip } from "./roleChips";
 
 afterEach(cleanup);
 
-test("a built-in role takes its palette colour and background", () => {
-  expect(roleChipColors("editor")).toMatchObject({ color: "#34d399", bg: ROLE_META.editor.bg });
+test("a built-in role takes its role token and a tint of it", () => {
+  expect(roleChipColors("editor")).toMatchObject({ color: "var(--t-role-member)", bg: roleTint("var(--t-role-member)") });
 });
 
 test("an explicit role colour wins over the palette", () => {
   expect(roleChipColors("editor", "#ff0000").color).toBe("#ff0000");
 });
 
-test("an unknown role falls back, and its background is the colour at 10%", () => {
-  expect(roleChipColors("wrangler")).toEqual({ meta: undefined, color: "var(--t-accent)", bg: "var(--t-accent)1a" });
-  expect(roleChipColors("wrangler", null, "#123456")).toMatchObject({ color: "#123456", bg: "#1234561a" });
+test("an unknown role falls back, and its background is a tint of the colour", () => {
+  expect(roleChipColors("wrangler")).toMatchObject({ meta: undefined, color: "var(--t-accent)", bg: roleTint("var(--t-accent)") });
+  expect(roleChipColors("wrangler", null, "#123456")).toMatchObject({ color: "#123456", bg: roleTint("#123456") });
 });
 
-test("an explicit colour on a built-in role keeps the palette background", () => {
-  expect(roleChipColors("editor", "#ff0000").bg).toBe(ROLE_META.editor.bg);
+test("an explicit colour on a built-in role tints with that colour; plain member stays flat", () => {
+  expect(roleChipColors("editor", "#ff0000").bg).toBe(roleTint("#ff0000"));
+  expect(roleChipColors("member").bg).toBe("var(--t-bg-elevated)");
 });
 
 test("an active chip is tinted and bordered, an inactive one is not", () => {
   render(<RoleToggleChip name="editor" active onClick={() => {}} />);
   const active = screen.getByRole("button");
-  expect(active.style.color).toBe("rgb(52, 211, 153)");
-  expect(active.style.border).toBe("1px solid rgba(52, 211, 153, 0.267)");
+  expect(active.style.color).toBe("var(--t-role-member)");
+  expect(active.getAttribute("style")).toContain("color-mix");
   cleanup();
 
   render(<RoleToggleChip name="editor" active={false} onClick={() => {}} />);

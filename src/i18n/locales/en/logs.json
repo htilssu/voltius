@@ -158,6 +158,8 @@
       "pageOf": "Page {{page}} / {{totalPages}}"
     },
     "emptyState": "No events match your filters.",
+
+    "searchNoResults": "No events on this page match “{{search}}”. Search only covers the loaded page.",
     "error": {
       "retry": "Retry"
     }

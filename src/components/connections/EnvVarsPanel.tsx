@@ -68,7 +68,7 @@ export default function EnvVarsPanel({ envVars, onChange, onBack }: Props) {
             <button
               type="button"
               onClick={() => removeVar(ev.id)}
-              className="text-(--t-text-dim) hover:text-red-400 transition-colors shrink-0"
+              className="text-(--t-text-dim) hover:text-(--t-status-error) transition-colors shrink-0"
               aria-label={t("connections.envVarsPanel.removeAriaLabel")}
             >
               <Icon icon="lucide:x" width={14} />

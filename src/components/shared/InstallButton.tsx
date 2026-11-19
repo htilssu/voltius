@@ -15,9 +15,8 @@ export function InstallButton({ label, busy, onClick, disabledReason = null, com
       disabled={busy || disabledReason !== null}
       onClick={onClick}
       className={compact
-        ? "flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-medium shrink-0 bg-(--t-bg-elevated) text-(--t-text-secondary) hover:text-(--t-text-primary) transition-colors"
-        : "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 bg-(--t-accent) text-(--t-bg-base) transition-opacity hover:opacity-85"}
-      style={{ opacity: busy ? 0.6 : disabledReason !== null ? 0.4 : undefined, cursor: disabledReason !== null ? "not-allowed" : undefined }}
+        ? "btn btn-secondary flex items-center gap-1 px-2 py-0.5 rounded-sm text-2xs font-medium shrink-0"
+        : "btn btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"}
     >
       <Icon icon={busy ? "lucide:loader" : "lucide:download"} width={compact ? 10 : 12} className={busy ? "animate-spin" : undefined} />
       {label}

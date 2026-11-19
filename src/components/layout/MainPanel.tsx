@@ -19,7 +19,7 @@ import { SnippetsPage } from "@/components/snippets/SnippetsPage";
 import { PortForwardingPage } from "@/components/port_forwarding/PortForwardingPage";
 import MembersPage from "@/components/members/MembersPage";
 import AuditLogsPage from "@/components/logs/AuditLogsPage";
-import { Icon } from "@iconify/react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useHostPingPolling } from "@/hooks/useHostPingPolling";
 import { EmptySplitPane } from "@/components/panes/PaneTerminal";
 import { PaneView } from "@/components/panes/PaneView";
@@ -33,24 +33,12 @@ import type { TerminalSession } from "@/types";
 function NoVaultSelected() {
   const { t } = useTranslation();
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-4 bg-(--t-bg-base)">
-      <div
-        className="flex items-center justify-center rounded-3xl w-[5.333rem] h-[5.333rem] text-(--t-text-dim)"
-        style={{
-          background: "linear-gradient(135deg, var(--t-bg-elevated) 0%, var(--t-bg-card) 100%)",
-          border: "1px solid var(--t-border)",
-        }}
-      >
-        <Icon icon="lucide:vault" width={36} />
-      </div>
-      <div className="flex flex-col items-center gap-1.5 text-center">
-        <span className="text-base font-semibold text-(--t-text-primary)">
-          {t("layout.mainPanel.noVaultSelectedTitle")}
-        </span>
-        <span className="text-sm text-(--t-text-dim) max-w-[18.667rem]">
-          {t("layout.mainPanel.noVaultSelectedBody")}
-        </span>
-      </div>
+    <div className="flex-1 grid place-items-center bg-(--t-bg-base)">
+      <EmptyState
+        icon="lucide:vault"
+        title={t("layout.mainPanel.noVaultSelectedTitle")}
+        body={t("layout.mainPanel.noVaultSelectedBody")}
+      />
     </div>
   );
 }

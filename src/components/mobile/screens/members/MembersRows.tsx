@@ -13,7 +13,7 @@ import { OverflowList } from "@/components/shared/OverflowTagList";
 import { inviteLabel, memberLabel, secondaryHandle } from "@/services/memberLabel";
 import MobileListRow from "../../MobileListRow";
 
-const MORE_CHIP = "shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full bg-(--t-bg-elevated) text-(--t-text-dim)";
+const MORE_CHIP = "shrink-0 text-2xs font-medium px-2 py-0.5 rounded-full bg-(--t-bg-elevated) text-(--t-text-dim)";
 
 function RoleChipStrip({ member, roles }: { member: TeamMember; roles: TeamRole[] }) {
   const { t } = useTranslation();

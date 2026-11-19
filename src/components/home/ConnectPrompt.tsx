@@ -90,13 +90,13 @@ export function ConnectPrompt({ placeholder, autoFocus, searchFallback }: Props)
             spellCheck={false}
             autoCapitalize="off"
             autoCorrect="off"
-            className="form-input w-full h-11 pl-10 pr-3 rounded-xl text-sm font-mono outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
+            className="form-input w-full h-11 pl-10 pr-3 rounded-lg text-sm font-mono outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
           />
         </div>
         <button
           type="submit"
           disabled={!intent && !isJoin && !isSearch}
-          className="btn btn-primary flex items-center justify-center gap-2 h-11 min-w-28 px-5 rounded-xl text-sm font-medium"
+          className="btn btn-primary flex items-center justify-center gap-2 h-11 min-w-28 px-5 rounded-lg text-sm font-medium"
         >
           {joining && <Icon icon="lucide:loader-circle" width={14} className="animate-spin" />}
           {label}

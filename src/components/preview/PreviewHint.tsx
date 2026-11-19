@@ -9,7 +9,7 @@ export function usePreviewLevel(type: TeamObjectType, id: string): AccessLevel |
   return object ? accessLevel(object.mask, type) : null;
 }
 
-const CHIP = "shrink-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold border border-(--t-border) bg-(--t-bg-input) text-(--t-text-dim)";
+const CHIP = "shrink-0 px-1.5 py-0.5 rounded-md text-2xs font-semibold border border-(--t-border) bg-(--t-bg-input) text-(--t-text-dim)";
 const DRAFT_CHIP = `${CHIP} text-(--t-accent)`;
 
 export function PreviewHint({ type, id, layout }: { type: TeamObjectType; id: string; layout: "grid" | "list" | "row" }) {

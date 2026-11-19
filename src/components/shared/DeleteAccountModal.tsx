@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { ConfirmModal } from "./ConfirmModal";
-import { Modal, ModalCard } from "./Modal";
+import { DIALOG_WIDTH, Modal, ModalCard } from "./Modal";
 import { deleteAccount, getCurrentUserEmail } from "@/services/account";
 import { appToast } from "@/services/appToast";
 import { useServerBillingEnabled } from "@/services/serverCapabilities";
@@ -40,7 +40,7 @@ export function DeleteAccountModal({ onCancel, onDeleted }: Props) {
     // Held open until acknowledged: the desktop reload that follows would swallow the toast.
     return (
       <Modal onClose={onDeleted} onEnter={onDeleted}>
-        <ModalCard className="p-6 flex flex-col gap-4 min-w-[21.333rem] max-w-[26.667rem]">
+        <ModalCard className={`p-6 flex flex-col gap-4 ${DIALOG_WIDTH}`}>
           <div className="flex items-center gap-3">
             <Icon icon="lucide:circle-check" width={20} className="shrink-0 text-(--t-status-connected)" />
             <h2 className="text-sm font-semibold text-(--t-text-bright)">{t("shared.deleteAccount.deletedTitle")}</h2>

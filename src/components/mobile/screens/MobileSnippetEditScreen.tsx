@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import MobileEditScreen from "../MobileEditScreen";
+import { MobileButton } from "../MobileButton";
 import { useSnippetStore, type SnippetDraft } from "@/stores/snippetStore";
 import { useAllSnippets } from "@/hooks/useAllSnippets";
 import { useVaultScope } from "@/hooks/useVaultScope";
@@ -57,6 +58,7 @@ function MobileSnippetEditorFields({ editing, placement, draft, readOnly }: Edit
   const [steps, setSteps] = useState<SnippetStep[]>(initialSteps);
   const [remotePick, setRemotePick] = useState<{ index: number; field: "from_path" | "to_path"; isDir: boolean } | null>(null);
   const [revealErrors, setRevealErrors] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   useBackInterceptor(!!remotePick, () => setRemotePick(null));
 
   // Single-script fast path: keep the plain textarea when the snippet is just one script step.
@@ -163,16 +165,21 @@ function MobileSnippetEditorFields({ editing, placement, draft, readOnly }: Edit
             </button>
           </div>
         )}
-        {editing && !readOnly && (
-          <button
-            data-mobile-snippet-delete
-            onClick={() => { void deleteSnippet(editing.id); pop(); }}
-            className="shrink-0 flex items-center justify-center gap-2 rounded-full h-12 text-sm font-medium"
-            style={{ color: "var(--t-danger, #e5484d)", border: "1px solid var(--t-border)" }}
-          >
+        {editing && !readOnly && (confirmingDelete ? (
+          <div className="shrink-0 flex flex-col gap-2">
+            <p className="text-sm text-(--t-text-secondary)">{t("mobile.sheets.shared.confirmDeleteBody", { name: editing.name })}</p>
+            <MobileButton block variant="danger" data-mobile-snippet-delete-confirm onClick={() => { void deleteSnippet(editing.id); pop(); }}>
+              <Icon icon="lucide:trash-2" width={16} /> {t("common.action.delete")}
+            </MobileButton>
+            <MobileButton block variant="secondary" onClick={() => setConfirmingDelete(false)}>
+              {t("common.action.cancel")}
+            </MobileButton>
+          </div>
+        ) : (
+          <MobileButton block variant="danger-ghost" data-mobile-snippet-delete onClick={() => setConfirmingDelete(true)} className="shrink-0">
             <Icon icon="lucide:trash-2" width={16} /> {t("mobile.snippetEdit.delete")}
-          </button>
-        )}
+          </MobileButton>
+        ))}
       </ReadOnlyFields>
       {editing && (
         <div className="px-4 pb-4 empty:hidden">

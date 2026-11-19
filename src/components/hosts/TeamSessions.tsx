@@ -20,6 +20,7 @@ import { usePreviewActive } from "@/hooks/previewScope";
 import { useGreyedUnless } from "@/hooks/useGreyedUnless";
 import { refuseWhilePreviewing } from "@/services/previewGuard";
 import { previewAreaLock } from "@/components/preview/previewAreaLocks";
+import { toastActionError } from "@/components/shared/actionError";
 
 function JoinByCodeButton({ onClick, disabledReason }: { onClick: () => void; disabledReason?: string }) {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ function JoinByCodeButton({ onClick, disabledReason }: { onClick: () => void; di
     <button
       disabled={!!disabledReason}
       title={disabledReason}
-      className="disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-medium transition-colors border border-(--t-border) text-(--t-text-dim) hover:text-(--t-text-primary)"
+      className="disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed flex items-center gap-1 px-2 py-0.5 rounded-sm text-xs font-medium transition-colors border border-(--t-border) text-(--t-text-dim) hover:text-(--t-text-primary)"
       onClick={onClick}
     >
       <Icon icon="lucide:link" width={11} />
@@ -115,7 +116,7 @@ export function TeamSessions() {
     try {
       await doJoinSession(session.id);
     } catch (err) {
-      console.error("Failed to join session:", err);
+      toastActionError(err, t);
     }
   };
 
@@ -178,7 +179,7 @@ export function TeamSessions() {
   function renderJoinPanel() {
     return (
       <div
-        className="mb-3 p-3 rounded-xl"
+        className="mb-3 p-3 rounded-[var(--r-lg)]"
         style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
       >
         <p className="text-xs font-medium mb-2" style={{ color: "var(--t-text-secondary)" }}>
@@ -203,8 +204,7 @@ export function TeamSessions() {
           <button
             disabled={joinLoading || !inviteCode.trim()}
             onClick={() => void handleJoinByCode()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity disabled:opacity-50"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
           >
             {joinLoading
               ? <Icon icon="lucide:loader-circle" width={12} className="animate-spin" />
@@ -213,9 +213,8 @@ export function TeamSessions() {
           </button>
           <button
             onClick={() => setShowJoinModal(false)}
-            className="px-2 py-1.5 rounded-lg text-xs transition-opacity"
+            className="btn btn-ghost px-2 py-1.5 rounded-lg text-xs"
             aria-label={t("common.action.close")}
-            style={{ color: "var(--t-text-dim)" }}
           >
             <Icon icon="lucide:x" width={13} />
           </button>
@@ -313,7 +312,7 @@ export function TeamSessions() {
                 <button
                   onClick={(e) => { e.stopPropagation(); void handleJoinCard(session); }}
                   {...joinGrey}
-                  className={`disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                     alreadyIn
                       ? "border border-(--t-border) bg-(--t-bg-terminal) text-(--t-accent)"
                       : "bg-(--t-accent) text-(--t-on-accent) hover:brightness-110"

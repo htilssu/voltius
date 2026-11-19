@@ -114,8 +114,8 @@ export default function CloudAuthModal() {
       <ModalCard className="flex flex-col gap-5 p-6" style={{ width: "min(27rem, 92vw)" }}>
         <div className="flex items-start gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "color-mix(in srgb, var(--t-accent) 12%, transparent)" }}
           >
             <Icon icon="lucide:cloud" width={20} style={{ color: "var(--t-accent)" }} />
           </div>
@@ -185,7 +185,7 @@ export default function CloudAuthModal() {
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full py-2.5 rounded-lg text-sm font-semibold disabled:opacity-60"
+            className="btn btn-primary w-full py-2.5 rounded-lg text-sm font-semibold"
           >
             {loading
               ? t("layout.cloudAuthModal.pleaseWait")

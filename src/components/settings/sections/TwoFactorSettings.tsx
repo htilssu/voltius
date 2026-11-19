@@ -17,7 +17,7 @@ import {
 import type { TwoFactorProof } from "@/services/twoFactorProof";
 import { writeClipboard } from "@/utils/clipboard";
 import { SHORT_DATE, formatDate } from "@/utils/localeFormat";
-import { ActionItem, FormButtons, SettingsDialog, SettingsInput } from "./shared";
+import { ActionItem, FormButtons, SettingsDialog, SettingsInput, toastError } from "./shared";
 
 const QUIET_ZONE = 4;
 
@@ -39,6 +39,7 @@ function QrCode({ value, label }: { value: string; label: string }) {
   return (
     <svg role="img" aria-label={label} viewBox={`0 0 ${size} ${size}`} className="mx-auto rounded-lg" width={168} height={168}
       shapeRendering="crispEdges">
+      {/* QR code: must stay black-on-white to scan, whatever the theme. */}
       <rect width={size} height={size} fill="#fff" />
       <path d={path} fill="#000" />
     </svg>
@@ -75,7 +76,7 @@ function RecoveryCodes({ codes, onDone }: { codes: string[]; onDone: () => void 
       </ul>
       <div className="flex gap-2">
         <button type="button" className="btn btn-secondary flex-1 py-1.5 rounded-lg text-sm"
-          onClick={() => void writeClipboard(text).then(() => flash()).catch(() => {})}>
+          onClick={() => void writeClipboard(text).then(() => flash()).catch(toastError)}>
           {copied ? t("settings.account.twoFactor.copied") : t("settings.account.twoFactor.copy")}
         </button>
         <button type="button" className="btn btn-secondary flex-1 py-1.5 rounded-lg text-sm"
@@ -230,8 +231,8 @@ function TwoFactorDialog({ enabled, offered, onChange, onClose }: {
           <button
             type="button"
             title={t("settings.account.twoFactor.copyKey")}
-            onClick={() => void writeClipboard(view.setup.secret).then(() => flashKey()).catch(() => {})}
-            className="w-full flex items-center justify-center gap-1.5 font-mono text-[11px] break-all text-(--t-text-muted) hover:text-(--t-text-primary) select-text"
+            onClick={() => void writeClipboard(view.setup.secret).then(() => flashKey()).catch(toastError)}
+            className="w-full flex items-center justify-center gap-1.5 font-mono text-2xs break-all text-(--t-text-muted) hover:text-(--t-text-primary) select-text"
           >
             {view.setup.secret}
             <Icon icon={keyCopied ? "lucide:check" : "lucide:copy"} width={11} className="shrink-0" />

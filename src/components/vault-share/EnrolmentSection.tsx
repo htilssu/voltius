@@ -21,8 +21,7 @@ import { formatDateTime, formatRelative } from "@/utils/localeFormat";
 import { ChoiceChip } from "./ChoiceChip";
 import { isOwnerRole } from "./vaultShareModel";
 
-const LABEL = "text-[10px] uppercase tracking-wider text-(--t-text-secondary)";
-const ACCENT_BTN = { background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" };
+const LABEL = "text-2xs uppercase tracking-wider text-(--t-text-secondary)";
 const EXPIRY_PRESETS = [
   { key: "never", days: null },
   { key: "day30", days: 30 },
@@ -163,7 +162,7 @@ export function EnrolmentSection({ teamId, roles }: Props) {
         <span className="text-xs font-semibold text-(--t-text-primary)">{t("members.enrollment.title")}</span>
       </div>
       {loadError != null && (
-        <p className="flex items-center gap-2 text-[11px]" style={{ color: "var(--t-status-error)" }}>
+        <p className="flex items-center gap-2 text-xs" style={{ color: "var(--t-status-error)" }}>
           <span className="flex-1 min-w-0">{t("members.enrollment.loadFailed", { reason: userFacingReason(loadError) })}</span>
           <button onClick={load} className="shrink-0 underline">{t("common.action.retry")}</button>
         </p>
@@ -235,7 +234,7 @@ function CreateForm({ roles, teamName, noEmail, busy, onCreate }: CreateFormProp
 
   return (
     <>
-      <p className="text-[11px] leading-relaxed text-(--t-text-secondary)">
+      <p className="text-xs leading-relaxed text-(--t-text-secondary)">
         {t("members.enrollment.explainer", { team: teamName })}
       </p>
 
@@ -268,7 +267,7 @@ function CreateForm({ roles, teamName, noEmail, busy, onCreate }: CreateFormProp
           placeholder={t("members.enrollment.domainPlaceholder")}
           keepPlaceholder
         />
-        {domainError && <p className="text-[11px]" style={{ color: "var(--t-status-error)" }}>{domainError}</p>}
+        {domainError && <p className="text-xs" style={{ color: "var(--t-status-error)" }}>{domainError}</p>}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -277,7 +276,7 @@ function CreateForm({ roles, teamName, noEmail, busy, onCreate }: CreateFormProp
           <Toggle checked={approval} disabled={noEmail} onChange={setApprove} aria-label={t("members.enrollment.approve")} />
         </div>
         {noEmail && (
-          <p className="flex items-start gap-1.5 text-[11px] text-(--t-text-dim)">
+          <p className="flex items-start gap-1.5 text-2xs text-(--t-text-dim)">
             <Icon icon="lucide:mail-x" width={12} className="mt-0.5 shrink-0" />
             {t("members.enrollment.noEmail")}
           </p>
@@ -297,13 +296,12 @@ function CreateForm({ roles, teamName, noEmail, busy, onCreate }: CreateFormProp
         <button
           onClick={() => onCreate({ role, domains, approve, expiresAt: expiryDays ? new Date(Date.now() + expiryDays * DAY_MS).toISOString() : null })}
           disabled={busy || (domains.length === 0 && !approval)}
-          className="px-3 py-1.5 rounded-lg text-[11px] font-medium disabled:opacity-50"
-          style={ACCENT_BTN}
+          className="btn btn-primary px-3 py-1.5 rounded-lg text-xs font-medium"
         >
           {t("members.enrollment.create")}
         </button>
       </div>
-      <p className="text-[10px] text-(--t-text-dim)">{t("members.enrollment.guardHint")}</p>
+      <p className="text-2xs text-(--t-text-dim)">{t("members.enrollment.guardHint")}</p>
     </>
   );
 }
@@ -334,11 +332,11 @@ function TokenCard({ info, fresh, locked, busy, onRotate, onRevoke }: TokenCardP
     <div className="flex flex-col gap-1.5 px-3 py-2 rounded-lg bg-(--t-bg-card)">
       <div className="flex items-start gap-2">
         <RoleNamePill name={info.role} />
-        <span className="text-[11px] text-(--t-text-secondary) flex-1 min-w-0 break-words">{summary}</span>
+        <span className="text-xs text-(--t-text-secondary) flex-1 min-w-0 break-words">{summary}</span>
       </div>
 
       {isExpired && (
-        <p className="flex items-start gap-1.5 text-[11px]" style={{ color: "var(--t-status-error)" }}>
+        <p className="flex items-start gap-1.5 text-xs" style={{ color: "var(--t-status-error)" }}>
           <Icon icon="lucide:clock-alert" width={12} className="mt-0.5 shrink-0" />
           <span>{`${expiry} · ${t("members.enrollment.expiredHint")}`}</span>
         </p>
@@ -347,18 +345,18 @@ function TokenCard({ info, fresh, locked, busy, onRotate, onRevoke }: TokenCardP
       {fresh && (
         <>
           <CopySecretField value={fresh} mono ariaLabel={t("members.enrollment.tokenLabel")} extra={<CopyLinkButton token={fresh} />} />
-          <p className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--t-status-warning)" }}>
+          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--t-status-warning)" }}>
             <Icon icon="lucide:triangle-alert" width={12} className="shrink-0" />
             {t("members.enrollment.copyNow")}
           </p>
           <span className={`${LABEL} mt-1`}>{t("members.enrollment.example")}</span>
-          <code className="block px-2 py-1.5 rounded-md bg-(--t-bg-elevated) border border-(--t-border) font-mono text-[10px] text-(--t-text-primary) break-all">
+          <code className="block px-2 py-1.5 rounded-md bg-(--t-bg-elevated) border border-(--t-border) font-mono text-2xs text-(--t-text-primary) break-all">
             voltius-cli enroll {fresh}
           </code>
         </>
       )}
 
-      <div className="flex flex-col gap-0.5 text-[11px] text-(--t-text-secondary)">
+      <div className="flex flex-col gap-0.5 text-xs text-(--t-text-secondary)">
         <span>
           {info.created_by_name
             ? t("members.enrollment.createdBy", { name: info.created_by_name, date: created })
@@ -379,17 +377,17 @@ function TokenCard({ info, fresh, locked, busy, onRotate, onRevoke }: TokenCardP
           <button
             onClick={onRotate}
             disabled={busy}
-            className="shrink-0 disabled:opacity-50 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border border-(--t-border) text-(--t-text-secondary)"
+            className="btn btn-secondary shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs"
           >
             <Icon icon="lucide:refresh-cw" width={12} />
             {t("members.enrollment.rotate")}
           </button>
         )}
-        <button onClick={onRevoke} disabled={busy} className="shrink-0 disabled:opacity-50 px-2.5 py-1 rounded-lg text-[11px]" style={{ color: "var(--t-status-error)" }}>
+        <button onClick={onRevoke} disabled={busy} className="btn btn-danger-ghost shrink-0 px-2.5 py-1 rounded-lg text-xs">
           {t("members.enrollment.revoke")}
         </button>
       </div>
-      {!fresh && <span className="text-[10px] text-(--t-text-dim)">{t("members.enrollment.notShownAgain")}</span>}
+      {!fresh && <span className="text-2xs text-(--t-text-dim)">{t("members.enrollment.notShownAgain")}</span>}
     </div>
   );
 }
@@ -402,7 +400,7 @@ function CopyLinkButton({ token }: { token: string }) {
       label={t("members.enrollment.copyLink")}
       title={t("members.enrollment.copyLinkTitle")}
       icon={<Icon icon="lucide:link" width={12} />}
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium shrink-0 border border-(--t-border) text-(--t-text-secondary)"
+      className="btn btn-secondary inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium shrink-0"
     />
   );
 }

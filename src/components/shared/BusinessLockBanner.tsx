@@ -5,6 +5,7 @@ import { useBusinessLock } from "@/hooks/useBusinessLock";
 import { openBillingCheckout } from "@/services/billingCheckout";
 import { whenWritable } from "@/services/previewGuard";
 import { CAN_OPEN_CHECKOUT } from "@/services/distribution";
+import { toastActionError } from "@/components/shared/actionError";
 
 export function UpgradeAction({ teamId, look, className = "" }: { teamId: string; look: "button" | "link"; className?: string }) {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ export function UpgradeAction({ teamId, look, className = "" }: { teamId: string
     return <button type="button" onClick={upgrade} className={`text-(--t-accent) ${className}`}>{t("shared.businessLock.upgrade")}</button>;
   }
   return (
-    <button type="button" onClick={upgrade} className="text-xs px-3 py-1.5 rounded-lg font-medium bg-(--t-accent) text-(--t-on-accent)">
+    <button type="button" onClick={upgrade} className="btn btn-primary text-xs px-3 py-1.5 rounded-lg font-medium">
       {t("shared.businessLock.upgrade")}
     </button>
   );
@@ -39,7 +40,9 @@ export function BusinessLapseNotice({ teamId, message, removeLabel, onRemove }: 
   const remove = async () => {
     if (!confirming) { setConfirming(true); return; }
     setBusy(true);
-    try { await onRemove?.(); } finally { setBusy(false); setConfirming(false); }
+    try { await onRemove?.(); }
+    catch (e) { toastActionError(e, t); }
+    finally { setBusy(false); setConfirming(false); }
   };
 
   return (
@@ -56,7 +59,7 @@ export function BusinessLapseNotice({ teamId, message, removeLabel, onRemove }: 
             onClick={() => void remove()}
             onBlur={() => setConfirming(false)}
             disabled={busy}
-            className="text-xs text-(--t-status-error) disabled:opacity-50"
+            className="text-xs text-(--t-status-error) disabled:opacity-(--disabled-opacity)"
           >
             {confirming ? t("shared.businessLock.confirmClear") : removeLabel}
           </button>
@@ -70,7 +73,7 @@ export function BusinessLockLine({ teamId, label, compact = false }: { teamId: s
   const { locked } = useBusinessLock(teamId);
   if (!locked) return null;
   return (
-    <p className={`${compact ? "text-[11px]" : "text-xs"} text-(--t-text-dim)`}>
+    <p className={`${compact ? "text-2xs" : "text-xs"} text-(--t-text-dim)`}>
       <Icon icon="lucide:lock" width={compact ? 11 : 12} className="inline align-[-1px] mr-1.5" />
       {label} <UpgradeAction teamId={teamId} look="link" />
     </p>
@@ -96,11 +99,11 @@ export function MemberPermissionsLock({ teamId, name, hasOverrides, onRemove }: 
 export function BusinessLockCard({ teamId, body }: { teamId: string; body: string }) {
   const { t } = useTranslation();
   return (
-    <div className="rounded-xl p-4 mb-2 flex flex-col items-center gap-3 text-center border border-(--t-border) bg-(--t-bg-card)">
+    <div className="rounded-[var(--r-lg)] p-4 mb-2 flex flex-col items-center gap-3 text-center border border-(--t-border) bg-(--t-bg-card)">
       <Icon icon="lucide:lock" width={20} className="text-(--t-text-dim)" />
       <div>
         <p className="text-sm font-medium text-(--t-text-primary)">{t("shared.businessLock.title")}</p>
-        <p className="text-xs mt-1 max-w-[220px] text-(--t-text-dim)">{body}</p>
+        <p className="text-xs mt-1 max-w-56 text-(--t-text-dim)">{body}</p>
       </div>
       <UpgradeAction teamId={teamId} look="button" />
     </div>

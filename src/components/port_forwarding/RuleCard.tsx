@@ -18,6 +18,7 @@ import { ruleToForm } from "@/utils/portForwardingForm";
 import { useInlineRename } from "@/hooks/useInlineRename";
 import { usePortForwardingStore } from "@/stores/portForwardingStore";
 import { PORT_FORWARDING_ICON } from "@/lib/conceptIcons";
+import { ScopedCountBadge, TunnelTypeBadge } from "./TunnelBadges";
 
 interface Props {
   rule: PortForwardingRule;
@@ -90,24 +91,10 @@ function RuleCardBody({
   ];
 
   const portLabel = formatRuleLabel(rule);
-  const tunnelType = rule.tunnel_type ?? "local";
-  const typeBadgeClass = tunnelType === "remote"
-    ? "bg-orange-500/15 text-orange-400 border-orange-500/20"
-    : tunnelType === "dynamic"
-    ? "bg-purple-500/20 text-purple-400 border-purple-500/20"
-    : "bg-blue-500/15 text-blue-400 border-blue-500/20";
-  const typeBadgeLabel = tunnelType === "dynamic"
-    ? t("portForwarding.activeTunnels.socks5")
-    : tunnelType === "remote"
-    ? t("portForwarding.activeTunnels.remote")
-    : t("portForwarding.activeTunnels.local");
-  const typeBadge = (
-    <span className={`shrink-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold border ${typeBadgeClass}`}>
-      {typeBadgeLabel.toUpperCase()}
-    </span>
-  );
+  const typeBadge = <TunnelTypeBadge tunnelType={rule.tunnel_type} />;
+  const scopedTitle = t("portForwarding.ruleCard.scopedToConnections", { count: rule.connection_ids.length });
   const effectiveStatusLabel = statusLabel ?? (status === "active" ? t("portForwarding.ruleCard.active") : status === "error" ? t("portForwarding.ruleCard.error") : t("portForwarding.ruleCard.stopped"));
-  const statusLabelClass = status === "error" ? "text-red-400" : "text-(--t-text-dim)";
+  const statusLabelClass = status === "error" ? "text-(--t-status-error)" : "text-(--t-text-dim)";
   const actionIcon = isBusy ? "lucide:loader-circle" : status === "active" ? "lucide:pause" : "lucide:play";
   const actionTitle = status === "active" ? t("portForwarding.ruleCard.pauseForwarding") : t("portForwarding.ruleCard.resumeForwarding");
   const handleToggle = () => {
@@ -146,7 +133,7 @@ function RuleCardBody({
             <AvatarTile icon={PORT_FORWARDING_ICON} iconSize={15} className="w-7 h-7 rounded-lg text-(--t-text-secondary)" />
             {statusDot}
           </div>
-          <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">
+          <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">
             {rename.editor ?? rule.name}
           </p>
           {typeBadge}
@@ -154,20 +141,14 @@ function RuleCardBody({
             {portLabel}
           </p>
           {rule.connection_ids.length > 0 && (
-            <span
-              className="text-[10px] px-1 py-0.5 rounded font-medium shrink-0 leading-none
-                bg-amber-500/15 text-amber-400 hidden lg:inline"
-              title={t("portForwarding.ruleCard.scopedToConnections", { count: rule.connection_ids.length })}
-            >
-              {rule.connection_ids.length}
-            </span>
+            <span className="hidden lg:inline-flex"><ScopedCountBadge title={scopedTitle}>{rule.connection_ids.length}</ScopedCountBadge></span>
           )}
           {rule.description && (
             <p className="text-xs truncate text-(--t-text-muted) hidden lg:block max-w-48">
               {rule.description}
             </p>
           )}
-          <span title={effectiveStatusLabel} className={`text-xs shrink-0 hidden md:inline max-w-72 truncate ${statusLabelClass}`}>{effectiveStatusLabel}</span>
+          <span title={effectiveStatusLabel} className={`text-xs shrink min-w-0 max-w-72 truncate ${statusLabelClass}`}>{effectiveStatusLabel}</span>
           <div className="flex items-center gap-1 shrink-0">
             <PreviewHint type="port_forwarding_rule" id={rule.id} layout="list" />
             {webButton(true)}
@@ -180,7 +161,7 @@ function RuleCardBody({
         <div className="flex-1 min-w-0 self-start flex flex-col gap-3">
           <div className="flex items-start gap-2 min-w-0">
             <div className="relative shrink-0">
-              <AvatarTile icon={PORT_FORWARDING_ICON} iconSize={16} className="w-[30px] h-[30px] rounded-lg text-(--t-text-secondary)" />
+              <AvatarTile icon={PORT_FORWARDING_ICON} iconSize={16} className="w-8 h-8 rounded-lg text-(--t-text-secondary)" />
               {statusDot}
             </div>
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
@@ -198,13 +179,7 @@ function RuleCardBody({
             <p className="text-xs text-(--t-text-muted) truncate">{rule.description}</p>
           )}
           {rule.connection_ids.length > 0 && (
-            <span
-              className="text-[10px] px-1 py-0.5 rounded font-medium w-fit leading-none
-                bg-amber-500/15 text-amber-400"
-              title={t("portForwarding.ruleCard.scopedToConnections", { count: rule.connection_ids.length })}
-            >
-              {t("portForwarding.ruleCard.connectionsCount", { count: rule.connection_ids.length })}
-            </span>
+            <span className="w-fit"><ScopedCountBadge title={scopedTitle}>{t("portForwarding.ruleCard.connectionsCount", { count: rule.connection_ids.length })}</ScopedCountBadge></span>
           )}
           <div className="flex items-center gap-0.5 -mb-1.5">
             <span title={effectiveStatusLabel} className={`flex-1 min-w-0 truncate text-xs font-medium ${statusLabelClass}`}>{effectiveStatusLabel}</span>

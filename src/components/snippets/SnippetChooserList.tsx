@@ -57,13 +57,13 @@ export function SnippetChooserList({ search, onPick, renderActions, emptyAction,
     <>
       {showRecents && recents.length > 0 && !q && (
         <div className="mb-0.5">
-          <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-(--t-text-dim)">
+          <p className="px-4 py-1.5 text-2xs font-bold uppercase tracking-widest text-(--t-text-dim)">
             {t("hosts.snippetPicker.recent")}
           </p>
           {recents.map((s) => (
             <Row key={s.id} snippet={s} onPick={onPick} renderActions={renderActions} />
           ))}
-          <p className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-(--t-text-dim)">
+          <p className="px-4 py-1.5 text-2xs font-bold uppercase tracking-widest text-(--t-text-dim)">
             {t("hosts.snippetPicker.allSnippets")}
           </p>
         </div>
@@ -93,7 +93,7 @@ function Row({ snippet, onPick, renderActions }: {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium truncate text-(--t-text-bright)">{snippet.name}</p>
-        <p className="text-[11px] truncate font-mono text-(--t-text-dim)">
+        <p className="text-2xs truncate font-mono text-(--t-text-dim)">
           {snippet.description || <SnippetPreview snippet={snippet} />}
         </p>
       </div>

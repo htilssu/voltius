@@ -16,13 +16,13 @@ export function ConflictDialog({ conflict, conflictNumber, totalConflicts, onRes
 
   return (
     <Modal onClose={() => onResolve("cancel")}>
-      <ModalCard className="relative z-10 flex flex-col overflow-hidden w-[26.667rem] max-w-[90vw]">
+      <ModalCard className="relative z-10 flex flex-col overflow-hidden w-[26.667rem] max-w-[calc(100vw-2rem)]">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-b-(--t-border)">
           <div
-            className="flex items-center justify-center rounded-lg shrink-0 w-[2.133rem] h-[2.133rem]"
-            style={{ background: "color-mix(in srgb, #f59e0b 18%, transparent)" }}
+            className="flex items-center justify-center rounded-lg shrink-0 w-8 h-8"
+            style={{ background: "color-mix(in srgb, var(--t-status-warning) 18%, transparent)" }}
           >
-            <Icon icon="lucide:triangle-alert" width={16} className="text-[#f59e0b]" />
+            <Icon icon="lucide:triangle-alert" width={16} className="text-(--t-status-warning)" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-(--t-text-primary)">{t("fileTransfer.conflict.title")}</p>
@@ -35,8 +35,8 @@ export function ConflictDialog({ conflict, conflictNumber, totalConflicts, onRes
         </div>
 
         <div className="px-5 py-4">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-(--t-bg-elevated) border border-(--t-border)">
-            <Icon icon={conflict.isDir ? "lucide:folder" : "lucide:file"} width={18} className="shrink-0" style={{ color: conflict.isDir ? "#f0c050" : "var(--t-text-dim)" }} />
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-(--t-bg-elevated) border border-(--t-border)">
+            <Icon icon={conflict.isDir ? "lucide:folder" : "lucide:file"} width={18} className={`shrink-0 ${conflict.isDir ? "text-(--t-file-folder)" : "text-(--t-text-dim)"}`} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-(--t-text-primary)">{conflict.name}</p>
               {!conflict.isDir && <p className="text-xs text-(--t-text-dim)">{formatSize(conflict.size)}</p>}

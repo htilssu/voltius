@@ -11,8 +11,8 @@ export default function MobileFab({
       data-snackbar-avoid
       aria-label={label}
       {...greyedTapProps(disabledReason, onTap)}
-      className="absolute right-4 bottom-4 z-10 h-14 flex items-center pl-4 rounded-2xl text-sm font-medium shadow-[0_6px_16px_-6px_rgba(0,0,0,0.5)] transition-[padding] duration-(--vt-dur-medium2) ease-(--vt-ease-emphasized) aria-disabled:opacity-45"
-      style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)", paddingRight: extended ? 20 : 16 }}
+      className="absolute right-4 bottom-4 z-10 h-14 flex items-center pl-4 rounded-lg text-sm font-medium transition-[padding] duration-(--vt-dur-medium2) ease-(--vt-ease-emphasized) aria-disabled:opacity-(--disabled-opacity)"
+      style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", boxShadow: "var(--t-elev-2)", paddingRight: extended ? 20 : 16 }}
     >
       <Icon icon={icon} width={24} className="shrink-0" />
       <span

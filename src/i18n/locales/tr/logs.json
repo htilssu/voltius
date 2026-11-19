@@ -158,6 +158,8 @@
       "pageOf": "Sayfa {{page}} / {{totalPages}}"
     },
     "emptyState": "Filtrelerinizle eşleşen olay yok.",
+
+    "searchNoResults": "Bu sayfada “{{search}}” ile eşleşen olay yok. Arama yalnızca yüklenen sayfayı kapsar.",
     "error": {
       "retry": "Tekrar dene"
     }

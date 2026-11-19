@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 import { USER_DATA_HANDLERS, applyUserDataBundle } from "@/services/user-data/registry";
 import { fromUserDataJSON } from "@/services/user-data/formats";
 import type { UserDataBundle } from "@/services/user-data/formats";
-import { ActionBtn } from "./shared";
+import { ActionBtn, StatusNote } from "./shared";
 import { CheckboxBox } from "@/components/shared/Checkbox";
 import { FileInputArea } from "./FileInputArea";
 
@@ -70,10 +70,7 @@ export function UserDataImportTab({ onClose }: { onClose: () => void }) {
       />
 
       {status.type === "error" && (
-        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-sm"
-          style={{ background: "rgba(239,68,68,0.12)", color: "var(--t-status-error)", border: "1px solid rgba(239,68,68,0.25)" }}>
-          <Icon icon="lucide:circle-alert" width={15} className="mt-0.5 shrink-0" /> {status.message}
-        </div>
+        <StatusNote error>{status.message}</StatusNote>
       )}
 
       {status.type === "ready" && (
@@ -98,15 +95,7 @@ export function UserDataImportTab({ onClose }: { onClose: () => void }) {
       )}
 
       {importResult && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-          style={{
-            background: importResult.isError ? "rgba(239,68,68,0.12)" : "rgba(34,197,94,0.1)",
-            color: importResult.isError ? "var(--t-status-error)" : "var(--t-status-connected)",
-            border: `1px solid ${importResult.isError ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.2)"}`,
-          }}>
-          <Icon icon={importResult.isError ? "lucide:circle-alert" : "lucide:circle-check-big"} width={14} />
-          {importResult.text}
-        </div>
+        <StatusNote error={importResult.isError}>{importResult.text}</StatusNote>
       )}
 
       <div className="mt-auto pt-3 border-t border-(--t-border)">

@@ -83,10 +83,7 @@ export function PickerOption({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors w-full"
-      style={{ color: active ? "var(--t-accent)" : "var(--t-text-secondary)" }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-card-hover)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors w-full hover:bg-(--t-bg-card-hover) ${active ? "text-(--t-accent)" : "text-(--t-text-secondary)"}`}
     >
       {icon && <Icon icon={icon} width={13} className="shrink-0" />}
       <div className="flex-1 text-left min-w-0">
@@ -129,15 +126,7 @@ export function PickerFooterAction({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors text-(--t-text-dim)"
-      onMouseEnter={(e) => {
-        e.currentTarget.style.color = "var(--t-accent)";
-        e.currentTarget.style.background = "var(--t-bg-card-hover)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = "var(--t-text-dim)";
-        e.currentTarget.style.background = "transparent";
-      }}
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-colors text-(--t-text-dim) hover:text-(--t-accent) hover:bg-(--t-bg-card-hover)"
     >
       <Icon icon={icon} width={13} />
       <span className="flex-1 text-left">{label}</span>
@@ -178,5 +167,5 @@ export function PickerSearch({
 }
 
 export function PickerSectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-(--t-text-dim)">{children}</p>;
+  return <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-wider text-(--t-text-dim)">{children}</p>;
 }

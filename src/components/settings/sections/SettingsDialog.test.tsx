@@ -16,18 +16,19 @@ afterEach(cleanup);
 describe("SettingsDialog", () => {
   test("closes on the scrim and on the header button, not on the card itself", () => {
     const onClose = vi.fn();
-    const { container } = render(
+    render(
       <SettingsDialog title="Change password" onClose={onClose}>
         <p>body</p>
       </SettingsDialog>,
     );
-    const scrim = container.firstElementChild as HTMLElement;
-    const card = scrim.firstElementChild as HTMLElement;
+    // Modal portals to <body>: scrim > dialog wrapper > card.
+    const scrim = document.body.lastElementChild as HTMLElement;
+    const card = screen.getByText("body").parentElement as HTMLElement;
 
     fireEvent.click(card);
     expect(onClose).not.toHaveBeenCalled();
 
-    fireEvent.click(container.querySelector("[data-icon='lucide:x']")!.parentElement!);
+    fireEvent.click(document.querySelector("[data-icon='lucide:x']")!.parentElement!);
     expect(onClose).toHaveBeenCalledTimes(1);
 
     fireEvent.click(scrim);
@@ -54,16 +55,16 @@ describe("FormButtons", () => {
     const { container } = render(<FormButtons onCancel={onCancel} submitLabel="Saving…" submitting />);
     const submit = container.querySelector<HTMLButtonElement>("button[type='submit']")!;
     expect(submit.disabled).toBe(true);
-    expect(submit.style.opacity).toBe("0.7");
+    expect(submit.getAttribute("aria-busy")).toBe("true");
 
     fireEvent.click(container.querySelector("button[type='button']")!);
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  test("submitting false keeps submit enabled at full opacity", () => {
+  test("submitting false keeps submit enabled", () => {
     const { container } = render(<FormButtons onCancel={() => {}} submitLabel="Save" submitting={false} />);
     const submit = container.querySelector<HTMLButtonElement>("button[type='submit']")!;
     expect(submit.disabled).toBe(false);
-    expect(submit.style.opacity).toBe("1");
+    expect(submit.getAttribute("aria-busy")).toBeNull();
   });
 });

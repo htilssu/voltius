@@ -2,6 +2,7 @@
 # bundle id app.voltius) through the App Store Connect API. The release task
 # submits an uploaded build for review, as ios.yml does on each tag; the
 # schedule submits the newest build when a tag found another version in review.
+# Without the Apple API key secrets the run is skipped (not failed).
 name: asc
 
 on:
@@ -36,16 +37,27 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TASK: ${{ github.event_name == 'schedule' && 'release' || inputs.task || 'status' }}
+      # Secrets cannot be read in an `if:`, so expose whether the key is configured.
+      HAS_ASC_KEY: ${{ secrets.APPLE_API_KEY != '' && secrets.APPLE_API_ISSUER != '' && secrets.APPLE_API_KEY_P8 != '' }}
     steps:
+      # Forks and repos without the App Store Connect key skip the run instead of
+      # failing every 6 hours on the schedule.
+      - name: Skip (App Store Connect key not configured)
+        if: env.HAS_ASC_KEY != 'true'
+        run: echo "::notice::APPLE_API_KEY, APPLE_API_ISSUER or APPLE_API_KEY_P8 is not set; skipping the asc $TASK task."
+
       - name: Checkout repository
+        if: env.HAS_ASC_KEY == 'true'
         uses: actions/checkout@v7
 
       - name: Setup node
+        if: env.HAS_ASC_KEY == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: lts/*
 
       - name: Run the scripts/asc task
+        if: env.HAS_ASC_KEY == 'true'
         env:
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}

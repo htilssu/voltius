@@ -57,19 +57,19 @@ export function FileAccessRequestModal() {
       <ModalCard className="p-5 flex flex-col gap-3.5 w-[min(26.25rem,calc(100vw-2rem))]">
         <div className="flex items-center gap-3">
           <span
-            className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 text-(--t-text-bright)"
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-(--t-text-bright)"
             style={{ background: DEVICE_TILE_BASE }}
           >
             <Icon icon={deviceIcon(prompt.platform)} width={18} />
           </span>
           <div className="flex flex-col gap-0.5 min-w-0">
-            <h2 className="text-[0.9375rem] font-semibold text-(--t-text-bright)">
+            <h2 className="text-sm font-semibold text-(--t-text-bright)">
               {t("layout.deviceFiles.title", { name: prompt.deviceName })}
             </h2>
             <span className="text-xs text-(--t-text-muted)">
               {t("layout.deviceFiles.subtitle", { route: routeLabel(t, prompt.route) })}
               {prompt.newDevice && (
-                <span className="ml-2 px-1.5 py-0.5 rounded text-[0.6875rem] text-(--t-accent) bg-(--t-bg-hover)">
+                <span className="ml-2 px-1.5 py-0.5 rounded-sm text-2xs text-(--t-accent) bg-(--t-bg-card-hover)">
                   {t("layout.deviceFiles.newDevice")}
                 </span>
               )}

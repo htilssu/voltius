@@ -5,11 +5,11 @@ interface Props {
   onClose: () => void;
   onEnter?: () => void;
   children: React.ReactNode;
-  /** Backdrop blur strength. `true` (default) blurs the scrim; `false` keeps it flat. */
+  /** @deprecated No-op: the scrim is always flat (no backdrop blur). Kept for existing callers. */
   blur?: boolean;
 }
 
-export function Modal({ onClose, onEnter, children, blur = true }: Props) {
+export function Modal({ onClose, onEnter, children }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,12 +32,7 @@ export function Modal({ onClose, onEnter, children, blur = true }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{
-        background: "rgba(0,0,0,0.5)",
-        backdropFilter: blur ? "blur(10px) saturate(1.2)" : undefined,
-        WebkitBackdropFilter: blur ? "blur(10px) saturate(1.2)" : undefined,
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-(--t-scrim)"
       onClick={onClose}
     >
       <div role="dialog" ref={dialogRef} tabIndex={-1} className="outline-hidden" onClick={(e) => e.stopPropagation()}>
@@ -49,13 +44,11 @@ export function Modal({ onClose, onEnter, children, blur = true }: Props) {
 }
 
 /**
- * Shared dialog shell. Both variants carry the same ring + top-edge highlight
- * and modal-level elevation tokens, so they read as one family; only the fill
- * differs by surface role (see docs/design-surfaces.md):
- *  - default (glass): translucent + blurred, for lightweight transient dialogs
- *    (confirm, small prompts).
- *  - `solid`: opaque, no blur, for dense content/reading surfaces (changelog,
- *    settings) where legibility comes first.
+ * Shared dialog shell. Both variants are opaque with the same ring and
+ * modal-level elevation; only the fill differs by surface role:
+ *  - default: card fill, for lightweight transient dialogs (confirm, prompts).
+ *  - `solid`: base fill, for dense content/reading surfaces (changelog,
+ *    settings).
  * Use instead of hand-rolling `bg-(--t-bg-card) border ... boxShadow`.
  */
 export function ModalCard({
@@ -78,3 +71,6 @@ export function ModalCard({
     </div>
   );
 }
+
+/** Width clamp for small confirm-style dialogs: 21–27rem, never wider than the viewport. */
+export const DIALOG_WIDTH = "min-w-[min(21rem,calc(100vw-2rem))] max-w-[min(27rem,calc(100vw-2rem))]";

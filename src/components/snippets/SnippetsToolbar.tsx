@@ -1,12 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { Icon } from "@iconify/react";
 import { FilterInput, SORT_MODE_ICONS, type SortMode, type LayoutMode } from "@/components/shared/ToolbarViewControls";
 import { ToolbarDropdown } from "@/components/shared/ToolbarDropdown";
 import { Pills } from "@/components/shared/Pills";
-import { DropdownMenuItem } from "@/components/shared/DropdownMenuItem";
 import { useToolbarResize } from "@/hooks/useToolbarResize";
-import { useRipple } from "@/hooks/useRipple";
-import { SplitMenuChevron } from "@/components/shared/SplitMenuChevron";
 
 interface Props {
   tab: "mine" | "community";
@@ -37,7 +33,6 @@ export function SnippetsToolbar({
 }: Props) {
   const { t } = useTranslation();
   const { compact, rowRef, leftRef, rightRef } = useToolbarResize();
-  const { createRipple, rippleEls } = useRipple();
 
   return (
     <>
@@ -87,34 +82,15 @@ export function SnippetsToolbar({
 
         <div ref={rightRef} className="ml-auto shrink-0">
         {tab === "mine" && (
-        <div className="flex items-center gap-px">
-          <button
-            onClick={onNewSnippet}
-            onPointerDown={createRipple}
-            title={compact ? t("snippets.toolbar.newSnippet") : undefined}
-            type="button"
-            className="flex items-center gap-2 px-3 h-8 text-sm font-bold tracking-wider transition-colors shrink-0 whitespace-nowrap relative overflow-hidden rounded-tl-[0.533rem] rounded-bl-[0.533rem]"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-accent-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-accent)")}
-          >
-            {rippleEls}
-            <Icon icon="lucide:braces" width={18} />
-            {!compact && t("snippets.toolbar.newSnippet")}
-          </button>
-
-          <SplitMenuChevron label={t("snippets.toolbar.newSnippetOptions")}>
-            {(close) => (
-              <DropdownMenuItem
-                icon="lucide:folder-plus"
-                label={t("snippets.toolbar.newFolder")}
-                disabled={!!newFolderBlocked}
-                title={newFolderBlocked}
-                onClick={() => { close(); onNewFolder(); }}
-              />
-            )}
-          </SplitMenuChevron>
-        </div>
+        <ToolbarDropdown
+          icon="lucide:braces"
+          label={compact ? undefined : t("snippets.toolbar.newSnippet")}
+          onAction={onNewSnippet}
+          variant="accent"
+          align="right"
+          menuWidth={200}
+          items={[{ label: t("snippets.toolbar.newFolder"), icon: "lucide:folder-plus", onClick: onNewFolder, disabledReason: newFolderBlocked }]}
+        />
         )}
         </div>
       </div>

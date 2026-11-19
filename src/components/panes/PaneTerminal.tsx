@@ -34,8 +34,8 @@ export function EmptySplitPane() {
   const { t } = useTranslation();
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-3 text-(--t-text-dim) bg-(--t-bg-terminal)">
-      <div className="size-12 rounded-2xl flex items-center justify-center border border-(--t-border) bg-(--t-bg-card)">
-        <Icon icon="lucide:layout-dashboard" width={24} />
+      <div className="size-10 rounded-lg flex items-center justify-center border border-(--t-border) bg-(--t-bg-card)">
+        <Icon icon="lucide:layout-dashboard" width={18} />
       </div>
       <div className="text-sm font-medium text-(--t-text-secondary)">{t("panes.terminal.emptyTitle")}</div>
       <div className="text-xs">{t("panes.terminal.emptyHint")}</div>

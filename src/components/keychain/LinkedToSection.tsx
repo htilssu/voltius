@@ -16,10 +16,10 @@ export interface HostUnlink {
   run: (conn: Connection) => void;
 }
 
-function RowButton({ icon, title, hoverColor, disabled, onClick }: {
+function RowButton({ icon, title, danger, disabled, onClick }: {
   icon: string;
   title: string;
-  hoverColor: string;
+  danger?: boolean;
   disabled?: boolean;
   onClick: () => void;
 }) {
@@ -28,9 +28,8 @@ function RowButton({ icon, title, hoverColor, disabled, onClick }: {
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim) disabled:opacity-40 disabled:cursor-not-allowed"
-      onMouseEnter={(e) => { if (disabled) return; e.currentTarget.style.color = hoverColor; e.currentTarget.style.background = "var(--t-bg-elevated)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--t-text-dim)"; e.currentTarget.style.background = "transparent"; }}
+      aria-label={title}
+      className={`p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim) enabled:hover:bg-(--t-bg-elevated) ${danger ? "enabled:hover:text-(--t-status-error)" : "enabled:hover:text-(--t-text-primary)"} disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed`}
     >
       <Icon icon={icon} width={14} />
     </button>
@@ -81,7 +80,6 @@ export function LinkedToSection({ hosts, identities = [], unlink, onLeave }: {
             <RowButton
               icon="lucide:pencil"
               title={t("keychain.identityForm.editIdentityTitle")}
-              hoverColor="var(--t-text-bright)"
               onClick={() => open({ kind: "identity-edit", identityId: i.id }, () => setKeychainPendingAction({ action: "edit-identity", id: i.id }))}
             />
           </LinkedRow>
@@ -107,14 +105,13 @@ export function LinkedToSection({ hosts, identities = [], unlink, onLeave }: {
               <RowButton
                 icon="lucide:pencil"
                 title={t("keychain.identityForm.editHostTitle")}
-                hoverColor="var(--t-text-bright)"
                 onClick={() => open({ kind: "host-edit", hostId: c.id }, () => { setActiveNav("hosts"); setHomePendingAction({ action: "edit", id: c.id }); })}
               />
               {unlink && (
                 <RowButton
                   icon="lucide:unlink"
                   title={allowed ? t("keychain.identityForm.unlinkTitle") : t("keychain.identityForm.unlinkNoPermission")}
-                  hoverColor="var(--t-status-error, #ef4444)"
+                  danger
                   disabled={!allowed}
                   onClick={() => unlink.run(c)}
                 />

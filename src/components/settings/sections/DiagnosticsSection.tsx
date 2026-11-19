@@ -93,7 +93,7 @@ export default function DiagnosticsSection() {
             type="button"
             onClick={() => void onCreate()}
             disabled={reportState === "working"}
-            className="w-full flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium bg-(--t-accent) text-(--t-on-accent) disabled:opacity-60"
+            className="btn btn-primary w-full flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
           >
             <Icon
               icon={reportState === "working" ? "lucide:loader-circle" : reportState === "done" ? "lucide:check" : "lucide:bug"}

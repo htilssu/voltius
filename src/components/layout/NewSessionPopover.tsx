@@ -6,6 +6,7 @@ import { useAllConnections } from "@/hooks/useAllConnections";
 import { ConnectionAvatar } from "@/components/shared/ConnectionAvatar";
 import { StatusDot } from "@/components/shared/StatusDot";
 import { VaultBadge } from "@/components/shared/VaultBadge";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { pingStatusTone } from "@/utils/statusTone";
 import { parseQuickConnect } from "@/services/quickConnect";
 import { quickConnectLabel, type QuickConnectRowIntent } from "@/components/omni/quickConnectLabel";
@@ -171,7 +172,7 @@ function NewSessionPanel({ popover, anchorRef, onClose }: {
   const sectionHeader = (label: string, divider: boolean) => (
     <>
       {divider && <div className="border-t border-t-(--t-border) my-1" />}
-      <p className="px-3 pt-1 pb-1 text-[11px] font-bold uppercase tracking-widest text-(--t-text-dim)">{label}</p>
+      <SectionHeader compact label={label} className="px-3 pt-1 pb-1" />
     </>
   );
 
@@ -180,7 +181,7 @@ function NewSessionPanel({ popover, anchorRef, onClose }: {
   return createPortal(
     <div
       ref={popover.panelRef}
-      className={`fixed z-100 w-[22rem] overflow-hidden surface-glass-solid shadow-xl ${popover.className}`}
+      className={`fixed z-100 w-[min(22rem,calc(100vw-2rem))] overflow-hidden surface-glass-solid ${popover.className}`}
       style={{ ...popover.style, top: pos.top, left: pos.left, borderRadius: "var(--r-lg)" }}
     >
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-b-(--t-border)">

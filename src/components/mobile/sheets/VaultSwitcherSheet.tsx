@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import BottomSheet from "./BottomSheet";
+import { MobileButton } from "../MobileButton";
 import { useVaultStore } from "@/stores/vaultStore";
 import { useTeamStore } from "@/stores/teamStore";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
@@ -81,23 +82,17 @@ export default function VaultSwitcherSheet() {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") create(); }}
             placeholder={t("mobile.sheets.vaultSwitcher.namePlaceholder")}
-            className="flex-1 bg-transparent text-sm outline-none rounded-lg px-3 h-10 text-(--t-text-primary)"
+            className="flex-1 min-w-0 bg-transparent text-sm outline-none rounded-lg px-3 h-12 text-(--t-text-primary)"
             style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
           />
-          <button
-            data-vault-new-create
-            onClick={create}
-            disabled={!name.trim()}
-            className="px-3 h-10 rounded-lg text-sm font-semibold disabled:opacity-40"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-          >
+          <MobileButton data-vault-new-create onClick={create} disabled={!name.trim()} className="shrink-0">
             {t("common.action.create")}
-          </button>
+          </MobileButton>
         </div>
       ) : (
         <button
           data-vault-new
-          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left active:bg-(--t-bg-card) text-(--t-accent)"
+          className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left active:bg-(--t-bg-card) text-(--t-accent)"
           onClick={() => (vaultLimitReached ? setLimitOpen(true) : setCreating(true))}
         >
           <Icon icon="lucide:plus" width={18} />
@@ -116,10 +111,10 @@ function VaultEntryRow({ entry, active, onOpen, onSettings }: {
   const { t } = useTranslation();
   const press = useLongPress(onSettings ?? (() => {}), onOpen);
   return (
-    <div className="flex items-center rounded-xl" style={{ background: active ? "var(--t-bg-card)" : "transparent" }}>
+    <div className="flex items-center rounded-lg" style={{ background: active ? "var(--t-bg-card)" : "transparent" }}>
       <button
         data-vault-entry={entry.id}
-        className="flex-1 min-w-0 flex items-center gap-3 px-3 py-3 rounded-xl text-left"
+        className="flex-1 min-w-0 flex items-center gap-3 px-3 py-3 rounded-lg text-left"
         {...(onSettings ? press : { onClick: onOpen })}
       >
         <Icon icon={entry.icon} width={18} className="shrink-0 text-(--t-text-dim)" />

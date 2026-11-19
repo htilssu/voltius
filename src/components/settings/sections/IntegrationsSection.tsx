@@ -60,7 +60,7 @@ function CopyRow({ value }: { value: string }) {
     <div className="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-md bg-(--t-bg-base) border border-(--t-border)">
       <input
         readOnly
-        className="flex-1 min-w-0 text-[11px] py-0.5 outline-hidden font-mono bg-transparent text-(--t-text-primary)"
+        className="flex-1 min-w-0 text-2xs py-0.5 outline-hidden font-mono bg-transparent text-(--t-text-primary)"
         value={value}
         onFocus={(e) => e.target.select()}
       />
@@ -74,7 +74,7 @@ function CopyBlock({ value }: { value: string }) {
 
   return (
     <div className="relative rounded-md bg-(--t-bg-base) border border-(--t-border)">
-      <pre className="text-[11px] font-mono whitespace-pre overflow-x-auto px-2.5 py-2 pr-9 text-(--t-text-primary)">
+      <pre className="text-2xs font-mono whitespace-pre overflow-x-auto px-2.5 py-2 pr-9 text-(--t-text-primary)">
         {value}
       </pre>
       <div className="absolute top-1 right-1">
@@ -144,7 +144,7 @@ export default function IntegrationsSection() {
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-(--t-text-primary)">{t("settings.toggleDefs.mcpServer.label")}</p>
                 {status?.enabled && (
-                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-(--t-status-connected)/10 text-(--t-status-connected)">
+                  <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-medium bg-(--t-status-connected)/10 text-(--t-status-connected)">
                     <StatusDot tone="connected" size="sm" />
                     {t("settings.integrations.mcp.running")}
                   </span>
@@ -168,7 +168,7 @@ export default function IntegrationsSection() {
                 <p className="text-xs font-medium text-(--t-text-primary)">
                   {t("settings.integrations.mcp.quickSetup.title")}
                 </p>
-                <p className="text-[11px] text-(--t-text-dim) mt-0.5 mb-2">
+                <p className="text-2xs text-(--t-text-dim) mt-0.5 mb-2">
                   {t("settings.integrations.mcp.quickSetup.help")}
                 </p>
                 <CopyRow value={buildAddMcpCommand(status.exePath)} />
@@ -176,7 +176,7 @@ export default function IntegrationsSection() {
 
               <div>
                 <button
-                  className="group/manual flex items-center gap-1.5 -ml-1 pl-1 pr-2 py-1 rounded-md text-[11px] font-medium text-(--t-text-secondary) hover:text-(--t-text-primary) hover:bg-(--t-bg-card-hover) transition-colors"
+                  className="group/manual flex items-center gap-1.5 -ml-1 pl-1 pr-2 py-1 rounded-md text-2xs font-medium text-(--t-text-secondary) hover:text-(--t-text-primary) hover:bg-(--t-bg-card-hover) transition-colors"
                   aria-expanded={manualOpen}
                   onClick={() => setManualOpen((v) => !v)}
                 >
@@ -189,14 +189,14 @@ export default function IntegrationsSection() {
                 </button>
                 {manualOpen && (
                   <div className="mt-2 ml-1.5 pl-3.5 space-y-4 border-l border-(--t-border)">
-                    <p className="text-[11px] text-(--t-text-dim)">
+                    <p className="text-2xs text-(--t-text-dim)">
                       {t("settings.integrations.mcp.manualSetup.toggleSub")}
                     </p>
                     <div>
                       <p className="text-xs font-medium text-(--t-text-primary)">
                         {t("settings.integrations.mcp.setup.title")}
                       </p>
-                      <p className="text-[11px] text-(--t-text-dim) mt-0.5 mb-2">
+                      <p className="text-2xs text-(--t-text-dim) mt-0.5 mb-2">
                         {t("settings.integrations.mcp.setup.clientLabel")}
                       </p>
                       <FormSelect
@@ -206,7 +206,7 @@ export default function IntegrationsSection() {
                         onChange={(v) => setClientId(v as McpClientId)}
                         ariaLabel={t("settings.integrations.mcp.setup.clientLabel")}
                       />
-                      <p className="text-[11px] text-(--t-text-dim) mb-2">
+                      <p className="text-2xs text-(--t-text-dim) mb-2">
                         {t(CLIENT_HELP_KEYS[clientId])}
                       </p>
                       {clientId === "claude-code" ? (
@@ -216,13 +216,13 @@ export default function IntegrationsSection() {
                       )}
                     </div>
                     <div>
-                      <p className="text-[11px] text-(--t-text-dim) mb-1.5">
+                      <p className="text-2xs text-(--t-text-dim) mb-1.5">
                         {t("settings.integrations.mcp.setup.exePathLabel")}
                       </p>
                       <CopyRow value={status.exePath} />
                     </div>
                     <div>
-                      <p className="text-[11px] text-(--t-text-dim) mb-1.5">
+                      <p className="text-2xs text-(--t-text-dim) mb-1.5">
                         {t("settings.integrations.mcp.setup.socketLabel")}
                       </p>
                       <CopyRow value={status.socketPath} />
@@ -258,7 +258,7 @@ export default function IntegrationsSection() {
                   <p className="text-xs mt-0.5 text-(--t-text-dim)">
                     {t("settings.integrations.mcp.plugins.count", { count: tools.length })}
                   </p>
-                  <p className="text-[11px] mt-1 font-mono break-all text-(--t-text-dim)">
+                  <p className="text-2xs mt-1 font-mono break-all text-(--t-text-dim)">
                     {tools.map((tool) => tool.name).join(", ")}
                   </p>
                 </div>

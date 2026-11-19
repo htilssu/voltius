@@ -23,6 +23,7 @@ import {
   cmpSemver,
   type ChangelogEntry,
 } from "@/services/changelog";
+import { toastActionError } from "@/components/shared/actionError";
 
 function getQuickLinks(t: TFunction) {
   return [
@@ -160,12 +161,15 @@ function WhatsNewInner() {
 
 function UpdateBanner({ state }: { state: UpdaterStatus }) {
   const { t } = useTranslation();
+  const run = (action: () => Promise<void>) => {
+    action().catch((e: unknown) => toastActionError(e, t));
+  };
 
   if (state.status === "downloading") {
     return (
       <div className="px-5 py-3 border-b border-(--t-border) bg-(--t-bg-elevated) shrink-0 space-y-2">
         <div className="flex items-center gap-2 text-sm text-(--t-text-primary)">
-          <Icon icon="lucide:download" width={15} className="text-(--t-accent) animate-bounce" />
+          <Icon icon="lucide:download" width={15} className="text-(--t-accent)" />
           {t("changelog.updateBanner.downloading", { version: state.version, progress: state.progress })}
         </div>
         <div className="h-1 rounded-full overflow-hidden bg-(--t-bg-input)">
@@ -183,7 +187,7 @@ function UpdateBanner({ state }: { state: UpdaterStatus }) {
           {t("changelog.updateBanner.ready", { version: state.version })}
         </span>
         <button
-          onClick={() => installUpdate().catch(() => {})}
+          onClick={() => run(installUpdate)}
           className="btn btn-primary ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0"
         >
           <Icon icon="lucide:refresh-cw" width={13} />
@@ -202,7 +206,7 @@ function UpdateBanner({ state }: { state: UpdaterStatus }) {
           {t("changelog.updateBanner.available", { version: state.version })}
         </span>
         <button
-          onClick={() => download().catch(() => {})}
+          onClick={() => run(download)}
           className="btn btn-primary ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0"
         >
           <Icon icon="lucide:download" width={13} />
@@ -233,7 +237,7 @@ function EntryBlock({ entry, installed }: { entry: ChangelogEntry; installed: st
         <h3 className="text-sm font-semibold text-(--t-text-primary)">v{entry.version}</h3>
         {isNew && (
           <span
-            className="px-1.5 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wide"
+            className="px-1.5 py-0.5 rounded-sm text-2xs font-semibold uppercase tracking-wider"
             style={{
               color: "var(--t-accent)",
               background: "color-mix(in srgb, var(--t-accent) 15%, transparent)",
@@ -248,14 +252,14 @@ function EntryBlock({ entry, installed }: { entry: ChangelogEntry; installed: st
         <div key={g.label} className="space-y-1.5">
           <span
             lang="en"
-            className="inline-block px-1.5 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-wide"
+            className="inline-block px-1.5 py-0.5 rounded-sm text-2xs font-semibold uppercase tracking-wider"
             style={groupChipStyle(g.label)}
           >
             {g.label}
           </span>
           <ul className="space-y-1 pl-1">
             {g.items.map((item, i) => (
-              <li key={i} className="flex gap-2 text-[0.8rem] text-(--t-text-secondary) leading-snug">
+              <li key={i} className="flex gap-2 text-xs text-(--t-text-secondary) leading-snug">
                 <span className="text-(--t-text-dim) shrink-0">•</span>
                 <span>{item}</span>
               </li>

@@ -64,8 +64,8 @@ export function AuditExportButton({ context }: Props) {
 
       {fade.mounted && (
         <div
-          className={`absolute right-0 top-full mt-1 rounded-lg overflow-hidden shadow-lg z-10 min-w-[120px] ${fade.className}`}
-          style={{ ...fade.style, background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
+          className={`absolute right-0 top-full mt-1 rounded-lg overflow-hidden z-10 min-w-32 ${fade.className}`}
+          style={{ ...fade.style, background: "var(--t-bg-card)", border: "1px solid var(--t-border)", boxShadow: "var(--t-elev-2)" }}
         >
           {(["csv", "json"] as const).map((fmt) => (
             <button
@@ -80,7 +80,7 @@ export function AuditExportButton({ context }: Props) {
         </div>
       )}
       {exportError && (
-        <p className="mt-1 text-xs" style={{ color: "var(--t-error, #f87171)" }} role="alert">
+        <p className="mt-1 text-xs" style={{ color: "var(--t-status-error)" }} role="alert">
           {exportError}
         </p>
       )}

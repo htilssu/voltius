@@ -1,8 +1,9 @@
-import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
 import MobileTerminalTopBar from "../MobileTerminalTopBar";
+import { MobileButton } from "../MobileButton";
+import { MobileEmptyState } from "../MobileEmptyState";
 
 /** Chrome around the (separately mounted) session layer: persistent top bar or empty state. */
 export default function MobileTerminalScreen() {
@@ -12,18 +13,11 @@ export default function MobileTerminalScreen() {
 
   if (!hasSessions) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 text-(--t-text-dim)">
-        <Icon icon="lucide:square-terminal" width={32} />
-        <span className="text-sm">{t("mobile.terminalScreen.noActiveSessions")}</span>
-        <button
-          data-mobile-pick-host
-          className="text-sm px-4 py-2 rounded-xl font-medium"
-          style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-          onClick={() => setTab("hosts")}
-        >
+      <MobileEmptyState icon="lucide:square-terminal" title={t("mobile.terminalScreen.noActiveSessions")}>
+        <MobileButton data-mobile-pick-host onClick={() => setTab("hosts")}>
           {t("mobile.terminalScreen.pickHost")}
-        </button>
-      </div>
+        </MobileButton>
+      </MobileEmptyState>
     );
   }
 

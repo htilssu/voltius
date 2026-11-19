@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useEffectivePinned";
 import { targetOf, whenWritableOn } from "@/services/previewGuard";
 import type { Folder } from "@/types";
+import { toastActionError } from "@/components/shared/actionError";
 
 export function folderAccessType(folder: Folder): "folder" | "snippet_folder" {
   return folder.object_type === "snippet" || folder.object_type === "snippet_folder" ? "snippet_folder" : "folder";
@@ -27,12 +28,12 @@ export function useFolderPin(folder: Folder, canEdit?: boolean) {
   const pinSource = useEffectivePinSource(folder, folderType);
   const isTeamVault = useTeamStore((s) => s.teams.some((t) => t.id === folder.vault_id));
   const pinPersonal = (pinned: boolean | null) => {
-    if (isSnippetFolder) pinSnippetFolder(folder.id, pinned).catch(() => {});
-    else pinFolder(folder.id, pinned).catch(() => {});
+    if (isSnippetFolder) pinSnippetFolder(folder.id, pinned).catch((e: unknown) => toastActionError(e, t));
+    else pinFolder(folder.id, pinned).catch((e: unknown) => toastActionError(e, t));
   };
   const pinTeam = (pinned: boolean) => {
-    if (isSnippetFolder) pinSnippetFolderForTeam(folder.id, pinned).catch(() => {});
-    else pinFolderForTeam(folder.id, pinned).catch(() => {});
+    if (isSnippetFolder) pinSnippetFolderForTeam(folder.id, pinned).catch((e: unknown) => toastActionError(e, t));
+    else pinFolderForTeam(folder.id, pinned).catch((e: unknown) => toastActionError(e, t));
   };
   const target = targetOf(folderType)(folder.id);
   const togglePin = whenWritableOn(target, () => {

@@ -54,7 +54,7 @@ export default function MobileViewAsBar() {
         <button
           data-view-as-close
           aria-label={t("members.viewAs.exit")}
-          className="vt-icon-btn shrink-0 aria-disabled:opacity-40"
+          className="vt-icon-btn shrink-0 aria-disabled:opacity-(--disabled-opacity)"
           style={{ width: 48, height: 48 }}
           {...greyedTapProps(saving ? t("common.state.saving") : null, exitFlow.requestExit)}
         >

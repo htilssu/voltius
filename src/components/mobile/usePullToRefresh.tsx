@@ -128,7 +128,7 @@ export function PullIndicator({ phase, indicatorRef }: { phase: PullPhase; indic
       className="absolute left-1/2 top-0 z-10 flex items-center justify-center rounded-full pointer-events-none"
       style={{
         width: SIZE, height: SIZE, opacity: 0, transform: poseTransform(0, 0),
-        background: "var(--t-bg-elevated)", boxShadow: "0 1px 3px rgba(0,0,0,.3), 0 4px 8px rgba(0,0,0,.15)",
+        background: "var(--t-bg-elevated)", boxShadow: "var(--t-elev-2)",
       }}>
       <svg width={24} height={24} viewBox="0 0 24 24" className={phase === "refreshing" ? "motion-safe:animate-spin" : undefined}>
         <circle cx={12} cy={12} r={8.5} fill="none" stroke="var(--t-accent)" strokeWidth={2.5} strokeLinecap="round"

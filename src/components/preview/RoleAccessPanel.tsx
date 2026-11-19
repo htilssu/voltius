@@ -42,7 +42,7 @@ export function RoleAccessPanel() {
   return (
     <div data-testid="role-access-panel" className="p-4 space-y-3">
       <AccessHeading title={t("members.viewAs.roleTitle", { name: roleLabel(t, role.name) })} subtitleOnDesktop={false} />
-      {reason && <p className="text-[11px] text-(--t-text-dim)">{reason}</p>}
+      {reason && <p className="text-xs text-(--t-text-secondary)">{reason}</p>}
       {!reason && locked && <BusinessLockLine teamId={teamId} label={t("shared.businessLock.rolesBody")} />}
       <div title={reason ?? undefined} className={editable ? undefined : "opacity-60"}>
         <PermissionGrid value={shown} onChange={update} readOnly={!editable} size={touchSize()} />
@@ -55,7 +55,7 @@ export function RoleAccessPanel() {
             onToggle={() => setExpanded((v) => !v)}
             label={t("members.viewAs.affects", { count: affected.length })}
           />
-          {expanded && <p className="mt-1 text-[11px] text-(--t-text-dim)">{names.join(", ")}</p>}
+          {expanded && <p className="mt-1 text-2xs text-(--t-text-dim)">{names.join(", ")}</p>}
         </div>
       )}
     </div>

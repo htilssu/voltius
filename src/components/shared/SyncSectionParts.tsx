@@ -13,7 +13,7 @@ export function SyncInlineAction({ onClick, label, slug, disabled }: { onClick: 
       data-inline-action={slug}
       disabled={disabled}
       onClick={onClick}
-      className="text-[10px] font-medium transition-opacity hover:opacity-75 disabled:opacity-50 text-(--t-accent)"
+      className="text-2xs font-medium transition-opacity hover:opacity-75 disabled:opacity-(--disabled-opacity) text-(--t-accent)"
     >
       {label}
     </button>
@@ -27,19 +27,11 @@ export function SyncHeaderButton({ onClick, title, disabled = false, faded = fal
   faded?: boolean;
   children: React.ReactNode;
 }) {
-  const rest = disabled ? "var(--t-text-dim)" : "var(--t-text-secondary)";
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-medium transition-all"
-      style={{ color: rest, background: "var(--t-bg-elevated)", opacity: faded ? 0.4 : 1 }}
-      onMouseEnter={(e) => {
-        if (!disabled) e.currentTarget.style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = rest;
-      }}
+      className={`flex items-center gap-1 px-2 py-0.5 rounded-sm text-2xs font-medium transition-all bg-(--t-bg-elevated) ${disabled ? "text-(--t-text-dim)" : "text-(--t-text-secondary) hover:text-(--t-text-primary)"} ${faded ? "opacity-(--disabled-opacity)" : ""}`}
       title={title}
       aria-label={title}
     >
@@ -70,7 +62,7 @@ export function SyncSectionHeader({ variant, icon, label, lang, status, children
       <div className="min-w-0 flex-1">
         <div lang={lang} className={`${sheet ? "text-sm" : "text-xs"} font-semibold truncate text-(--t-text-primary)`}>{label}</div>
         {status && (
-          <div className={`${sheet ? "text-xs" : "text-[10px]"} flex items-center gap-1 leading-snug`} style={{ color }}>
+          <div className={`${sheet ? "text-xs" : "text-2xs"} flex items-center gap-1 leading-snug`} style={{ color }}>
             {status.spin && <Icon icon="lucide:loader-circle" width={sheet ? 12 : 10} className="shrink-0 motion-safe:animate-spin" />}
             <span>{status.label}</span>
           </div>

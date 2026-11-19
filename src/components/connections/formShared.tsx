@@ -176,7 +176,7 @@ export function DrillInRow({ icon, label, count, onClick, locked }: { icon: stri
       <Icon icon={icon} width={13} />
       <span>{label}{locked && <LockMark />}</span>
       {count > 0 && (
-        <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-(--t-accent) text-(--t-bg-card) text-[10px] font-bold leading-none">
+        <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-(--t-accent) text-(--t-bg-card) text-2xs font-bold leading-none">
           {count}
         </span>
       )}
@@ -216,7 +216,7 @@ export function hostCommandFieldsSet(f: HostCommandFieldsState): boolean {
 }
 
 export function SectionLabel({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <p className={`${className} text-[10px] font-semibold uppercase tracking-wide text-(--t-text-dim)`.trim()}>{children}</p>;
+  return <p className={`${className} text-2xs font-semibold uppercase tracking-wide text-(--t-text-dim)`.trim()}>{children}</p>;
 }
 
 export function FormHint({ children, className = "" }: { children: ReactNode; className?: string }) {

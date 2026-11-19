@@ -54,7 +54,7 @@ function RemoteTree({
           <div className="text-xs" style={{ color: "var(--t-text-dim)" }}>{t("snippets.step.remotePicker.connecting")}</div>
         )}
         {phase.tag === "error" && (
-          <div className="text-xs" style={{ color: "var(--t-danger)" }}>{phase.message}</div>
+          <div className="text-xs" style={{ color: "var(--t-status-error)" }}>{phase.message}</div>
         )}
         {phase.tag !== "connecting" && phase.tag !== "error" && (
           <>
@@ -68,7 +68,7 @@ function RemoteTree({
             <div className="flex-1 min-h-40 overflow-auto rounded-lg border" style={{ borderColor: "var(--t-border)" }}>
               {listing && <div className="p-2 text-xs" style={{ color: "var(--t-text-dim)" }}>…</div>}
               {entries.map((f) => (
-                <div key={f.path} className="flex items-center gap-2 px-2.5 py-1.5 hover:bg-(--t-bg-hover)">
+                <div key={f.path} className="flex items-center gap-2 px-2.5 py-1.5 hover:bg-(--t-bg-card-hover)">
                   <Icon icon={f.isDir ? "lucide:folder" : "lucide:file"} width={14} className="text-(--t-text-dim) shrink-0" />
                   {f.isDir ? (
                     <button type="button" className="text-xs flex-1 text-left truncate text-(--t-text-primary)" onClick={() => navigate(f.path)}>{f.name}</button>

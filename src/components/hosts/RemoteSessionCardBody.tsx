@@ -6,7 +6,7 @@ import { AvatarTile } from "@/components/shared/AvatarTile";
 import { sessionLabel } from "@/utils/sessionLabel";
 import { formatRelative } from "@/utils/localeFormat";
 
-const smallButton = "self-start text-[11px] font-semibold px-2 py-0.5 rounded-md bg-(--t-bg-elevated) hover:bg-(--t-bg-card-hover) text-(--t-text-bright)";
+const smallButton = "self-start text-2xs font-semibold px-2 py-0.5 rounded-md bg-(--t-bg-elevated) hover:bg-(--t-bg-card-hover) text-(--t-text-bright)";
 
 /** The inside of a "Live on other devices" card, shared by the desktop and mobile strips. */
 export function RemoteSessionCardBody({ session: a, state, joining, onUndo, onDismiss }: {
@@ -21,7 +21,7 @@ export function RemoteSessionCardBody({ session: a, state, joining, onUndo, onDi
     return (
       <div className="flex-1 min-w-0 self-stretch flex flex-col gap-1 opacity-70">
         <p className="text-sm font-bold truncate text-(--t-text-bright)">{t("hosts.remoteSessions.killing")}</p>
-        <p className="text-[11px] truncate text-(--t-text-dim)">{sessionLabel(a)}</p>
+        <p className="text-2xs truncate text-(--t-text-dim)">{sessionLabel(a)}</p>
         {state === "pending" ? (
           <div className="flex items-center gap-2">
             <div className="flex-1 h-1 rounded-full overflow-hidden bg-(--t-bg-elevated)">
@@ -40,8 +40,8 @@ export function RemoteSessionCardBody({ session: a, state, joining, onUndo, onDi
   if (state === "failed") {
     return (
       <div className="flex-1 min-w-0 self-stretch flex flex-col gap-2">
-        <p className="text-[11px] truncate text-(--t-text-bright)">{sessionLabel(a)}</p>
-        <p className="text-[11px] text-(--t-status-error)">{t("hosts.remoteSessions.killFailed")}</p>
+        <p className="text-2xs truncate text-(--t-text-bright)">{sessionLabel(a)}</p>
+        <p className="text-2xs text-(--t-status-error)">{t("hosts.remoteSessions.killFailed")}</p>
         <button onClick={(e) => { e.stopPropagation(); onDismiss(); }} className={smallButton}>
           {t("hosts.remoteSessions.dismiss")}
         </button>
@@ -55,15 +55,15 @@ export function RemoteSessionCardBody({ session: a, state, joining, onUndo, onDi
         icon={joining ? "lucide:loader-circle" : "lucide:monitor-smartphone"}
         size={30}
         radius={6}
-        className="text-white"
+        className="text-(--t-on-accent)"
         iconClassName={joining ? "animate-spin" : undefined}
       />
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
         <p className="text-sm font-bold truncate text-(--t-text-bright)">{sessionLabel(a)}</p>
-        <p className="text-[11px] truncate text-(--t-text-dim)">
+        <p className="text-2xs truncate text-(--t-text-dim)">
           {t("hosts.remoteSessions.deviceActive", { device: a.deviceName || t("hosts.remoteSessions.unknownDevice"), age: formatRelative(a.openedAt) })}
         </p>
-        {a.cwd && <p className="text-[11px] truncate text-(--t-text-dim)">{a.cwd}</p>}
+        {a.cwd && <p className="text-2xs truncate text-(--t-text-dim)">{a.cwd}</p>}
       </div>
     </div>
   );

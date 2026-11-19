@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import BottomSheet from "./BottomSheet";
+import { MobileButton } from "../MobileButton";
 import { FolderAppearanceFields, type FolderAppearance } from "@/components/folders/folderAppearance";
 
 export type FolderEdit = { name: string } & FolderAppearance;
@@ -29,19 +30,17 @@ export default function FolderFormSheet({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("mobile.sftp.folderNamePlaceholder")}
-          className="w-full h-11 px-3 rounded-xl bg-(--t-bg-card) outline-none text-sm text-(--t-text-primary)"
+          className="w-full h-11 px-3 rounded-lg bg-(--t-bg-card) outline-none text-sm text-(--t-text-primary)"
           style={{ border: "1px solid var(--t-border)" }}
         />
         <FolderAppearanceFields value={appearance} onChange={setAppearance} />
-        <button
+        <MobileButton
           data-folder-name-save
           disabled={!trimmed}
           onClick={() => { onSubmit({ name: trimmed, ...appearance }); onClose(); }}
-          className="h-11 rounded-xl text-sm font-medium disabled:opacity-40"
-          style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
         >
           {submitLabel ?? t("common.action.save")}
-        </button>
+        </MobileButton>
         {children}
       </div>
     </BottomSheet>

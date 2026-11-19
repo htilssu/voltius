@@ -13,10 +13,7 @@ export function PinButton({ pinned, onToggle, size = 15 }: Props) {
     <button
       onClick={(e) => { e.stopPropagation(); onToggle(); }}
       title={pinned ? t("common.action.unpin") : t("common.action.pin")}
-      className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors"
-      style={{ color: pinned ? "var(--t-accent)" : "var(--t-text-dim)" }}
-      onMouseEnter={(e) => { if (!pinned) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-      onMouseLeave={(e) => { if (!pinned) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+      className={`flex items-center justify-center w-7 h-7 rounded-lg transition-colors ${pinned ? "text-(--t-accent)" : "text-(--t-text-dim) hover:text-(--t-text-primary)"}`}
     >
       <Icon icon={pinned ? "lucide:pin" : "lucide:pin-off"} width={size} />
     </button>

@@ -146,23 +146,23 @@ export default function MobileSftpScreen({ presetConnectionId, asTab, visible = 
             const pct = tr.total > 0 ? Math.round((tr.transferred / tr.total) * 100) : 0;
             const failed = tr.status === "error";
             return (
-              <div key={tr.id} data-sftp-transfer={tr.id} className="rounded-xl px-3 py-2 flex items-center gap-2" style={{ background: "var(--t-bg-elevated)", border: `1px solid ${failed ? "var(--t-status-error)" : "var(--t-border)"}` }}>
+              <div key={tr.id} data-sftp-transfer={tr.id} className="rounded-lg px-3 py-2 flex items-center gap-2" style={{ background: "var(--t-bg-elevated)", border: `1px solid ${failed ? "var(--t-status-error)" : "var(--t-border)"}` }}>
                 <Icon icon={failed ? "lucide:triangle-alert" : tr.direction === "←" ? "lucide:download" : "lucide:arrow-right-left"} width={14}
                   className="shrink-0" style={{ color: failed ? "var(--t-status-error)" : "var(--t-text-dim)" }} />
                 <span className="flex flex-col min-w-0 flex-1">
                   <span className="text-xs text-(--t-text-primary) truncate">{tr.label}</span>
                   {failed ? (
-                    <span data-sftp-transfer-error className="text-[10px] mt-0.5 break-all" style={{ color: "var(--t-status-error)" }}>{tr.error ?? t("mobile.sftp.transferFailed")}</span>
+                    <span data-sftp-transfer-error className="text-2xs mt-0.5 break-all" style={{ color: "var(--t-status-error)" }}>{tr.error ?? t("mobile.sftp.transferFailed")}</span>
                   ) : (
                     <>
                       <div className="h-1 rounded-full mt-1 overflow-hidden" style={{ background: "var(--t-bg-card)" }}>
                         <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "var(--t-accent)" }} />
                       </div>
-                      <span data-sftp-transfer-meta className="text-[10px] text-(--t-text-dim) tabular-nums truncate mt-0.5">{formatTransferProgress(tr)}</span>
+                      <span data-sftp-transfer-meta className="text-2xs text-(--t-text-dim) tabular-nums truncate mt-0.5">{formatTransferProgress(tr)}</span>
                     </>
                   )}
                 </span>
-                {!failed && <span className="text-[11px] text-(--t-text-dim) tabular-nums shrink-0">{pct}%</span>}
+                {!failed && <span className="text-2xs text-(--t-text-dim) tabular-nums shrink-0">{pct}%</span>}
                 {failed && canRetry(tr.id) && (
                   <button data-sftp-transfer-retry={tr.id} onClick={() => { setDismissed((d) => [...d, tr.id]); retryTransfer(tr.id); }}
                     className="vt-hit px-2 py-1 text-xs font-semibold shrink-0" style={{ color: "var(--t-accent)" }}>{t("common.action.retry")}</button>
@@ -194,7 +194,7 @@ export default function MobileSftpScreen({ presetConnectionId, asTab, visible = 
 function TransferArrow({ dir, count, enabled, onTap }: { dir: "up" | "down"; count: number; enabled: boolean; onTap: () => void }) {
   return (
     <button data-sftp-copy={dir === "down" ? "a" : "b"} disabled={!enabled} onClick={onTap}
-      className="vt-hit flex items-center gap-1.5 px-6 py-1.5 rounded-xl text-sm font-medium"
+      className="vt-hit flex items-center gap-1.5 px-6 py-1.5 rounded-lg text-sm font-medium"
       style={{ background: enabled ? "var(--t-accent)" : "var(--t-bg-card)", color: enabled ? "var(--t-on-accent)" : "var(--t-text-dim)", opacity: enabled ? 1 : 0.45 }}>
       <Icon icon={dir === "down" ? "lucide:arrow-down" : "lucide:arrow-up"} width={18} />
       {count > 0 && <span className="tabular-nums">{count}</span>}

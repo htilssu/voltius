@@ -62,7 +62,7 @@ export default function HomePage() {
   return (
     <div className="h-full overflow-y-auto chrome-canvas focus-ring-scope">
       <div className="max-w-4xl mx-auto px-8 py-8">
-        <h1 className="text-2xl font-semibold mb-6 text-(--t-text-primary)">{t(greetingKey())}</h1>
+        <h1 className="text-sm font-medium mb-3 text-(--t-text-secondary)">{t(greetingKey())}</h1>
         {firstRun ? <FirstRunPanel /> : <LauncherBar />}
         {(inTeam || hasLiveSessions) && <TeamSessions />}
         <RecentHostsSection onSeeAll={() => setSubView("all-hosts")} />

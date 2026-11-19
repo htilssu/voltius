@@ -921,7 +921,8 @@
         "builtinBadge": "Intégré",
         "dragToReorder": "Glisser pour réordonner",
         "deleteRoleTitle": "Supprimer le rôle",
-        "clickToConfirm": "Cliquer à nouveau pour confirmer",
+        "deleteRoleConfirm": "Supprimer « {{name}} » ? Membres qui l’ont : {{count}}. Ils perdent ses permissions ; leurs autres rôles restent.",
+        "loadFailed": "Impossible de charger les rôles.",
         "failedToDelete": "Échec de la suppression",
         "editRole": "Modifier le rôle",
         "newRole": "Nouveau rôle personnalisé",
@@ -971,6 +972,9 @@
         "update": "Mettre à jour",
         "updating": "Mise à jour…",
         "updateTitle": "Mettre à jour vers la v{{version}}",
+        "confirmUninstall": {
+          "message": "{{name}} sera supprimé de cet appareil, avec ses paramètres."
+        },
         "confirmUninstallSeeded": {
           "title": "Désinstaller {{name}} ?",
           "message": "{{name}} est un plugin intégré. La désinstallation le retire de votre liste — vous pouvez le réinstaller à tout moment depuis l'onglet Parcourir.",

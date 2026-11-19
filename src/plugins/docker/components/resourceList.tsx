@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Icon } from "@iconify/react";
-import { useDockerT } from "../runtime";
+import { getDockerApi, useDockerT } from "../runtime";
 
 /** Prune state shared by the image, network and volume lists. */
 export function usePrune(run: () => Promise<string>, onRefresh: () => void) {
@@ -31,6 +31,7 @@ export function useRowAction<A extends unknown[]>(
   onRefresh: () => void,
   label: string,
 ) {
+  const t = useDockerT();
   const [busy, setBusy] = useState(false);
 
   const act = async (...args: A) => {
@@ -40,6 +41,7 @@ export function useRowAction<A extends unknown[]>(
       onRefresh();
     } catch (e) {
       console.error(`[docker] ${label} failed:`, e);
+      getDockerApi()?.notifications?.toast(t("actionFailed", { error: String(e) }), { severity: "error" });
     } finally {
       setBusy(false);
     }
@@ -75,7 +77,7 @@ export function ResourceList({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-1 border-b border-(--t-border) shrink-0">
-        <span className="text-[11px] text-(--t-text-muted)">
+        <span className="text-2xs text-(--t-text-muted)">
           {countLabel}
           {countSuffix}
         </span>
@@ -84,7 +86,7 @@ export function ResourceList({
           <button
             onClick={prune.prune}
             disabled={prune.pruning}
-            className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-sm text-(--t-status-warning) hover:bg-(--t-bg-hover) disabled:opacity-40"
+            className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-sm text-(--t-status-warning) hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity)"
           >
             <Icon icon="lucide:trash" width={10} />
             {prune.pruning ? t("pruning") : t("prune")}
@@ -93,15 +95,15 @@ export function ResourceList({
       </div>
 
       {prune.message && (
-        <p className="px-3 py-1 text-[11px] text-(--t-text-muted) border-b border-(--t-border)">
+        <p className="px-3 py-1 text-2xs text-(--t-text-muted) border-b border-(--t-border)">
           {prune.message}
         </p>
       )}
 
       <div className="overflow-y-auto flex-1">
         {count === 0 ? (
-          <div className="flex items-center justify-center h-20 opacity-40">
-            <p className="text-[12px] text-(--t-text-muted)">{emptyLabel}</p>
+          <div className="flex items-center justify-center h-20">
+            <p className="text-xs text-(--t-text-dim)">{emptyLabel}</p>
           </div>
         ) : (
           children
@@ -131,20 +133,28 @@ export function ResourceRow({
   const { busy, act } = useRowAction(onRemove, onRefresh, removeTitle.toLowerCase());
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-(--t-border) last:border-0 hover:bg-(--t-bg-hover) group">
+    <div className="flex items-center gap-2 px-3 py-1.5 border-b border-(--t-border) last:border-0 hover:bg-(--t-bg-card-hover) group">
       <div className="flex-1 min-w-0">
         {title}
         {subtitle}
       </div>
       {trailing}
-      <button
-        disabled={busy}
-        onClick={act}
-        title={removeTitle}
-        className="opacity-0 group-hover:opacity-100 p-0.5 text-(--t-status-error) opacity-60 hover:opacity-100 disabled:opacity-40 shrink-0"
-      >
-        <Icon icon="lucide:trash-2" width={11} />
-      </button>
+      <RowRemoveButton busy={busy} onClick={() => void act()} title={removeTitle} />
     </div>
+  );
+}
+
+/** Hover-revealed trash button of a resource row; also shown on keyboard focus and always on touch. */
+export function RowRemoveButton({ busy, onClick, title }: { busy: boolean; onClick: () => void; title: string }) {
+  return (
+    <button
+      disabled={busy}
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      className="opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 [@media(hover:none)]:opacity-60 hover:opacity-100! focus-visible:opacity-100! p-0.5 text-(--t-status-error) disabled:opacity-(--disabled-opacity) shrink-0"
+    >
+      <Icon icon="lucide:trash-2" width={11} />
+    </button>
   );
 }

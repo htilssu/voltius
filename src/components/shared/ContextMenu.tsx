@@ -74,21 +74,12 @@ export function MenuItemList({
                 item.onClick?.();
                 onClose();
               }}
-              className="flex items-center gap-2.5 p-3 rounded-lg transition-colors w-full"
-              style={{
-                background: isSubActive ? "var(--t-bg-card-hover)" : "transparent",
-                opacity: item.disabledReason ? 0.4 : 1,
-                color: item.danger ? "var(--t-status-error)" : "var(--t-text-secondary)",
-              }}
+              className={`flex items-center gap-2.5 p-3 rounded-lg transition-colors w-full hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity) ${isSubActive ? "bg-(--t-bg-card-hover)" : ""} ${item.danger ? "text-(--t-status-error)" : "text-(--t-text-secondary) hover:text-(--t-text-primary)"}`}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--t-bg-card-hover)";
-                if (!item.danger) e.currentTarget.style.color = "var(--t-text-primary)";
                 if (item.children) openSub(i, e.currentTarget);
                 else scheduleClose();
               }}
-              onMouseLeave={(e) => {
-                if (!isSubActive) e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = item.danger ? "var(--t-status-error)" : "var(--t-text-secondary)";
+              onMouseLeave={() => {
                 if (item.children) scheduleClose();
               }}
             >
@@ -98,7 +89,7 @@ export function MenuItemList({
               </span>
               {item.hint && <span className="text-xs shrink-0 whitespace-nowrap text-(--t-text-dim)">{item.hint}</span>}
               {item.shortcut && !item.children && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-sm font-mono shrink-0 bg-(--t-bg-elevated) text-(--t-text-dim) border border-(--t-border)">
+                <span className="text-2xs px-1.5 py-0.5 rounded-sm font-mono shrink-0 bg-(--t-bg-elevated) text-(--t-text-dim) border border-(--t-border)">
                   {item.shortcut}
                 </span>
               )}
@@ -196,7 +187,7 @@ function SubmenuPanel({ row, onMouseEnter, onMouseLeave, children }: {
       ref={ref}
       // PickerSurface treats this marker as inside-click; z-index keeps a flipped submenu above its parent.
       data-menu-portal=""
-      className={`surface-float fixed z-10000 p-1.5 flex flex-col min-w-[12.667rem] overflow-y-auto ${fade.className}`}
+      className={`surface-float fixed z-10000 p-1.5 flex flex-col min-w-50 overflow-y-auto ${fade.className}`}
       style={{ ...fade.style, left, top, maxHeight: viewportMaxHeight() }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -242,7 +233,7 @@ export function ContextMenu({ items, pos, onClose, direction = "down" }: Context
     <div
       ref={menuRef}
       data-menu-portal=""
-      className={`surface-float fixed z-100 p-1.5 flex flex-col min-w-[12.667rem] overflow-y-auto ${fade.className}`}
+      className={`surface-float fixed z-100 p-1.5 flex flex-col min-w-50 overflow-y-auto ${fade.className}`}
       style={{
         ...fade.style,
         left,

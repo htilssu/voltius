@@ -112,9 +112,7 @@ export function HomeToolbar({
           {/* Android sandbox has no /dev/tty* access — hide serial console. */}
           {!isMobile && (
             <button
-              className="flex items-center gap-2 px-3 py-2 h-8 rounded-lg text-sm font-bold tracking-wider transition-colors shrink-0 whitespace-nowrap bg-(--t-bg-input) text-(--t-text-primary) border border-(--t-border-hover) relative overflow-hidden"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-input-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-bg-input)")}
+              className="flex items-center gap-2 px-3 py-2 h-8 rounded-lg text-sm font-bold tracking-wider transition-colors shrink-0 whitespace-nowrap bg-(--t-bg-input) hover:bg-(--t-bg-input-hover) text-(--t-text-primary) border border-(--t-border-hover) relative overflow-hidden"
               onPointerDown={rippleSerial}
               onClick={onOpenSerial}
               title={t("hosts.toolbar.openSerialConsole")}

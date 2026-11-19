@@ -6,7 +6,7 @@ export interface Greyed {
   title: string | undefined;
 }
 
-export const GREYED_CLASS = "disabled:opacity-50 disabled:cursor-not-allowed";
+export const GREYED_CLASS = "disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed";
 
 const LACK_KEYS = {
   preview: { any: "members.viewAs.lacksPermission", edit: "members.viewAs.cannotEdit" },

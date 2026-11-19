@@ -37,7 +37,7 @@ function TagChips({ tags }: { tags: string[] }) {
   return (
     <span className="flex items-center gap-1 flex-wrap">
       {tags.slice(0, 3).map((t) => (
-        <span key={t} className="px-1.5 py-0.5 rounded text-[10px] text-(--t-text-dim)" style={{ background: "var(--t-bg-card)" }}>{t}</span>
+        <span key={t} className="px-1.5 py-0.5 rounded text-2xs text-(--t-text-dim)" style={{ background: "var(--t-bg-card)" }}>{t}</span>
       ))}
     </span>
   );
@@ -118,12 +118,12 @@ export default function MobileKeychainScreen() {
               const name = k.name ?? t("mobile.sheets.keychainActions.unnamedKey");
               return (
               <GhostOr key={k.id} type="key" id={k.id} icon={KEY_ICON} name={name} layout="row">
-              <button data-keychain-key className="w-full flex items-center gap-3 px-2 py-3 rounded-xl text-left active:bg-(--t-bg-card)" onClick={() => setSheet({ kind: "key", item: k })}>
+              <button data-keychain-key className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-left active:bg-(--t-bg-card)" onClick={() => setSheet({ kind: "key", item: k })}>
                 <AvatarTile icon={KEY_ICON} className="w-9 h-9 rounded-lg" iconSize={18} />
                 <span className="flex-1 min-w-0 flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-(--t-text-primary) truncate">{name}</span>
                   <PreviewSubtitle type="key" id={k.id}>
-                    <span className="text-[11px] text-(--t-text-dim) truncate">{k.key_type ? `${k.key_type} · ` : ""}{t("mobile.keychainScreen.addedOn", { date: formatDate(k.created_at) })}</span>
+                    <span className="text-2xs text-(--t-text-dim) truncate">{k.key_type ? `${k.key_type} · ` : ""}{t("mobile.keychainScreen.addedOn", { date: formatDate(k.created_at) })}</span>
                   </PreviewSubtitle>
                   <TagChips tags={k.tags} />
                 </span>
@@ -141,12 +141,12 @@ export default function MobileKeychainScreen() {
               const name = i.name ?? i.username;
               return (
               <GhostOr key={i.id} type="identity" id={i.id} icon={IDENTITY_ICON} name={name} layout="row">
-              <button data-keychain-identity className="w-full flex items-center gap-3 px-2 py-3 rounded-xl text-left active:bg-(--t-bg-card)" onClick={() => setSheet({ kind: "identity", item: i })}>
+              <button data-keychain-identity className="w-full flex items-center gap-3 px-2 py-3 rounded-lg text-left active:bg-(--t-bg-card)" onClick={() => setSheet({ kind: "identity", item: i })}>
                 <AvatarTile icon={IDENTITY_ICON} className="w-9 h-9 rounded-lg" iconSize={18} />
                 <span className="flex-1 min-w-0 flex flex-col gap-0.5">
                   <span className="text-sm font-medium text-(--t-text-primary) truncate">{name}</span>
                   <PreviewSubtitle type="identity" id={i.id}>
-                    {i.name && <span className="text-[11px] text-(--t-text-dim) truncate">{i.username}</span>}
+                    {i.name && <span className="text-2xs text-(--t-text-dim) truncate">{i.username}</span>}
                   </PreviewSubtitle>
                   <TagChips tags={i.tags} />
                 </span>

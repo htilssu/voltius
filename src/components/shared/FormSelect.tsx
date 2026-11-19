@@ -48,7 +48,7 @@ export function FormSelect({ value, options, onChange, className = "", ariaLabel
           disabled={disabled}
           data-row-control
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-1 min-h-10 pl-3 pr-2 -mr-2 rounded-full text-sm text-right text-(--t-accent) disabled:opacity-50"
+          className="flex items-center gap-1 min-h-10 pl-3 pr-2 -mr-2 rounded-full text-sm text-right text-(--t-accent) disabled:opacity-(--disabled-opacity)"
         >
           <span className="line-clamp-2 wrap-break-word">{selectedLabel}</span>
           <Icon icon="lucide:chevron-down" width={16} className="shrink-0" />
@@ -63,7 +63,7 @@ export function FormSelect({ value, options, onChange, className = "", ariaLabel
         disabled={disabled}
         onClick={() => setOpen((o) => !o)}
         data-form-select
-        className="form-input w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm disabled:opacity-50"
+        className="form-input w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm disabled:opacity-(--disabled-opacity)"
         style={formInputStyle}
       >
         <span className="text-(--t-text-primary)">{selectedLabel}</span>

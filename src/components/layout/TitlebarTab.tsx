@@ -26,6 +26,7 @@ export function sessionTabIcon(
     return (
       <span
         className="flex items-center justify-center size-6 rounded-md shrink-0"
+        // White glyph on the distro's brand color (brand palette, not a theme surface).
         style={{ background: distroBg ?? "transparent", color: "#fff" }}
       >
         <Icon icon={distroIcon} width={16} />
@@ -45,12 +46,15 @@ export function sessionTabIcon(
   return <StatusDot tone={tone} />;
 }
 
-export function tabSurfaceStyle(active: boolean): React.CSSProperties {
-  return {
-    background: active ? "var(--t-tab-active-bg)" : "var(--t-tab-bg)",
-    color: active ? "var(--t-tab-active-text)" : "var(--t-text-secondary)",
-    border: active ? "1px solid var(--t-tab-active-border)" : "1px solid transparent",
-  };
+/** Pressed/selected surface for titlebar tabs and toggles. Pair with `border`. */
+export const TAB_ACTIVE_CLASS = "bg-(--t-tab-active-bg) text-(--t-tab-active-text) border-(--t-tab-active-border)";
+
+/** Tab surface classes; `interactive` adds the hover lift for clickable, inactive tabs. */
+export function tabSurfaceClass(active: boolean, interactive = false): string {
+  if (active) return `border ${TAB_ACTIVE_CLASS}`;
+  return `border border-transparent bg-(--t-tab-bg) text-(--t-text-secondary)${
+    interactive ? " hover:bg-(--t-bg-toolbar) hover:text-(--t-text-primary)" : ""
+  }`;
 }
 
 interface SessionTabHandlerDeps {
@@ -141,8 +145,7 @@ export function TitlebarTab({
     return (
       <div
         data-titlebar-key={itemKey}
-        className="relative flex items-center gap-2 h-9 px-2 rounded-xl text-base font-medium-bold shrink-0 overflow-hidden"
-        style={tabSurfaceStyle(active)}
+        className={`relative flex items-center gap-2 h-9 px-2 rounded-lg text-base font-medium-bold shrink-0 overflow-hidden ${tabSurfaceClass(active)}`}
       >
         {icon}
         <InlineNameEditor
@@ -164,23 +167,10 @@ export function TitlebarTab({
       onContextMenu={onContextMenu}
       onDoubleClick={onDoubleClick}
       onPointerDown={onPointerDown}
-      className={`group relative flex items-center h-9 rounded-xl text-base font-medium-bold shrink-0 transition-all ${compact ? "w-10 justify-center" : "gap-2 px-2 overflow-hidden"}`}
+      className={`group relative flex items-center h-9 rounded-lg text-base font-medium-bold shrink-0 transition-all ${tabSurfaceClass(active, true)} ${compact ? "w-10 justify-center" : "gap-2 px-2 overflow-hidden"}`}
       title={compact ? [renameValue, title].filter(Boolean).join("\n") : title}
-      style={tabSurfaceStyle(active)}
-      onMouseEnter={(e) => {
-        if (!active) {
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-toolbar)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-        }
-        onMouseEnter?.(e);
-      }}
-      onMouseLeave={(e) => {
-        if (!active) {
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--t-tab-bg)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-        }
-        onMouseLeave?.(e);
-      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       {mcpBar}
       {compact ? (

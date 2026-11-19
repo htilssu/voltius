@@ -38,7 +38,7 @@ function SaveFailures({ failures, roles }: { failures: SaveFailure[]; roles: Tea
   const { t } = useTranslation();
   if (failures.length === 0) return null;
   return (
-    <ul className="space-y-1 px-1 text-[11px]" style={{ color: "var(--t-status-error)" }}>
+    <ul className="space-y-1 px-1 text-2xs" style={{ color: "var(--t-status-error)" }}>
       {failures.map((f) => {
         const role = roles.find((r) => r.id === f.roleId);
         const step = t(`members.viewAs.step.${f.step}`, { role: role ? roleLabel(t, role.name) : f.roleId });
@@ -104,7 +104,7 @@ export function MemberAccessPanel() {
       <FormSection label={t("members.viewAs.access.can", { name })}>
         {groups.map((g) => (
           <div key={g.key}>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-(--t-text-dim) opacity-70 mb-0.5">
+            <p className="text-2xs font-semibold uppercase tracking-wider text-(--t-text-dim) mb-0.5">
               {t(`members.permissions.group.${g.key}`)}
             </p>
             {g.permissions.map((p) => {
@@ -114,14 +114,14 @@ export function MemberAccessPanel() {
                   <Icon icon={has ? "lucide:check" : "lucide:x"} width={11} />
                   {permissionLabel(t, p)}
                   {changedFrom((currentBits & PERM_BITS[p]) !== 0, has) && (
-                    <span className="text-[10px] text-(--t-accent)">{t("members.viewAs.draftTag")}</span>
+                    <span className="text-2xs text-(--t-accent)">{t("members.viewAs.draftTag")}</span>
                   )}
                 </p>
               );
             })}
           </div>
         ))}
-        {loseKey && <p className="text-[11px]" style={{ color: "var(--t-status-error)" }}>{t("members.viewAs.keyLoss", { name })}</p>}
+        {loseKey && <p className="text-xs" style={{ color: "var(--t-status-error)" }}>{t("members.viewAs.keyLoss", { name })}</p>}
       </FormSection>
 
       <FormSection label={t("members.roles")}>
@@ -141,7 +141,7 @@ export function MemberAccessPanel() {
         <MemberPermissionsLock teamId={teamId} name={name} hasOverrides={(allow | deny) !== 0} />
         {!lockedEmpty && (
           <>
-          {readOnlyReason && <p className="text-[10px] text-(--t-text-dim)">{readOnlyReason}</p>}
+          {readOnlyReason && <p className="text-xs text-(--t-text-secondary)">{readOnlyReason}</p>}
           {overrideRows.map((p) => (
             <PermissionOverrideRow
               key={p}
