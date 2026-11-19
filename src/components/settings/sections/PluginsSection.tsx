@@ -22,12 +22,15 @@ import { useBrowseCatalog } from "@/hooks/useBrowseCatalog";
 import { Managed, ManagedNote, ManagedUninstall, ManagedWhen } from "@/components/shared/ManagedNote";
 import { usePolicyRefresh } from "@/stores/policyStore";
 import { applyPluginEnabled } from "@/plugins/applyPluginEnabled";
-import { DirtyDot, ResetButton, SETTINGS_SURFACE, SettingRow } from "./shared";
+import { DirtyDot, ResetButton, SETTINGS_SURFACE, SettingRow, toastError } from "./shared";
 import { useIsMobile } from "@/utils/platform";
 import { visiblePlugins } from "@/components/settings/settingsMobileCore";
 import { searchMatcher } from "@/utils/search";
 import { isThemeEntry, isThemeOnly, THEME_TAG } from "@/themes/marketplaceThemes";
 import { SettingMark } from "@/components/settings/Setting";
+
+const ICON_BTN = "p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim) enabled:hover:bg-(--t-bg-elevated) enabled:hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)";
+const DANGER_ICON_BTN = "p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim) enabled:hover:bg-(--t-status-error)/15 enabled:hover:text-(--t-status-error) disabled:opacity-(--disabled-opacity)";
 
 // ─── Auto-generated settings form ─────────────────────────────────────────
 
@@ -204,9 +207,7 @@ function PluginSettingsButton({ manifest, settingsPages, onOpenPage, onOpenConfi
   return (
     <button
       onClick={() => (page ? onOpenPage(page.id) : onOpenConfig(manifest))}
-      className="p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim)"
-      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+      className={ICON_BTN}
       title={t("settings.plugins.installed.settingsTitle")}
     >
       <Icon icon="lucide:settings" width={15} />
@@ -225,6 +226,23 @@ function PluginSettingsButton({ manifest, settingsPages, onOpenPage, onOpenConfi
  * in this list too. Anything that needs a genuine app-bundled artifact must check
  * `seededEntries` instead — see the Update guard below.
  */
+interface UninstallTarget { id: string; name: string; seeded?: boolean }
+
+/** The one uninstall confirmation, for bundled (seeded) and external plugins alike. */
+function UninstallConfirm({ target, onConfirm, onClose }: { target: UninstallTarget; onConfirm: () => void; onClose: () => void }) {
+  const { t } = useTranslation();
+  const vars = { name: target.name };
+  return (
+    <ConfirmModal
+      title={t("settings.plugins.installed.confirmUninstallSeeded.title", vars)}
+      message={t(target.seeded ? "settings.plugins.installed.confirmUninstallSeeded.message" : "settings.plugins.installed.confirmUninstall.message", vars)}
+      confirmLabel={t("settings.plugins.installed.confirmUninstallSeeded.confirm")}
+      onConfirm={() => { onClose(); onConfirm(); }}
+      onCancel={onClose}
+    />
+  );
+}
+
 function bundledPluginManifests(excludeIds: Set<string>): PluginManifest[] {
   return getLoadedPlugins().filter((m) => !excludeIds.has(m.id));
 }
@@ -249,7 +267,7 @@ export function InstalledTab() {
   const [reloading, setReloading] = useState<Set<string>>(new Set());
   const [uninstalling, setUninstalling] = useState<Set<string>>(new Set());
   const [scanning, setScanning] = useState(false);
-  const [confirmUninstallSeeded, setConfirmUninstallSeeded] = useState<PluginManifest | null>(null);
+  const [confirmUninstall, setConfirmUninstall] = useState<UninstallTarget | null>(null);
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   useFilterShortcut(searchRef);
@@ -279,21 +297,13 @@ export function InstalledTab() {
     }
   };
 
-  const handleUninstall = async (id: string) => {
+  const handleUninstall = async (id: string, seeded: boolean) => {
     setUninstalling((s) => new Set([...s, id]));
     try {
-      await uninstallPlugin(id);
+      await (seeded ? uninstallSeededPlugin(id) : uninstallPlugin(id));
       refreshLoaded();
-    } finally {
-      setUninstalling((s) => { const n = new Set(s); n.delete(id); return n; });
-    }
-  };
-
-  const handleUninstallSeeded = async (id: string) => {
-    setUninstalling((s) => new Set([...s, id]));
-    try {
-      await uninstallSeededPlugin(id);
-      refreshLoaded();
+    } catch (e) {
+      toastError(e);
     } finally {
       setUninstalling((s) => { const n = new Set(s); n.delete(id); return n; });
     }
@@ -310,9 +320,8 @@ export function InstalledTab() {
         <div className="flex items-center gap-2 px-6 py-3 shrink-0 border-b border-b-(--t-border)">
           <button
             onClick={() => setAutoConfigManifest(null)}
-            className="p-1 rounded-lg transition-colors text-(--t-text-muted)"
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
+            aria-label={t("common.action.close")}
+            className="p-1 rounded-lg transition-colors text-(--t-text-muted) hover:text-(--t-text-bright)"
           >
             <Icon icon="lucide:arrow-left" width={15} />
           </button>
@@ -363,10 +372,7 @@ export function InstalledTab() {
         <button
           onClick={() => void handleScan()}
           disabled={scanning}
-          className="p-2 rounded-lg text-(--t-text-dim) transition-colors border border-(--t-border) shrink-0"
-          style={{ background: "var(--t-bg-elevated)" }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+          className="p-2 rounded-lg text-(--t-text-dim) enabled:hover:text-(--t-text-primary) transition-colors border border-(--t-border) bg-(--t-bg-elevated) shrink-0"
           title={t("settings.plugins.installed.scanTitle")}
         >
           <Icon icon="lucide:refresh-cw" width={13} className={scanning ? "animate-spin" : ""} />
@@ -391,7 +397,7 @@ export function InstalledTab() {
           return (
             <div
               key={manifest.id}
-              className="rounded-xl overflow-hidden bg-(--t-bg-card)"
+              className="rounded-lg overflow-hidden bg-(--t-bg-card)"
               style={{ border: `1px solid ${enabled ? "var(--t-border-hover)" : "var(--t-border)"}`, opacity: enabled ? 1 : 0.6 }}
             >
               <div className="flex items-center gap-3 px-4 py-3">
@@ -413,8 +419,7 @@ export function InstalledTab() {
                   <button
                     onClick={() => startUpdate(seededUpdate, manifest.permissions)}
                     disabled={isUpdating}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                    style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isUpdating ? 0.6 : 1 }}
+                    className="btn btn-primary flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0"
                     title={t("settings.plugins.installed.updateTitle", { version: seededUpdate.version })}
                   >
                     <Icon icon={isUpdating ? "lucide:loader" : "lucide:arrow-up-circle"} width={12} className={isUpdating ? "animate-spin" : ""} />
@@ -429,11 +434,9 @@ export function InstalledTab() {
                 />
                 <ManagedUninstall id={manifest.id}>
                   <button
-                    onClick={() => setConfirmUninstallSeeded(manifest)}
+                    onClick={() => setConfirmUninstall({ id: manifest.id, name: manifest.name, seeded: true })}
                     disabled={isUninstalling}
-                    className="p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim)"
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "color-mix(in srgb, var(--t-status-error) 15%, transparent)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-status-error)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+                    className={DANGER_ICON_BTN}
                     title={t("settings.plugins.installed.uninstallTitle")}
                   >
                     <Icon icon={isUninstalling ? "lucide:loader" : "lucide:trash-2"} width={14} className={isUninstalling ? "animate-spin" : ""} />
@@ -472,7 +475,7 @@ export function InstalledTab() {
           return (
             <div
               key={meta.id}
-              className="rounded-xl overflow-hidden bg-(--t-bg-card)"
+              className="rounded-lg overflow-hidden bg-(--t-bg-card)"
               style={{ border: `1px solid ${enabled ? "var(--t-border-hover)" : "var(--t-border)"}`, opacity: enabled ? 1 : 0.7 }}
             >
               <div className="flex items-center gap-3 px-4 py-3">
@@ -512,8 +515,7 @@ export function InstalledTab() {
                   <button
                     onClick={() => startUpdate(update, getLoadedPlugins().find((m) => m.id === meta.id)?.permissions ?? [])}
                     disabled={isUpdating || updateVersionUnsatisfied}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                    style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isUpdating || updateVersionUnsatisfied ? 0.6 : 1 }}
+                    className="btn btn-primary flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0"
                     title={updateVersionUnsatisfied
                       ? t("settings.plugins.browse.requiresVersion", { version: update.minAppVersion })
                       : t("settings.plugins.installed.updateTitle", { version: update.version })}
@@ -533,20 +535,16 @@ export function InstalledTab() {
                 <button
                   onClick={() => void handleReload(meta.id)}
                   disabled={isReloading}
-                  className="p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim)"
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+                  className={ICON_BTN}
                   title={t("settings.plugins.installed.reloadTitle")}
                 >
                   <Icon icon="lucide:refresh-cw" width={14} className={isReloading ? "animate-spin" : ""} />
                 </button>
                 <ManagedUninstall id={meta.id}>
                   <button
-                    onClick={() => void handleUninstall(meta.id)}
+                    onClick={() => setConfirmUninstall({ id: meta.id, name: manifest?.name ?? meta.id, seeded: false })}
                     disabled={isUninstalling}
-                    className="p-1.5 rounded-lg transition-colors shrink-0 text-(--t-text-dim)"
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "color-mix(in srgb, var(--t-status-error) 15%, transparent)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-status-error)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+                    className={DANGER_ICON_BTN}
                     title={t("settings.plugins.installed.uninstallTitle")}
                   >
                     <Icon icon={isUninstalling ? "lucide:loader" : "lucide:trash-2"} width={14} className={isUninstalling ? "animate-spin" : ""} />
@@ -576,17 +574,11 @@ export function InstalledTab() {
       </div>
     </div>
     {updateModal}
-    {confirmUninstallSeeded && (
-      <ConfirmModal
-        title={t("settings.plugins.installed.confirmUninstallSeeded.title", { name: confirmUninstallSeeded.name })}
-        message={t("settings.plugins.installed.confirmUninstallSeeded.message", { name: confirmUninstallSeeded.name })}
-        confirmLabel={t("settings.plugins.installed.confirmUninstallSeeded.confirm")}
-        onConfirm={() => {
-          const id = confirmUninstallSeeded.id;
-          setConfirmUninstallSeeded(null);
-          void handleUninstallSeeded(id);
-        }}
-        onCancel={() => setConfirmUninstallSeeded(null)}
+    {confirmUninstall && (
+      <UninstallConfirm
+        target={confirmUninstall}
+        onConfirm={() => void handleUninstall(confirmUninstall.id, !!confirmUninstall.seeded)}
+        onClose={() => setConfirmUninstall(null)}
       />
     )}
     </div>
@@ -621,9 +613,10 @@ function BrowseTab() {
   const searchRef = useRef<HTMLInputElement>(null);
   useFilterShortcut(searchRef);
 
+  const [confirmUninstall, setConfirmUninstall] = useState<UninstallTarget | null>(null);
   const handleUninstall = async (id: string) => {
     setUninstalling((s) => new Set([...s, id]));
-    try { await uninstallPlugin(id); } finally {
+    try { await uninstallPlugin(id); } catch (e) { toastError(e); } finally {
       setUninstalling((s) => { const n = new Set(s); n.delete(id); return n; });
     }
   };
@@ -661,9 +654,8 @@ function BrowseTab() {
         <div className="flex items-center gap-2 px-6 py-3 shrink-0 border-b border-b-(--t-border)">
           <button
             onClick={() => setShowSources(false)}
-            className="p-1 rounded-lg transition-colors text-(--t-text-muted)"
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
+            aria-label={t("common.action.close")}
+            className="p-1 rounded-lg transition-colors text-(--t-text-muted) hover:text-(--t-text-bright)"
           >
             <Icon icon="lucide:arrow-left" width={15} />
           </button>
@@ -672,18 +664,17 @@ function BrowseTab() {
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <div className="space-y-2">
             {sources.map((source) => (
-              <div key={source.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-(--t-bg-card) border border-(--t-border)">
+              <div key={source.id} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-(--t-bg-card) border border-(--t-border)">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-(--t-text-primary) truncate">{source.name}</p>
                   <p className="text-xs text-(--t-text-dim) truncate">{source.url}</p>
                 </div>
-                <Toggle checked={source.enabled} onChange={() => { void toggleSource(source.id).catch(console.warn); }} />
+                <Toggle checked={source.enabled} onChange={() => { void toggleSource(source.id).catch(toastError); }} />
                 {source.deletable && (
                   <button
-                    onClick={() => { void removeSource(source.id).catch(console.warn); }}
-                    className="p-1.5 rounded-lg text-(--t-text-dim) transition-colors"
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-status-error)"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)"; }}
+                    onClick={() => { void removeSource(source.id).catch(toastError); }}
+                    aria-label={t("common.action.delete")}
+                    className={DANGER_ICON_BTN}
                   >
                     <Icon icon="lucide:trash-2" width={14} />
                   </button>
@@ -706,8 +697,7 @@ function BrowseTab() {
               <button
                 onClick={() => void handleAddSource()}
                 disabled={addingSource || !newSourceUrl.trim()}
-                className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: addingSource ? 0.6 : 1 }}
+                className="btn btn-primary px-3 py-2 rounded-lg text-sm font-medium"
               >
                 {addingSource ? <Icon icon="lucide:loader" width={14} className="animate-spin" /> : t("settings.plugins.browse.add")}
               </button>
@@ -822,7 +812,7 @@ function BrowseTab() {
             const updateVersionUnsatisfied = !!update && appVersion !== null && !satisfiesMinAppVersion(update, appVersion);
 
             return (
-              <div key={plugin.id} className="rounded-xl bg-(--t-bg-card) border border-(--t-border) px-4 py-3">
+              <div key={plugin.id} className="rounded-lg bg-(--t-bg-card) border border-(--t-border) px-4 py-3">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-(--t-bg-elevated) border border-(--t-border) mt-0.5">
                     <Icon icon={catalogEntryIcon(plugin)} width={15} className="text-(--t-accent)" />
@@ -859,8 +849,7 @@ function BrowseTab() {
                         onClick={() => startInstall(plugin)}
                         disabled={isBusy || versionUnsatisfied}
                         title={versionUnsatisfied ? t("settings.plugins.browse.requiresVersion", { version: plugin.minAppVersion }) : undefined}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                        style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isBusy || versionUnsatisfied ? 0.6 : undefined }}
+                        className="btn btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
                       >
                         {isBusy
                           ? <><Icon icon="lucide:loader" width={12} className="animate-spin" /> {t("settings.plugins.browse.installing")}</>
@@ -873,8 +862,7 @@ function BrowseTab() {
                       onClick={() => startUpdate(update, getLoadedPlugins().find((m) => m.id === plugin.id)?.permissions ?? [])}
                       disabled={isBusy || updateVersionUnsatisfied}
                       title={updateVersionUnsatisfied ? t("settings.plugins.browse.requiresVersion", { version: update.minAppVersion }) : t("settings.plugins.installed.updateTitle", { version: update.version })}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                      style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: isBusy || updateVersionUnsatisfied ? 0.6 : 1 }}
+                      className="btn btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
                     >
                       {isBusy
                         ? <><Icon icon="lucide:loader" width={12} className="animate-spin" /> {t("settings.plugins.installed.updating")}</>
@@ -884,10 +872,9 @@ function BrowseTab() {
                   ) : isPureSeededActive ? null : (
                     <ManagedUninstall id={plugin.id}>
                       <button
-                        onClick={() => void handleUninstall(plugin.id)}
+                        onClick={() => setConfirmUninstall({ id: plugin.id, name: plugin.name })}
                         disabled={isUninstalling}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors"
-                        style={{ background: "color-mix(in srgb, var(--t-status-error) 15%, transparent)", color: "var(--t-status-error)", opacity: isUninstalling ? 0.6 : undefined }}
+                        className="btn btn-danger-ghost flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
                       >
                         {isUninstalling
                           ? <><Icon icon="lucide:loader" width={12} className="animate-spin" /> {t("settings.plugins.browse.removing")}</>
@@ -903,6 +890,13 @@ function BrowseTab() {
         </div>
       </div>
       {modal}
+      {confirmUninstall && (
+        <UninstallConfirm
+          target={confirmUninstall}
+          onConfirm={() => void handleUninstall(confirmUninstall.id)}
+          onClose={() => setConfirmUninstall(null)}
+        />
+      )}
     </div>
   );
 }

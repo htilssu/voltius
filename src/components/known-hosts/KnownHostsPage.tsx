@@ -21,6 +21,8 @@ import type { KnownHost, VaultOption } from "@/types";
 import type { SortMode } from "@/components/shared/ToolbarViewControls";
 import { compareStrings } from "@/utils/localeFormat";
 import { useSearchMatcher } from "@/utils/search";
+import { SkeletonList } from "@/components/placeholder/SkeletonList";
+import { toastActionError } from "@/components/shared/actionError";
 
 function sortHosts(hosts: KnownHost[], mode: SortMode): KnownHost[] {
   return [...hosts].sort((a, b) => {
@@ -49,6 +51,9 @@ export default function KnownHostsPage() {
   const setLayoutMode = useUIStore((s) => s.setKnownHostsLayoutMode);
   const [sortMode, setSortMode] = useState<SortMode>("name-asc");
   const [confirmDeleteIds, setConfirmDeleteIds] = useState<string[] | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  // The store has no loaded flag; this page triggers the load, so track it here.
+  const [loaded, setLoaded] = useState(() => knownHosts.length > 0);
 
   const canEdit = selectedVaultIds.some((vid) => can("EDIT_CONNECTIONS", vid));
 
@@ -90,7 +95,11 @@ export default function KnownHostsPage() {
     onSearch: () => setOmniOpen(true),
   });
 
-  useEffect(() => { loadKnownHosts(); }, []);
+  useEffect(() => {
+    loadKnownHosts()
+      .catch((e: unknown) => toastActionError(e, t))
+      .finally(() => setLoaded(true));
+  }, []);
 
   usePageBulkActions({
     navItem: "known-hosts",
@@ -103,9 +112,16 @@ export default function KnownHostsPage() {
   const handleDelete = useCallback(whenWritable((ids: string[]) => setConfirmDeleteIds(ids)), []);
 
   const confirmDelete = async () => {
-    if (!confirmDeleteIds) return;
-    await Promise.all(confirmDeleteIds.map((id) => removeKnownHost(id)));
-    setConfirmDeleteIds(null);
+    if (!confirmDeleteIds || deleting) return;
+    setDeleting(true);
+    try {
+      await Promise.all(confirmDeleteIds.map((id) => removeKnownHost(id)));
+      setConfirmDeleteIds(null);
+    } catch (e) {
+      toastActionError(e, t);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const otherVaultsFor = (host: KnownHost): VaultOption[] => {
@@ -136,7 +152,9 @@ export default function KnownHostsPage() {
         onClick={() => { /* deselect handled by useDragSelection */ }}
       >
         <div className="px-9 pt-5 pb-9">
-          {filtered.length === 0 ? (
+          {!loaded && filtered.length === 0 ? (
+            <SkeletonList />
+          ) : filtered.length === 0 ? (
             <EmptyState
               icon={q ? "lucide:search-x" : "lucide:fingerprint-pattern"}
               title={q ? t("knownHosts.page.noSearchResults") : t("knownHosts.page.emptyState")}
@@ -171,8 +189,9 @@ export default function KnownHostsPage() {
           title={t("knownHosts.page.confirmDelete.title", { count: confirmDeleteIds.length })}
           message={t("knownHosts.page.confirmDelete.message", { count: confirmDeleteIds.length })}
           confirmLabel={t("common.action.delete")}
-          onConfirm={confirmDelete}
-          onCancel={() => setConfirmDeleteIds(null)}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => { if (!deleting) setConfirmDeleteIds(null); }}
+          busy={deleting}
         />
       )}
     </div>

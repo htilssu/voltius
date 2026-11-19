@@ -44,6 +44,7 @@ const pt: Record<string, string> = {
   "rollbackFailed": "Falha na reversão: {{error}}",
   "deleteFailed": "Falha na exclusão: {{error}}",
   "actionFailed": "Falha na ação: {{error}}",
+  "loadFailed": "Não foi possível carregar os dados do Proxmox",
 };
 
 const ptPt: Record<string, string> = {
@@ -87,6 +88,7 @@ const ptPt: Record<string, string> = {
   "rollbackFailed": "Falha na reversão: {{error}}",
   "deleteFailed": "Falha na exclusão: {{error}}",
   "actionFailed": "Falha na ação: {{error}}",
+  "loadFailed": "Não foi possível carregar os dados do Proxmox",
 };
 
 export const messages: Record<PluginLocale, Record<string,string>> = {
@@ -131,6 +133,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "Rollback failed: {{error}}",
     "deleteFailed": "Delete failed: {{error}}",
     "actionFailed": "Action failed: {{error}}",
+    "loadFailed": "Could not load Proxmox data",
   },
   fr: {
     "title": "Proxmox",
@@ -172,6 +175,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "Échec de la restauration : {{error}}",
     "deleteFailed": "Échec de la suppression : {{error}}",
     "actionFailed": "Échec de l'action : {{error}}",
+    "loadFailed": "Impossible de charger les données Proxmox",
   },
   ru: {
     "title": "Proxmox",
@@ -213,6 +217,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "Не удалось откатить: {{error}}",
     "deleteFailed": "Не удалось удалить: {{error}}",
     "actionFailed": "Не удалось выполнить действие: {{error}}",
+    "loadFailed": "Не удалось загрузить данные Proxmox",
   },
   zh: {
     "title": "Proxmox",
@@ -254,6 +259,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "回滚失败：{{error}}",
     "deleteFailed": "删除失败：{{error}}",
     "actionFailed": "操作失败：{{error}}",
+    "loadFailed": "无法加载 Proxmox 数据",
   },
   tr: {
     "title": "Proxmox",
@@ -295,6 +301,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "Geri döndürülemedi: {{error}}",
     "deleteFailed": "Silinemedi: {{error}}",
     "actionFailed": "İşlem başarısız: {{error}}",
+    "loadFailed": "Proxmox verileri yüklenemedi",
   },
   cs: {
     "title": "Proxmox",
@@ -336,6 +343,7 @@ export const messages: Record<PluginLocale, Record<string,string>> = {
     "rollbackFailed": "Návrat selhal: {{error}}",
     "deleteFailed": "Smazání selhalo: {{error}}",
     "actionFailed": "Akce selhala: {{error}}",
+    "loadFailed": "Nepodařilo se načíst data Proxmoxu",
   },
   pt,
   "pt-BR": pt,

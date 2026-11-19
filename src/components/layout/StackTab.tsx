@@ -92,8 +92,8 @@ export function StackTab({
   const trailing = (
     <>
       <span
-        className={`relative inline-flex items-center justify-center min-w-[1.35rem] h-[1.35rem] px-1.5 rounded-full text-[11px] font-bold tabular-nums ${
-          active ? "bg-(--t-accent) text-(--t-bg-base)" : "bg-(--t-bg-elevated) text-(--t-text-secondary)"
+        className={`relative inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-2xs font-bold tabular-nums ${
+          active ? "bg-(--t-accent) text-(--t-on-accent)" : "bg-(--t-bg-elevated) text-(--t-text-secondary)"
         }`}
       >
         <span className={lockCue.active ? "invisible" : undefined}>{members.length}</span>

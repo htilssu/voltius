@@ -17,7 +17,7 @@ import {
 type Scope = NonNullable<AttrChange["recurse"]>;
 
 const INPUT_CLASS =
-  "form-input px-2 rounded-md outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary) disabled:opacity-50";
+  "form-input px-2 rounded-md outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary) disabled:opacity-(--disabled-opacity)";
 
 function shared<K extends keyof OwnerInfo>(owners: OwnerInfo[] | null | "loading", key: K): OwnerInfo[K] | null {
   return Array.isArray(owners) ? commonValue(owners.map((o) => o[key])) : null;
@@ -213,7 +213,7 @@ export function PermissionsDialog({ sftpId, files, onClose, onApplied, touch = f
 
         {hasDir && (
           <div className="flex items-center gap-2">
-            <div className={`whitespace-nowrap${ownerDisabled ? " opacity-50 pointer-events-none" : ""}`}>
+            <div className={`whitespace-nowrap${ownerDisabled ? " opacity-(--disabled-opacity) pointer-events-none" : ""}`}>
               <Checkbox checked={recursive && hasShell} onChange={setRecursive} label={t("fileTransfer.permissions.recurse")} />
             </div>
             {recursive && hasShell && (

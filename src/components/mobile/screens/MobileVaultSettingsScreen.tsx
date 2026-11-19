@@ -213,11 +213,11 @@ function SettingsRow({ id, icon, label, summary, greyedReason, danger, chevron, 
       data-vault-settings-row={id}
       aria-disabled={greyedReason !== null || undefined}
       onClick={onTap}
-      className={`w-full flex items-center gap-4 pl-4 pr-3 py-2 text-left aria-disabled:opacity-50 ${subtitle ? "min-h-[72px]" : "min-h-14"}`}
+      className={`w-full flex items-center gap-4 pl-4 pr-3 py-2 text-left aria-disabled:opacity-(--disabled-opacity) ${subtitle ? "min-h-[72px]" : "min-h-14"}`}
     >
-      <Icon icon={icon} width={24} className="shrink-0" style={{ color: danger ? "var(--t-danger, #e5484d)" : "var(--t-text-dim)" }} />
+      <Icon icon={icon} width={24} className="shrink-0" style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-dim)" }} />
       <span className="flex-1 min-w-0 flex flex-col">
-        <span className="text-base truncate" style={{ color: danger ? "var(--t-danger, #e5484d)" : "var(--t-text-primary)" }}>{label}</span>
+        <span className="text-base truncate" style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-primary)" }}>{label}</span>
         {subtitle && <span className="text-sm text-(--t-text-dim) line-clamp-2">{subtitle}</span>}
       </span>
       {chevron && <Icon icon="lucide:chevron-right" width={20} className="shrink-0 text-(--t-text-dim)" />}
@@ -263,7 +263,7 @@ function VaultNameRow({ target, editable: canRename }: { target: VaultAdminTarge
         <span data-vault-settings-name-readonly className="flex items-center h-14 text-base text-(--t-text-primary) truncate">{target.name}</span>
       )}
       {editable && !draft.trim() && (
-        <span data-field-error className="block mt-1 text-xs" style={{ color: "var(--t-danger, #e5484d)" }}>{t("mobile.vaultSettings.nameRequired")}</span>
+        <span data-field-error className="block mt-1 text-xs" style={{ color: "var(--t-status-error)" }}>{t("mobile.vaultSettings.nameRequired")}</span>
       )}
       {!editable && <span className="block text-xs text-(--t-text-dim)">{readOnly ?? t("mobile.vaultSettings.nameReadOnly")}</span>}
     </label>

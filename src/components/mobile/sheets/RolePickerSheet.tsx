@@ -30,7 +30,7 @@ export default function RolePickerSheet({ title, roles, mode, selectedIds = [], 
             aria-checked={mode === "toggle" ? checked : undefined}
             aria-busy={busy || undefined}
             disabled={!!reason || busy}
-            className="w-full min-h-12 flex items-center gap-3 px-3 py-3 rounded-xl text-left active:bg-(--t-bg-card) disabled:opacity-50"
+            className="w-full min-h-12 flex items-center gap-3 px-3 py-3 rounded-lg text-left active:bg-(--t-bg-card) disabled:opacity-(--disabled-opacity)"
             onClick={() => { onPick(r); if (mode === "pick") onClose(); }}
           >
             <span aria-hidden className="w-3 h-3 shrink-0 rounded-full" style={{ background: roleColor(r) }} />

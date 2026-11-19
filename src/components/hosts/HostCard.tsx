@@ -44,6 +44,7 @@ import {
 import { knocksOnConnect } from "@/services/portKnock";
 import { memberLabel } from "@/services/memberLabel";
 import { SFTP_ICON } from "@/lib/conceptIcons";
+import { toastActionError } from "@/components/shared/actionError";
 
 const EMPTY_TEAM_MEMBERS: TeamMember[] = [];
 
@@ -120,7 +121,8 @@ function HostCardBody({
     return member ? memberLabel(member) : t("hosts.card.teamMemberFallback");
   })();
   const handlePinClick = whenWritableOn(connectionTarget(connection.id), () => {
-    pinConnection(connection.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effectivePinned).catch(() => {});
+    pinConnection(connection.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effectivePinned)
+      .catch((e) => toastActionError(e, t));
   });
   const pinTooltip = (() => {
     if (!isTeamVault) return effectivePinned ? t("hosts.card.unpin") : t("hosts.card.pin");
@@ -167,7 +169,7 @@ function HostCardBody({
     <span className="flex items-center" title={presenceTitle}>
       <MiniAvatar name={presence.primary.avatar} size={18} />
       {presence.overflow > 0 && (
-        <span className="ml-1 text-[10px] font-semibold px-1 rounded-full bg-(--t-bg-elevated) text-(--t-text-dim)">
+        <span className="ml-1 text-2xs font-semibold px-1 rounded-full bg-(--t-bg-elevated) text-(--t-text-dim)">
           +{presence.overflow}
         </span>
       )}
@@ -234,7 +236,7 @@ function HostCardBody({
         ...(canEdit && isTeamVault ? [{
           label: (connection.pinned === true) ? t("hosts.card.unpinForTeam") : t("hosts.card.pinForTeam"),
           icon: "lucide:users",
-          onClick: whenWritableOn(connectionTarget(connection.id), () => pinConnectionForTeam(connection.id, !(connection.pinned === true)).catch(() => {})),
+          onClick: whenWritableOn(connectionTarget(connection.id), () => pinConnectionForTeam(connection.id, !(connection.pinned === true)).catch((e) => toastActionError(e, t))),
         }] : []),
       ],
     }),
@@ -299,7 +301,7 @@ function HostCardBody({
               <StatusDot tone={pingTone} motion={pingMotion} hollow={knockClosed} halo="var(--t-bg-card)" corner />
             )}
           </div>
-          <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">
+          <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">
             {rename.editor ?? displayName}
           </p>
           <p className="text-xs truncate flex-1 text-(--t-text-secondary)">
@@ -322,10 +324,9 @@ function HostCardBody({
             <button
               disabled={connectDisabled}
               onClick={(e) => { e.stopPropagation(); onConnect(connection); }}
-              className="flex items-center justify-center p-1.5 rounded-lg transition-colors text-(--t-accent) disabled:opacity-40 disabled:cursor-not-allowed"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--t-accent) 16%, transparent)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="flex items-center justify-center p-1.5 rounded-lg transition-colors text-(--t-accent) hover:bg-(--t-accent)/15 focus-visible:outline-2 focus-visible:outline-(--t-accent) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
               title={connectTitle}
+              aria-label={connectTitle}
             >
               <Icon icon={fileOnly ? SFTP_ICON : "lucide:terminal"} width={18} />
             </button>
@@ -342,7 +343,7 @@ function HostCardBody({
                   <p className="text-sm font-bold truncate text-(--t-text-bright)">
                     {rename.editor ?? displayName}
                   </p>
-                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[11px] font-semibold bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
+                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-2xs font-semibold bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
                     {protocol}
                   </span>
                   <ManagedBadge id={connection.id} />
@@ -370,7 +371,7 @@ function HostCardBody({
                 </div>
                 <div className="self-start w-full min-h-[26px]" style={{ maxWidth: tagMaxWidth }}>
                   {connection.tags.length > 0 && (
-                    <OverflowTagList tags={connection.tags} className="w-full" badgeClassName="py-0 text-[11px]" maxWidth={tagMaxWidth} />
+                    <OverflowTagList tags={connection.tags} className="w-full" badgeClassName="py-0 text-2xs" maxWidth={tagMaxWidth} />
                   )}
                 </div>
               </div>
@@ -390,16 +391,14 @@ function HostCardBody({
                 ref={terminalBtnRef}
                 disabled={connectDisabled}
                 onClick={(e) => { e.stopPropagation(); onConnect(connection); }}
-                className="terminal-connect-btn disabled:opacity-40 disabled:cursor-not-allowed -mt-5 -mr-[calc(0.75rem+2px)] -mb-[calc(0.75rem+2px)] pr-[calc(0.75rem+2px)] pb-3.5 pt-2.5 pl-3 rounded-tl-xl rounded-br-2xl bg-(--t-bg-terminal) text-(--t-terminal-foreground) hover:brightness-150 transition-all text-xs flex flex-col min-w-0 overflow-hidden max-w-[75%]"
-                style={{ fontFamily: "var(--t-terminal-font-family)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07), inset 1px 0 0 rgba(255,255,255,0.07)" }}
+                className="terminal-connect-btn disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed -mt-5 -mr-[calc(0.75rem+2px)] -mb-[calc(0.75rem+2px)] pr-[calc(0.75rem+2px)] py-2.5 pl-3 rounded-tl-lg rounded-br-[var(--r-lg)] bg-(--t-bg-terminal) text-(--t-terminal-foreground) hover:brightness-150 transition-all text-xs flex flex-col min-w-0 overflow-hidden max-w-[75%] outline-none focus-visible:ring-2 focus-visible:ring-(--t-accent) focus-visible:ring-inset"
+                style={{ fontFamily: "var(--t-terminal-font-family)" }}
                 title={connectTitle}
+                aria-label={connectTitle}
               >
-                <div className="flex items-center gap-1 mb-1.5 shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-[#ff5f56]" />
-                  <span className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
-                  <span className="w-2 h-2 rounded-full bg-[#27c93f]" />
-                  {viewOnly && <span className="ml-1 text-[10px] leading-2 font-sans font-semibold">{t("members.viewAs.level.view")}</span>}
-                </div>
+                {viewOnly && (
+                  <span className="mb-1 shrink-0 text-2xs font-sans font-semibold text-(--t-text-dim)">{t("members.viewAs.level.view")}</span>
+                )}
                 <div className="flex items-center min-w-0 w-full">
                   {fileOnly ? (
                     <>

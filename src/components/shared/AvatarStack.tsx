@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+// Deterministic per-user identity palette (exception to token-only colors), with white initials on top.
 const AVATAR_COLORS = [
   "#6366f1", "#8b5cf6", "#ec4899", "#ef4444",
   "#f59e0b", "#10b981", "#3b82f6", "#14b8a6",
@@ -65,7 +66,7 @@ export function AvatarOverflow({
   if (count <= 0) return null;
   return (
     <div
-      className="flex items-center justify-center text-[10px] font-semibold rounded-full shrink-0"
+      className="flex items-center justify-center text-2xs font-semibold rounded-full shrink-0"
       style={{
         marginLeft: overlap ? -(size * 0.37) : 0,
         zIndex: 0,
@@ -108,7 +109,7 @@ export function AvatarStack({
   if (!participants || participants.length === 0) {
     return (
       <span
-        className="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+        className="text-2xs font-medium px-1.5 py-0.5 rounded-full"
         style={{ background: "var(--t-bg-elevated)", color: "var(--t-text-dim)" }}
       >
         {t("shared.avatarStack.participantCount", { count: total })}

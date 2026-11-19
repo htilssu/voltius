@@ -38,17 +38,9 @@ function Btn({
   variant?: "primary" | "secondary" | "danger";
   small?: boolean;
 }) {
-  const base =
-    "rounded-lg font-medium transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-default";
   const size = small ? "px-3 py-1 text-xs" : "px-4 py-2 text-sm";
-  const colors =
-    variant === "primary"
-      ? "bg-(--t-accent) text-(--t-on-accent) hover:bg-(--t-accent-hover)"
-      : variant === "danger"
-        ? "bg-transparent border border-(--t-status-error) text-(--t-status-error) hover:bg-[color-mix(in_srgb,var(--t-status-error)_10%,transparent)]"
-        : "bg-(--t-bg-elevated) border border-(--t-border) text-(--t-text-muted) hover:border-(--t-border-hover)";
   return (
-    <button className={`${base} ${size} ${colors}`} onClick={onClick} disabled={disabled}>
+    <button className={`btn btn-${variant === "danger" ? "danger-ghost" : variant} rounded-lg font-medium ${size}`} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );
@@ -91,9 +83,7 @@ function SecretInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="form-input w-full px-3 py-2 pr-16 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
-          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--t-accent)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--t-border)")}
+          className="form-input w-full px-3 py-2 pr-16 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) focus:border-(--t-accent) text-(--t-text-primary)"
         />
         <div className="absolute right-2 flex items-center gap-1.5">
           {saveState && <SaveIndicator saveState={saveState} />}
@@ -160,7 +150,7 @@ function RolePill({
         active
           ? "bg-[color-mix(in_srgb,var(--t-accent)_14%,transparent)] text-(--t-accent) border-(--t-accent)"
           : disabled
-          ? "opacity-40 cursor-not-allowed text-(--t-text-dim) border-(--t-border)"
+          ? "opacity-(--disabled-opacity) cursor-not-allowed text-(--t-text-dim) border-(--t-border)"
           : "cursor-pointer text-(--t-text-dim) border-(--t-border) hover:border-(--t-border-hover) hover:text-(--t-text-muted)",
         disabled ? "cursor-not-allowed" : "cursor-pointer",
       ].join(" ")}
@@ -268,13 +258,13 @@ function GistRow({
         />
       </div>
 
-      {/* Actions — visible on hover */}
-      <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Actions — revealed on hover/focus, always shown on touch */}
+      <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
         <button
           type="button"
           onClick={handleCopyLink}
           title={t("copyGistUrl")}
-          className="p-1 rounded-sm text-(--t-text-dim) hover:text-(--t-text-muted) hover:bg-(--t-bg-hover) transition-colors cursor-pointer"
+          className="p-1 rounded-sm text-(--t-text-dim) hover:text-(--t-text-muted) hover:bg-(--t-bg-card-hover) transition-colors cursor-pointer"
         >
           <Icon icon={copied ? "lucide:check" : "lucide:copy"} width={13} className={copied ? "text-(--t-status-connected)" : ""} />
         </button>
@@ -282,7 +272,7 @@ function GistRow({
           type="button"
           onClick={onUnlink}
           title={t("unlink")}
-          className="p-1 rounded-sm text-(--t-text-dim) hover:text-(--t-text-muted) hover:bg-(--t-bg-hover) transition-colors cursor-pointer"
+          className="p-1 rounded-sm text-(--t-text-dim) hover:text-(--t-text-muted) hover:bg-(--t-bg-card-hover) transition-colors cursor-pointer"
         >
           <Icon icon="lucide:unlink" width={13} />
         </button>
@@ -621,7 +611,7 @@ export function createSettingsPage(api: PluginAPI): React.FC {
         )}
 
         {/* Credentials */}
-        <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--t-bg-elevated) border border-(--t-border)">
+        <div className="flex flex-col gap-3 p-4 rounded-lg bg-(--t-bg-elevated) border border-(--t-border)">
           <p className="text-xs font-semibold text-(--t-text-muted) uppercase tracking-wide">
             {t("credentials")}
           </p>
@@ -661,13 +651,13 @@ export function createSettingsPage(api: PluginAPI): React.FC {
         </div>
 
         {/* Registered Gists */}
-        <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--t-bg-elevated) border border-(--t-border)">
+        <div className="flex flex-col gap-3 p-4 rounded-lg bg-(--t-bg-elevated) border border-(--t-border)">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-(--t-text-muted) uppercase tracking-wide">
               {t("gists")} {gists.length > 0 && `(${gists.length})`}
             </p>
             {gists.length > 0 && (
-              <p className="text-[10px] text-(--t-text-dim)">
+              <p className="text-2xs text-(--t-text-dim)">
                 <Rich
                   text={t("rolesHint")}
                   nodes={{
@@ -702,7 +692,7 @@ export function createSettingsPage(api: PluginAPI): React.FC {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 py-4 text-center">
-              <Icon icon="custom:github" width={28} className="text-(--t-text-dim) opacity-40" />
+              <Icon icon="custom:github" width={28} className="text-(--t-text-dim)" />
               <p className="text-sm text-(--t-text-dim)">{t("noGists")}</p>
               <p className="text-xs text-(--t-text-dim) opacity-70">{t("noGistsSub")}</p>
             </div>
@@ -791,9 +781,7 @@ export function createSettingsPage(api: PluginAPI): React.FC {
                 onChange={(e) => setLinkInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLinkGist()}
                 placeholder={t("linkPlaceholder")}
-                className="form-input flex-1 px-3 py-2 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
-                onFocus={(e) => (e.currentTarget.style.borderColor = "var(--t-accent)")}
-                onBlur={(e) => (e.currentTarget.style.borderColor = "var(--t-border)")}
+                className="form-input flex-1 px-3 py-2 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border) focus:border-(--t-accent) text-(--t-text-primary)"
               />
               <Btn onClick={handleLinkGist} disabled={!linkInput.trim() || saving}>
                 {saving ? <Icon icon="lucide:loader-circle" width={13} className="animate-spin" /> : t("link")}
@@ -804,7 +792,7 @@ export function createSettingsPage(api: PluginAPI): React.FC {
 
         {/* Sync */}
         {configured && (
-          <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--t-bg-elevated) border border-(--t-border)">
+          <div className="flex flex-col gap-3 p-4 rounded-lg bg-(--t-bg-elevated) border border-(--t-border)">
             <p className="text-xs font-semibold text-(--t-text-muted) uppercase tracking-wide">
               {t("sync")}
             </p>
@@ -845,7 +833,7 @@ export function createSettingsPage(api: PluginAPI): React.FC {
 
         {/* Devices (import source gist only) */}
         {configured && sourceManifest && sourceManifest.devices.length > 0 && (
-          <div className="flex flex-col gap-3 p-4 rounded-xl bg-(--t-bg-elevated) border border-(--t-border)">
+          <div className="flex flex-col gap-3 p-4 rounded-lg bg-(--t-bg-elevated) border border-(--t-border)">
             <p className="text-xs font-semibold text-(--t-text-muted) uppercase tracking-wide">
               {t("devicesTitle", { count: sourceManifest.devices.length })}
             </p>

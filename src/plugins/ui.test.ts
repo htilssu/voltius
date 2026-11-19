@@ -5,7 +5,7 @@ describe("@voltius/ui public surface", () => {
   test("exports exactly the documented components", () => {
     expect(Object.keys(VoltiusUI).sort()).toEqual([
       "BottomSheet", "ConfirmModal", "ConnectionAvatar", "FormSelect", "Icon", "InfoTooltip",
-      "MobileScreenHeader", "StatusDot", "useActiveSession", "useAutosave", "useCopiedFlash", "useSessionById", "useT",
+      "MobileButton", "MobileEmptyState", "MobileScreenHeader", "SheetActionRow", "StatusDot", "useActiveSession", "useAutosave", "useCopiedFlash", "useSessionById", "useT",
       "writeClipboard",
     ]);
   });

@@ -45,7 +45,7 @@ beforeEach(() => {
 });
 afterEach(() => cleanup());
 
-test("delete is two-step: first click confirms (no service call), second click deletes", async () => {
+test("delete asks for confirmation in a dialog (no service call) before deleting", async () => {
   api.listRoles.mockResolvedValue([managerRole, role("custom1", 0, 100)]);
   api.listMembers.mockResolvedValue([member("me", ["mgr"])]);
   render(<TeamRolesPanel teamId="t1" />);
@@ -54,7 +54,7 @@ test("delete is two-step: first click confirms (no service call), second click d
   fireEvent.click(del);
   expect(api.deleteRole).not.toHaveBeenCalled();
 
-  const confirm = await screen.findByTitle("settings.vaults.rolesPanel.clickToConfirm");
+  const confirm = await screen.findByText("common.action.delete");
   fireEvent.click(confirm);
   await waitFor(() => expect(api.deleteRole).toHaveBeenCalledWith("t1", "custom1"));
 });
@@ -66,7 +66,7 @@ test("delete failure surfaces error and does not remove the role", async () => {
   render(<TeamRolesPanel teamId="t1" />);
 
   fireEvent.click(await screen.findByTitle("settings.vaults.rolesPanel.deleteRoleTitle"));
-  fireEvent.click(await screen.findByTitle("settings.vaults.rolesPanel.clickToConfirm"));
+  fireEvent.click(await screen.findByText("common.action.delete"));
 
   expect(await screen.findByText("del-boom")).toBeTruthy();
   expect(useTeamStore.getState().rolesByTeam.t1?.some((r) => r.id === "custom1")).toBe(true);

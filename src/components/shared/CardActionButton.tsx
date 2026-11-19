@@ -14,6 +14,9 @@ interface Props {
   disabled?: boolean;
 }
 
+const HOVER_DEFAULT = "enabled:hover:text-(--t-text-primary) enabled:hover:bg-[color-mix(in_srgb,var(--t-text-primary)_10%,transparent)]";
+const HOVER_DANGER = "enabled:hover:text-(--t-status-error) enabled:hover:bg-[color-mix(in_srgb,var(--t-status-error)_18%,transparent)]";
+
 const REVEAL = "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
 
 export function CardActionButton({ icon, title, onClick, danger, reveal = true, width = 18, iconClassName, disabled }: Props) {
@@ -23,18 +26,7 @@ export function CardActionButton({ icon, title, onClick, danger, reveal = true, 
       disabled={disabled}
       onClick={(e) => { e.stopPropagation(); onClick(e); }}
       onDoubleClick={(e) => e.stopPropagation()}
-      className={`flex ${reveal ? REVEAL : ""} items-center justify-center p-1.5 rounded-lg transition-colors text-(--t-text-secondary) disabled:opacity-40 disabled:cursor-not-allowed`}
-      onMouseEnter={(e) => {
-        if (disabled) return;
-        e.currentTarget.style.color = danger ? "var(--t-status-error)" : "var(--t-text-primary)";
-        e.currentTarget.style.background = danger
-          ? "color-mix(in srgb, var(--t-status-error) 18%, transparent)"
-          : "color-mix(in srgb, #ffffff 10%, transparent)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = "var(--t-text-secondary)";
-        e.currentTarget.style.background = "transparent";
-      }}
+      className={`flex ${reveal ? REVEAL : ""} items-center justify-center p-1.5 rounded-lg transition-colors text-(--t-text-secondary) ${danger ? HOVER_DANGER : HOVER_DEFAULT} disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed`}
       title={title}
       aria-label={title}
     >

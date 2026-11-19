@@ -88,7 +88,7 @@ export default function StepperCard({
     // M3 list item with a slider underneath: full bleed, 48 dp -/+ targets, Reset as a
     // text button only while the value is off its default.
     const stepBy = buttonStep ?? step;
-    const iconBtn = "w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-(--t-text-primary) disabled:opacity-40";
+    const iconBtn = "w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-(--t-text-primary) disabled:opacity-(--disabled-opacity)";
     return (
       <div data-settings-stepper className="-mx-4 px-4 py-3">
         <div className="flex items-center justify-between gap-3">

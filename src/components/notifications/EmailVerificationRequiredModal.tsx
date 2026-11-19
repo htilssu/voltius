@@ -59,7 +59,7 @@ export function EmailVerificationRequiredModal() {
           <button
             onClick={() => void handleResend()}
             disabled={sending}
-            className="btn btn-primary w-full py-2.5 rounded-lg text-sm font-semibold disabled:opacity-60"
+            className="btn btn-primary w-full py-2.5 rounded-lg text-sm font-semibold disabled:opacity-(--disabled-opacity)"
           >
             {sending ? t("notifications.emailVerification.modal.resending") : t("notifications.emailVerification.modal.resend")}
           </button>

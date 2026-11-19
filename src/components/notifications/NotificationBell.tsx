@@ -10,6 +10,7 @@ import { useAnchoredPopover } from "@/hooks/useAnchoredPopover";
 import { isMobileShell } from "@/utils/platform";
 import { MobileNotificationBell } from "@/components/mobile/MobileNotificationBell";
 import { NotificationBadge, NotificationSourceLabel } from "./NotificationBadge";
+import { CountBadge } from "./CountBadge";
 
 // Which bell is on screen changes when bells mount and unmount: the mobile
 // shell swaps the foreground tab's bell while the SFTP tab's stays mounted
@@ -38,7 +39,7 @@ function RowButton({ label, onClick, disabled = false }: { label: string; onClic
     <button
       disabled={disabled}
       onClick={onClick}
-      className="h-6 px-2.5 rounded-[7px] text-xs font-medium transition-colors disabled:opacity-50 bg-(--t-bg-input) hover:bg-(--t-bg-input-hover) text-(--t-text-primary)"
+      className="h-6 px-2.5 rounded-md text-xs font-medium transition-colors disabled:opacity-(--disabled-opacity) bg-(--t-bg-input) hover:bg-(--t-bg-input-hover) text-(--t-text-primary)"
       style={{ boxShadow: "var(--t-ring)" }}
     >
       {label}
@@ -127,7 +128,7 @@ function HistoryRow({ entry }: { entry: HistoryEntry }) {
         <p className="text-xs leading-5 line-clamp-2 text-(--t-text-secondary)">{entry.message}</p>
         <span className="flex items-center gap-3 min-w-0">
           <NotificationSourceLabel source={entry.source} host={entry.host} className="min-w-0" />
-          <span className="text-[11.5px] shrink-0 ml-auto text-(--t-text-dim)">{formatRelative(entry.dismissedAt)}</span>
+          <span className="text-2xs shrink-0 ml-auto text-(--t-text-dim)">{formatRelative(entry.dismissedAt)}</span>
         </span>
       </div>
     </div>
@@ -207,7 +208,6 @@ function DesktopNotificationBell() {
 
   const handleOpen = () => setOpen(!open);
 
-  const displayCount = Math.min(unreadCount, 9);
   const hasItems = inbox.length > 0 || banners.length > 0 || history.length > 0;
 
   return (
@@ -216,38 +216,11 @@ function DesktopNotificationBell() {
         <button
           ref={buttonRef}
           onClick={handleOpen}
-          className="flex items-center justify-center size-8 rounded-md transition-colors relative overflow-hidden"
-          style={{
-            color: open ? "var(--t-text-bright)" : "var(--t-text-dim)",
-            background: open ? "var(--t-bg-elevated)" : "transparent",
-          }}
+          className={`flex items-center justify-center size-8 rounded-md transition-colors relative hover:bg-(--t-bg-elevated) hover:text-(--t-text-bright) ${open ? "bg-(--t-bg-elevated) text-(--t-text-bright)" : "text-(--t-text-dim)"}`}
           title={t("notifications.bell.title")}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)";
-          }}
-          onMouseLeave={(e) => {
-            if (!open) {
-              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-            }
-          }}
         >
           <Icon icon="lucide:bell" width={16} />
-          {unreadCount > 0 && (
-            <span
-              className="absolute top-0.5 right-0.5 flex items-center justify-center rounded-full text-white font-bold"
-              style={{
-                background: "var(--t-status-error)",
-                fontSize: "8px",
-                minWidth: "13px",
-                height: "13px",
-                padding: "0 2px",
-              }}
-            >
-              {displayCount === 9 && unreadCount > 9 ? "9+" : displayCount}
-            </span>
-          )}
+          <CountBadge count={unreadCount} max={9} className="absolute -top-0.5 -right-0.5" />
         </button>
       </div>
 
@@ -273,13 +246,7 @@ function DesktopNotificationBell() {
             <button
               onClick={clearHistory}
               disabled={history.length === 0}
-              className="text-xs transition-colors"
-              style={{
-                color: history.length === 0 ? "var(--t-text-dim)" : "var(--t-text-muted)",
-                cursor: history.length === 0 ? "default" : "pointer",
-              }}
-              onMouseEnter={(e) => { if (history.length > 0) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = history.length === 0 ? "var(--t-text-dim)" : "var(--t-text-muted)"; }}
+              className="text-xs transition-colors text-(--t-text-muted) enabled:hover:text-(--t-text-primary) disabled:text-(--t-text-dim) disabled:cursor-default"
             >
               {t("notifications.bell.clearHistory")}
             </button>

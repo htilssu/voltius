@@ -18,6 +18,9 @@ export { useT, useSessionById, useActiveSession } from "./hooks";
 // here rather than duplicated across monitoring/docker/proxmox's mobile screens.
 export { default as BottomSheet } from "@/components/mobile/sheets/BottomSheet";
 export { MobileScreenHeader } from "@/components/mobile/MobileScreenHeader";
+export { MobileButton } from "@/components/mobile/MobileButton";
+export { MobileEmptyState } from "@/components/mobile/MobileEmptyState";
+export { SheetActionRow } from "@/components/mobile/sheets/SheetActionRow";
 export { ConnectionAvatar } from "@/components/shared/ConnectionAvatar";
 export { ConfirmModal } from "@/components/shared/ConfirmModal";
 export { StatusDot } from "@/components/shared/StatusDot";

@@ -150,7 +150,7 @@ export function EditorTab({ doc }: { doc: EditorDoc }) {
           {doc.hostLabel}:{doc.path}
         </span>
         {doc.dirty && (
-          <span className="shrink-0" style={{ color: "var(--t-accent-warn, #f59e0b)" }}>●</span>
+          <span className="shrink-0" style={{ color: "var(--t-status-warning)" }}>●</span>
         )}
         {readOnlyTip && <ReadOnlyBadge tip={readOnlyTip} className="ml-auto" />}
         {/* Auto-save toggle */}
@@ -232,7 +232,7 @@ function EditorError({
     msg = error;
   }
   return (
-    <div className="p-4 text-sm" style={{ color: "var(--t-error, #ef4444)" }}>
+    <div className="p-4 text-sm" style={{ color: "var(--t-status-error)" }}>
       {msg}
     </div>
   );

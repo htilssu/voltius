@@ -16,7 +16,7 @@ export function ManagedBadge({ id, compact }: { id: string; compact?: boolean })
   const alias = useManagedAlias(id);
   if (!alias) return null;
   return (
-    <span title={t("hosts.managed.tooltip", { alias })} className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-semibold" style={{ ...surface, color: "var(--t-accent)" }}>
+    <span title={t("hosts.managed.tooltip", { alias })} className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-2xs font-semibold" style={{ ...surface, color: "var(--t-accent)" }}>
       <Icon icon="lucide:file-cog" width={12} />
       {!compact && t("hosts.managed.badge")}
     </span>

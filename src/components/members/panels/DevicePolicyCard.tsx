@@ -183,7 +183,7 @@ export function DevicePolicyCard({ teamId }: { teamId: string }) {
               {entries.map(([key, value]) => {
                 const range = rangeOf(value);
                 return (
-                  <li key={key} className="flex flex-wrap items-baseline gap-x-3 px-3 py-1.5 font-mono text-[11px]">
+                  <li key={key} className="flex flex-wrap items-baseline gap-x-3 px-3 py-1.5 font-mono text-2xs">
                     <span className="shrink-0 max-w-full wrap-anywhere text-(--t-text-primary)">
                       <Icon
                         icon={range ? "lucide:sliders-horizontal" : "lucide:lock"}
@@ -222,7 +222,7 @@ export function DevicePolicyCard({ teamId }: { teamId: string }) {
               type="button"
               disabled={busy}
               onClick={whenWritable(() => setClearing(true))}
-              className="ml-auto text-xs px-2 py-1.5 text-(--t-status-error) disabled:opacity-40"
+              className="ml-auto text-xs px-2 py-1.5 text-(--t-status-error) disabled:opacity-(--disabled-opacity)"
             >
               {t("members.devicePolicy.clear")}
             </button>
@@ -298,7 +298,7 @@ function ImportPreview({ preview, busy, onCancel, onSave }: {
               <span className="min-w-0 break-words">
                 {row.key && <><code className="font-mono wrap-anywhere"><PolicyKey id={row.key} /></code> </>}
                 {row.text}
-                {row.detail && <span className="block mt-0.5 font-mono text-[11px] break-all text-(--t-text-dim)">{row.detail}</span>}
+                {row.detail && <span className="block mt-0.5 font-mono text-2xs break-all text-(--t-text-dim)">{row.detail}</span>}
               </span>
             </li>
           ))}

@@ -62,10 +62,10 @@ export function markErrorStep(currentSteps: Step[], lastActivatedId: string | nu
 }
 
 export function getStepTextClass(status: StepStatus): string {
-  if (status === "done") return "text-text-secondary";
-  if (status === "error") return "text-status-error";
-  if (status === "active") return "text-text-primary";
-  return "text-text-muted";
+  if (status === "done") return "text-(--t-text-secondary)";
+  if (status === "error") return "text-(--t-status-error)";
+  if (status === "active") return "text-(--t-text-primary)";
+  return "text-(--t-text-muted)";
 }
 
 export function truncateFp(fp: string): string {

@@ -1,5 +1,5 @@
 import { test, expect, vi, beforeEach } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 const h = vi.hoisted(() => ({ overlayProps: null as Record<string, unknown> | null, paneProps: null as Record<string, unknown> | null }));
 
@@ -52,6 +52,7 @@ const props = {
   onSelect: vi.fn(),
   onRefresh: vi.fn(),
   onChangeHost: vi.fn(),
+  onRetry: vi.fn(),
   side: "left" as const,
   onDropFiles: vi.fn(),
 };
@@ -90,6 +91,19 @@ test("an ordinary connect failure still shows its message and a retry", () => {
   expect(screen.getByText("Connection refused")).toBeTruthy();
   expect(screen.getByText("fileTransfer.side.tryAgain")).toBeTruthy();
   expect(h.overlayProps).toBeNull();
+});
+
+test("try again reconnects the same host; choosing another host is a separate action", () => {
+  props.onRetry.mockClear();
+  props.onChangeHost.mockClear();
+  renderPhase({ tag: "error", message: "Connection refused", host });
+
+  fireEvent.click(screen.getByText("fileTransfer.side.tryAgain"));
+  expect(props.onRetry).toHaveBeenCalledTimes(1);
+  expect(props.onChangeHost).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByText("fileTransfer.side.chooseHost", { selector: "button" }));
+  expect(props.onChangeHost).toHaveBeenCalledTimes(1);
 });
 
 const device = {

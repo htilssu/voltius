@@ -44,11 +44,8 @@ function SyncNowButton({ provider }: { provider: SyncProviderView }) {
     <button
       onClick={run}
       disabled={syncing}
-      className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors shrink-0 bg-(--t-bg-input)"
-      style={{
-        color: provider.state.status === "error" ? "var(--t-status-error)" : "var(--t-text-muted)",
-        opacity: syncing ? 0.5 : 1,
-      }}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors shrink-0 bg-(--t-bg-input) disabled:opacity-(--disabled-opacity)"
+      style={{ color: provider.state.status === "error" ? "var(--t-status-error)" : "var(--t-text-muted)" }}
     >
       <Icon icon="lucide:refresh-cw" width={18} />
       {t("settings.sync.active.syncNow")}
@@ -118,7 +115,7 @@ function VoltiusSyncGroup({ provider }: { provider: SyncProviderView }) {
         {provider.action && (
           <button
             onClick={runAction}
-            className="text-xs px-2.5 py-1 rounded-md font-medium shrink-0 bg-(--t-accent) text-(--t-on-accent) hover:opacity-85 transition-opacity"
+            className="text-xs px-2.5 py-1 rounded-md font-medium shrink-0 btn btn-primary"
           >
             {t("settings.sync.requiresPro.upgrade")}
           </button>
@@ -274,7 +271,7 @@ function LocalNetworkGroup() {
             <button
               data-sync-pair
               onClick={openPairDeviceDialog}
-              className="min-h-11 text-xs px-2.5 py-1 rounded-md font-medium shrink-0 bg-(--t-accent) text-(--t-on-accent) hover:opacity-85 transition-opacity"
+              className="min-h-11 text-xs px-2.5 py-1 rounded-md font-medium shrink-0 btn btn-primary"
             >
               {t("layout.sync.local.pair.title")}
             </button>

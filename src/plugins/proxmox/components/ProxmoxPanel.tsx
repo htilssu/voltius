@@ -20,8 +20,8 @@ export function ProxmoxPanel() {
 
   if (!px.ready) {
     return (
-      <div className="flex items-center justify-center h-full opacity-40">
-        <p className="text-sm text-(--t-text-muted)">{t("noActiveSession")}</p>
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-(--t-text-dim)">{t("noActiveSession")}</p>
       </div>
     );
   }
@@ -31,7 +31,7 @@ export function ProxmoxPanel() {
   // flash it on every mount/session-change before flipping to the real panel.
   if (isProxmoxHost === null) {
     return (
-      <div className="flex items-center justify-center h-full opacity-40">
+      <div className="flex items-center justify-center h-full">
         <Icon icon="lucide:loader-circle" width={16} className="animate-spin text-(--t-text-dim)" />
       </div>
     );
@@ -39,20 +39,14 @@ export function ProxmoxPanel() {
 
   if (!isProxmoxHost) {
     return (
-      <div
-        className="flex h-full items-center justify-center px-6 text-center"
-        style={{ background: "linear-gradient(135deg, var(--t-bg-elevated) 0%, var(--t-bg-card) 100%)" }}
-      >
+      <div className="flex h-full items-center justify-center px-6 text-center">
         <div className="flex flex-col items-center gap-3 max-w-[220px]">
-          <div
-            className="flex items-center justify-center rounded-2xl w-[3.2rem] h-[3.2rem] text-(--t-text-dim) border border-(--t-border)"
-            style={{ background: "linear-gradient(135deg, var(--t-bg-card) 0%, var(--t-bg-toolbar) 100%)" }}
-          >
-            <Icon icon="devicon:proxmox-plain" width={26} />
+          <div className="flex items-center justify-center rounded-lg w-10 h-10 bg-(--t-bg-card) border border-(--t-border)">
+            <Icon icon="devicon:proxmox-plain" width={20} />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-bold text-(--t-text-primary)">{t("notDetectedTitle")}</span>
-            <span className="text-xs leading-relaxed text-(--t-text-dim)">
+            <span className="text-sm font-medium text-(--t-text-primary)">{t("notDetectedTitle")}</span>
+            <span className="text-xs leading-relaxed text-(--t-text-secondary)">
               {t("notDetectedSub")}
             </span>
           </div>
@@ -84,7 +78,7 @@ export function ProxmoxPanel() {
             onClick={() => px.fetchContainers()}
             disabled={state.loading}
             title={t("refresh")}
-            className="p-1 text-(--t-text-muted) hover:text-(--t-text) disabled:opacity-40"
+            className="p-1 text-(--t-text-muted) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
           >
             <Icon icon="lucide:refresh-cw" width={11} className={state.loading ? "animate-spin" : ""} />
           </button>
@@ -93,8 +87,18 @@ export function ProxmoxPanel() {
 
       {/* Error state */}
       {state.error && state.view === "containers" && (
-        <div className="px-3 py-2 text-[10px] text-(--t-text-muted)">
-          <p className="break-all">{state.error}</p>
+        <div className="flex flex-col items-center gap-2 px-6 py-8 text-center">
+          <Icon icon="lucide:triangle-alert" width={18} className="text-(--t-status-error)" />
+          <p className="text-sm font-medium text-(--t-text-primary)">{t("loadFailed")}</p>
+          <p className="text-xs text-(--t-text-secondary) break-words max-w-[260px]">{state.error}</p>
+          <button
+            onClick={() => px.fetchContainers()}
+            disabled={state.loading}
+            className="btn btn-secondary inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs"
+          >
+            <Icon icon="lucide:refresh-cw" width={12} className={state.loading ? "animate-spin" : ""} />
+            {t("refresh")}
+          </button>
         </div>
       )}
 

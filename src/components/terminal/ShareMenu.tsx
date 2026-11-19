@@ -37,6 +37,8 @@ interface ShareMenuProps {
   onUpgrade: () => void;
 }
 
+const MENU_WIDTH = 280;
+
 export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectionName, connectionVaultId, isLoggedIn, tier, onSignIn, onUpgrade }: ShareMenuProps) {
   const { t } = useTranslation();
   const upgrade = usePlanDisplay().upgradeTo ? onUpgrade : undefined;
@@ -108,7 +110,9 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
     if (!open) return;
     if (anchorRef.current) {
       const rect = anchorRef.current.getBoundingClientRect();
-      const left = rect.left + rect.width / 2 - 140;
+      // Centered under the anchor, kept inside the viewport on narrow windows.
+      const width = Math.min(MENU_WIDTH, window.innerWidth - 16);
+      const left = Math.max(8, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - 8));
       setPos({ top: rect.bottom + 4, left, originX: rect.left + rect.width / 2 - left });
     }
     loadTeams().catch(() => {});
@@ -230,7 +234,7 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
       style={{
         top: pos.top,
         left: pos.left,
-        width: 280,
+        width: `min(${MENU_WIDTH}px, calc(100vw - 16px))`,
         transformOrigin: `${pos.originX}px top`,
         ...fade.style,
       }}
@@ -246,15 +250,12 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
             <p className="text-xs font-semibold mb-1" style={{ color: "var(--t-text-primary)" }}>
               {t("terminal.share.signInToShare")}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>
+            <p className="text-2xs leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>
               {t("terminal.share.signInDescription")}
             </p>
           </div>
           <button
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-opacity"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: 1 }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            className="btn btn-primary w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
             onClick={onSignIn}
           >
             <Icon icon="lucide:log-in" width={12} />
@@ -279,13 +280,13 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
             <p className="text-xs font-semibold mb-1" style={{ color: "var(--t-text-primary)" }}>
               {t("terminal.share.proRequired")}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>
+            <p className="text-2xs leading-relaxed" style={{ color: "var(--t-text-secondary)" }}>
               {t("terminal.share.proRequiredDescription")}
             </p>
           </div>
           <div className="w-full flex flex-col gap-1 text-left">
             {(t("terminal.share.features", { returnObjects: true }) as string[]).map((feat) => (
-              <div key={feat} className="flex items-start gap-2 text-[11px]" style={{ color: "var(--t-text-secondary)" }}>
+              <div key={feat} className="flex items-start gap-2 text-2xs" style={{ color: "var(--t-text-secondary)" }}>
                 <Icon icon="lucide:check" width={11} className="mt-0.5 shrink-0" style={{ color: "var(--t-accent)" }} />
                 <span>{feat}</span>
               </div>
@@ -293,10 +294,7 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
           </div>
           {upgrade && (
             <button
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-opacity"
-              style={{ background: "var(--t-accent)", color: "var(--t-on-accent)", opacity: 1 }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              className="btn btn-primary w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
               onClick={upgrade}
             >
               {t("terminal.share.upgradeToPro")}
@@ -363,7 +361,7 @@ export function ShareMenu({ anchorRef, open, onClose, activeSessionId, connectio
           )}
 
           {error && (
-            <div className="mx-3 mb-2 px-2 py-1.5 rounded-sm text-[11px]" style={{ background: "color-mix(in srgb, var(--t-status-error) 12%, transparent)", color: "var(--t-status-error)", border: "1px solid color-mix(in srgb, var(--t-status-error) 25%, transparent)" }}>
+            <div className="mx-3 mb-2 px-2 py-1.5 rounded-sm text-2xs" style={{ background: "color-mix(in srgb, var(--t-status-error) 12%, transparent)", color: "var(--t-status-error)", border: "1px solid color-mix(in srgb, var(--t-status-error) 25%, transparent)" }}>
               {error}
             </div>
           )}
@@ -453,7 +451,7 @@ function ActiveSharingView({
         <span className="text-xs font-semibold flex-1 truncate" style={{ color: "var(--t-text-primary)" }}>
           {connectionName}
         </span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: "color-mix(in srgb, var(--t-accent) 15%, transparent)", color: "var(--t-accent)" }}>
+        <span className="text-2xs px-1.5 py-0.5 rounded-full" style={{ background: "color-mix(in srgb, var(--t-accent) 15%, transparent)", color: "var(--t-accent)" }}>
           {t("terminal.share.live")}
         </span>
       </div>
@@ -473,7 +471,7 @@ function ActiveSharingView({
             return (
               <div
                 key={p.user_id}
-                className="flex items-center gap-1.5 pl-0.5 pr-2 py-0.5 rounded-full text-[10px]"
+                className="flex items-center gap-1.5 pl-0.5 pr-2 py-0.5 rounded-full text-2xs"
                 style={{
                   background: p.user_id === activeMp.controlHolder
                     ? "color-mix(in srgb, var(--t-accent) 15%, transparent)"
@@ -491,7 +489,7 @@ function ActiveSharingView({
       )}
 
       {participantCount === 0 && (
-        <p className="text-[11px] mb-3" style={{ color: "var(--t-text-dim)" }}>
+        <p className="text-2xs mb-3" style={{ color: "var(--t-text-dim)" }}>
           {t("terminal.share.waitingForGuests")}
         </p>
       )}
@@ -569,10 +567,7 @@ function TeamTab({
               <div key={team.id} className="mb-1">
                 {/* Vault row */}
                 <div
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer"
-                  style={{ color: "var(--t-text-primary)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.background = "var(--t-bg-elevated)")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.background = "transparent")}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-(--t-text-primary) hover:bg-(--t-bg-elevated)"
                   onClick={() => onToggleVault(team.id)}
                 >
                   <CheckboxBox checked={selected} small />
@@ -587,7 +582,7 @@ function TeamTab({
                       return (
                         <button
                           key={role}
-                          className="text-[10px] px-1.5 py-0.5 rounded-full transition-colors"
+                          className="text-2xs px-1.5 py-0.5 rounded-full transition-colors"
                           style={{
                             background: active
                               ? "color-mix(in srgb, var(--t-accent) 18%, transparent)"
@@ -601,7 +596,7 @@ function TeamTab({
                         </button>
                       );
                     })}
-                    <span className="text-[10px] self-center" style={{ color: "var(--t-text-dim)" }}>
+                    <span className="text-2xs self-center" style={{ color: "var(--t-text-dim)" }}>
                       {activeRoles.size === 0 ? t("terminal.share.allRoles") : ""}
                     </span>
                   </div>
@@ -614,13 +609,7 @@ function TeamTab({
 
       <div className="px-3 pb-3 pt-1" style={{ borderTop: "1px solid var(--t-border)" }}>
         <button
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium mt-2 transition-opacity"
-          style={{
-            background: "var(--t-accent)",
-            color: "white",
-            opacity: selectedVaultIds.size === 0 || loading ? 0.45 : 1,
-            cursor: selectedVaultIds.size === 0 ? "not-allowed" : "pointer",
-          }}
+          className="btn btn-primary w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium mt-2"
           disabled={selectedVaultIds.size === 0 || loading}
           onClick={onShare}
         >
@@ -662,7 +651,7 @@ function InviteLinkTab({
     <div className="px-3 pb-3">
       {inviteLinkToken ? (
         <>
-          <p className="text-[11px] mb-2" style={{ color: "var(--t-text-secondary)" }}>
+          <p className="text-2xs mb-2" style={{ color: "var(--t-text-secondary)" }}>
             {t("terminal.share.shareCodeDescription")}
           </p>
           <InviteCodeField code={buildInviteLink(sessionId, inviteLinkToken)} autoCopied={autoCopied} />
@@ -672,16 +661,11 @@ function InviteLinkTab({
         </>
       ) : (
         <>
-          <p className="text-[11px] mb-2" style={{ color: "var(--t-text-secondary)" }}>
+          <p className="text-2xs mb-2" style={{ color: "var(--t-text-secondary)" }}>
             {t("terminal.share.generateLinkDescription")}
           </p>
           <button
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-opacity"
-            style={{
-              background: "var(--t-accent)",
-              color: "white",
-              opacity: loading ? 0.5 : 1,
-            }}
+            className="btn btn-primary w-full flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium"
             disabled={loading}
             onClick={onGenerate}
           >
@@ -690,12 +674,12 @@ function InviteLinkTab({
               : <Icon icon="lucide:link" width={12} />}
             {t("terminal.share.generateInviteLink")}
           </button>
-          <p className="text-[10px] mt-1.5 text-center" style={{ color: "var(--t-text-dim)" }}>
+          <p className="text-2xs mt-1.5 text-center" style={{ color: "var(--t-text-dim)" }}>
             {t("terminal.share.upToParticipants", { count: guestCap })}
           </p>
           {tier === "pro" && onUpgrade && (
             <button
-              className="w-full text-[10px] mt-0.5 text-center underline"
+              className="w-full text-2xs mt-0.5 text-center underline"
               style={{ color: "var(--t-text-dim)", background: "none", border: "none", cursor: "pointer" }}
               onClick={onUpgrade}
             >

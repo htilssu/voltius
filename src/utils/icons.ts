@@ -273,21 +273,21 @@ export function getConnectionIconColor(icon: string): string {
 }
 
 /**
- * Glossy macOS app-icon tile derived from a base brand color: light top → tint
- * → dark bottom, with the shared ring + highlight and a soft colored glow.
- * color-mix is inlined (WebKitGTK-safe), never stored in a custom prop. Shared
- * by ConnectionAvatar and the ConnectionForm distro picker so every distro tile
- * reads as one system.
+ * Flat avatar tile derived from a base brand color: solid fill + the shared
+ * ring. Shared by ConnectionAvatar and the ConnectionForm distro picker so
+ * every distro tile reads as one system.
  */
 export function glossyTileStyle(base: string): CSSProperties {
+  // Flat fill + ring: no gradient sheen and no colored glow (kept under the
+  // historical name so every avatar/icon tile call site stays unchanged).
   return {
-    background: `linear-gradient(145deg, color-mix(in srgb, ${base} 78%, #ffffff 22%) 0%, ${base} 55%, color-mix(in srgb, ${base} 84%, #000000 16%) 100%)`,
-    boxShadow: `var(--t-ring), 0 4px 10px -5px color-mix(in srgb, ${base} 60%, transparent), var(--t-highlight)`,
+    background: base,
+    boxShadow: "var(--t-ring)",
   };
 }
 
 /**
- * Neutral glossy tile for vault objects without a brand color (keys, identities,
+ * Neutral flat tile for vault objects without a brand color (keys, identities,
  * snippets, folders, known hosts, port-forwarding rules). Same tile role as the
  * distro avatar, filled with the card-avatar surface color so abstract objects
  * read as part of the same system.

@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
-import { Modal } from "@/components/shared/Modal";
+import { Modal, ModalCard } from "@/components/shared/Modal";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { useVaultStore } from "@/stores/vaultStore";
 import { useUIStore } from "@/stores/uiStore";
@@ -30,15 +30,12 @@ export function VaultLimitModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <Modal onClose={onClose} blur>
-      <div
-        className="flex flex-col gap-4 bg-(--t-bg-base) border border-(--t-border) p-6"
-        style={{ width: "min(25rem, 92vw)", borderRadius: "0.933rem", boxShadow: "var(--t-elev-3)" }}
-      >
+    <Modal onClose={onClose}>
+      <ModalCard solid className="flex flex-col gap-4 p-6 w-[min(25rem,calc(100vw-2rem))]">
         <div className="flex items-start gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-            style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: "color-mix(in srgb, var(--t-accent) 12%, transparent)" }}
           >
             <Icon icon="lucide:vault" width={20} style={{ color: "var(--t-accent)" }} />
           </div>
@@ -56,19 +53,19 @@ export function VaultLimitModal({ onClose }: { onClose: () => void }) {
           {isCloudAccount && !showUpgrade ? <AvailableWithPlan plan="Pro" className="py-2" /> : (
           <button
             onClick={isCloudAccount ? () => void upgrade() : signIn}
-            className="w-full py-2.5 rounded-lg text-sm font-semibold bg-(--t-accent) text-(--t-on-accent) hover:opacity-90 transition-opacity"
+            className="btn btn-primary w-full py-2.5 rounded-lg text-sm font-semibold"
           >
             {isCloudAccount ? t("layout.vaultSidebar.upgradeToPro") : t("layout.vaultSidebar.signInOrCreate")}
           </button>
           )}
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-lg text-sm text-(--t-text-muted) hover:text-(--t-text-primary) transition-colors"
+            className="btn btn-ghost w-full py-2.5 rounded-lg text-sm"
           >
             {t("layout.vaultSidebar.maybeLater")}
           </button>
         </div>
-      </div>
+      </ModalCard>
     </Modal>
   );
 }

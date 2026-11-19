@@ -65,7 +65,7 @@ export const PERSON_TEXT_INDENT = "pl-[1.375rem]";
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className={`text-[10px] font-semibold uppercase mb-0.5 pr-2 ${PERSON_TEXT_INDENT}`}
+      className={`text-2xs font-semibold uppercase mb-0.5 pr-2 ${PERSON_TEXT_INDENT}`}
       style={{ color: "var(--t-text-dim)" }}
     >
       {children}
@@ -76,7 +76,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function ErrorBanner({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="mb-2 px-2 py-1.5 rounded-sm text-[11px]"
+      className="mb-2 px-2 py-1.5 rounded-sm text-2xs"
       style={{
         background: "color-mix(in srgb, var(--t-status-error) 12%, transparent)",
         color: "var(--t-status-error)",
@@ -138,24 +138,24 @@ function PersonRow({
         </span>
         {isStranger && (
           <span
-            className="text-[10px] px-1 py-0.5 rounded-sm shrink-0"
+            className="text-2xs px-1 py-0.5 rounded-sm shrink-0"
             style={{ color: "var(--t-text-dim)", border: "1px solid var(--t-border)" }}
           >
             {t("terminal.share.notInYourTeams")}
           </span>
         )}
         {hasAccess ? (
-          <span className="text-[10px] shrink-0" style={{ color: "var(--t-text-dim)" }}>
+          <span className="text-2xs shrink-0" style={{ color: "var(--t-text-dim)" }}>
             {t("terminal.share.inviteHasAccess")}
           </span>
         ) : inFlight ? (
           <Icon icon="lucide:loader-circle" width={12} className="animate-spin" style={{ color: "var(--t-text-dim)" }} />
         ) : invited ? (
-          <span className="text-[10px] shrink-0" style={{ color: "var(--t-accent)" }}>
+          <span className="text-2xs shrink-0" style={{ color: "var(--t-accent)" }}>
             {t("terminal.share.inviteSent")}
           </span>
         ) : capBlocked ? (
-          <span className="text-[10px] shrink-0" style={{ color: "var(--t-text-dim)" }}>
+          <span className="text-2xs shrink-0" style={{ color: "var(--t-text-dim)" }}>
             {t("terminal.share.inviteCapReached")}
           </span>
         ) : (
@@ -166,7 +166,7 @@ function PersonRow({
       </button>
       {invited && onUninvite && (
         <button
-          className="text-[10px] px-1.5 py-1 rounded-md shrink-0 transition-colors cursor-pointer"
+          className="text-2xs px-1.5 py-1 rounded-md shrink-0 transition-colors cursor-pointer"
           style={{ color: "var(--t-text-dim)" }}
           title={t("terminal.share.withdrawInvite")}
           onClick={onUninvite}

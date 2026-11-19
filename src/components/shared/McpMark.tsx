@@ -37,7 +37,7 @@ export function McpMark(props: Props) {
   return (
     <span
       data-testid="mcp-chip"
-      className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold"
+      className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-2xs font-semibold"
       style={{
         background: `color-mix(in srgb, var(--t-mcp) ${props.disconnected ? 10 : 22}%, transparent)`,
         color: "var(--t-mcp)",

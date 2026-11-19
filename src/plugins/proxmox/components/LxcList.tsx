@@ -19,12 +19,12 @@ export function LxcList({ containers, onAction, onSnapshots, onShell }: Props) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-3 py-1 border-b border-(--t-border) shrink-0">
-        <span className="text-[10px] text-(--t-text-muted)">{t("runningCount", { count: running })}</span>
+        <span className="text-2xs text-(--t-text-muted)">{t("runningCount", { count: running })}</span>
       </div>
       <div className="flex-1 overflow-y-auto">
         {containers.length === 0 ? (
-          <div className="flex items-center justify-center h-20 opacity-40">
-            <p className="text-[11px] text-(--t-text-muted)">{t("noContainers")}</p>
+          <div className="flex items-center justify-center h-20">
+            <p className="text-2xs text-(--t-text-dim)">{t("noContainers")}</p>
           </div>
         ) : (
           containers.map((c) => (
@@ -72,9 +72,9 @@ function LxcRow({
     <div className="border-b border-(--t-border) last:border-0 px-3 py-1.5">
       <div className="flex items-center gap-2 min-w-0">
         <StatusDot tone={lxcStatusTone(container.status)} size="sm" />
-        <span className="font-mono text-[10px] text-(--t-text-muted) shrink-0">{container.vmid}</span>
-        <span className="text-[11px] text-(--t-text) font-medium truncate flex-1">{container.name}</span>
-        {container.mem_mb > 0 && <span className="text-[10px] text-(--t-text-muted) shrink-0">{container.mem_mb}M</span>}
+        <span className="font-mono text-2xs text-(--t-text-muted) shrink-0">{container.vmid}</span>
+        <span className="text-2xs text-(--t-text-primary) font-medium truncate flex-1">{container.name}</span>
+        {container.mem_mb > 0 && <span className="text-2xs text-(--t-text-muted) shrink-0">{container.mem_mb}M</span>}
       </div>
       <div className="flex items-center gap-0.5 mt-0.5">
         {!running && (
@@ -117,7 +117,7 @@ function Btn({
   title,
   disabled,
   onClick,
-  color = "text-(--t-text-muted) hover:text-(--t-text)",
+  color = "text-(--t-text-muted) hover:text-(--t-text-primary)",
 }: {
   icon: string;
   title: string;
@@ -130,7 +130,7 @@ function Btn({
       disabled={disabled}
       onClick={onClick}
       title={title}
-      className={`p-1 rounded-sm hover:bg-(--t-bg-card-hover) disabled:opacity-40 ${color}`}
+      className={`p-1 rounded-sm hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity) ${color}`}
     >
       <Icon icon={icon} width={12} />
     </button>

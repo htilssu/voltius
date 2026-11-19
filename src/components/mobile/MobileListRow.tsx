@@ -43,7 +43,7 @@ export default function MobileListRow({
       style={{ background: checked ? "color-mix(in srgb, var(--t-accent) 14%, transparent)" : undefined }}
     >
       <button
-        className="flex-1 flex items-center gap-4 min-h-[72px] px-4 py-2 text-left min-w-0 aria-disabled:opacity-60"
+        className="flex-1 flex items-center gap-4 min-h-[72px] px-4 py-2 text-left min-w-0 aria-disabled:opacity-(--disabled-opacity)"
         aria-haspopup={onActions ? "menu" : undefined}
         aria-disabled={blocked || undefined}
         {...press}

@@ -365,17 +365,7 @@ function Popover({
           }}
           onBlur={() => setHexInput(currentHex)}
           spellCheck={false}
-          style={{
-            flex: 1,
-            background: "var(--t-bg-input)",
-            border: "1px solid var(--t-border)",
-            borderRadius: 4,
-            color: "var(--t-text-primary)",
-            fontFamily: "monospace",
-            fontSize: 12,
-            padding: "4px 8px",
-            outline: "none",
-          }}
+          className="form-input flex-1 min-w-0 px-2 py-1 rounded-sm font-mono text-xs outline-hidden bg-(--t-bg-input) border border-(--t-border) text-(--t-text-primary)"
         />
       </div>
     </div>,

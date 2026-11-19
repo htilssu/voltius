@@ -32,7 +32,7 @@ export function PanelActionsMenu({ items }: Props) {
           {/* Backdrop: closes menu on outside click without swallowing submenu portal clicks */}
           {open && <div className="fixed inset-0 z-49" onMouseDown={() => setOpen(false)} />}
           <div
-            className={`surface-float fixed p-1.5 flex flex-col z-50 min-w-[12.667rem] ${fade.className}`}
+            className={`surface-float fixed p-1.5 flex flex-col z-50 min-w-50 ${fade.className}`}
             style={{ ...fade.style, top: pos.top, right: pos.right }}
           >
             <MenuItemList items={items} onClose={() => setOpen(false)} />

@@ -28,7 +28,7 @@ export function TeamsPromoModal({ source, context, onClose }: PromoModalProps & 
                 <Icon icon={b.icon} width={18} className="shrink-0 mt-0.5 text-(--t-accent)" />
                 <div>
                   <div className="text-sm font-semibold text-(--t-text-bright)">{t(`shared.promos.teams.benefits.${b.id}.title`)}</div>
-                  <div className="mt-0.5 text-[13px] text-(--t-text-muted)">{t(`shared.promos.teams.benefits.${b.id}.desc`)}</div>
+                  <div className="mt-0.5 text-xs text-(--t-text-muted)">{t(`shared.promos.teams.benefits.${b.id}.desc`)}</div>
                 </div>
               </li>
             ))}
@@ -63,13 +63,13 @@ function DemoPane({ avatar, who, badge, children }: {
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-[10px] bg-(--t-bg-terminal) ring-1 ring-(--t-border) overflow-hidden">
-      <div className="h-[30px] flex items-center gap-1.5 px-2.5 bg-(--t-bg-elevated) border-b border-(--t-border)">
+    <div className="rounded-lg bg-(--t-bg-terminal) ring-1 ring-(--t-border) overflow-hidden">
+      <div className="h-7 flex items-center gap-1.5 px-2.5 bg-(--t-bg-elevated) border-b border-(--t-border)">
         <span className={`w-4 h-4 rounded-full ${avatar}`} />
-        <span className="text-[11px] text-(--t-text-secondary) truncate">{who}</span>
+        <span className="text-2xs text-(--t-text-secondary) truncate">{who}</span>
         <span className="ml-auto shrink-0">{badge}</span>
       </div>
-      <div className="px-2.5 pt-2 pb-2.5 font-mono text-[11px] leading-[1.75] text-(--t-text-primary)">{children}</div>
+      <div className="px-2.5 pt-2 pb-2.5 font-mono text-2xs leading-relaxed text-(--t-text-primary)">{children}</div>
     </div>
   );
 }
@@ -82,7 +82,7 @@ function SharedTerminalDemo() {
       <DemoPane
         avatar="bg-(--t-accent)"
         who={t("shared.promos.teams.demo.you")}
-        badge={<span className="text-[11px] font-medium text-(--t-accent)">prod-api-01 · {t("shared.promos.teams.demo.shared")}</span>}
+        badge={<span className="text-2xs font-medium text-(--t-accent)">prod-api-01 · {t("shared.promos.teams.demo.shared")}</span>}
       >
         <div>{PROMPT}$ <span className="promo-typed promo-type-1">tail -f /var/log/api.log</span></div>
         <div className="promo-out-1 text-(--t-text-muted)">pool exhausted (64/64)</div>
@@ -92,7 +92,7 @@ function SharedTerminalDemo() {
         avatar="promo-join bg-(--t-status-warning)"
         who={t("shared.promos.teams.demo.teammate")}
         badge={
-          <span className="promo-join inline-block px-1.5 rounded-[4px] text-[10px] font-semibold text-(--t-status-warning) ring-1 ring-(--t-status-warning)">
+          <span className="promo-join inline-block px-1.5 rounded-sm text-2xs font-semibold text-(--t-status-warning) ring-1 ring-(--t-status-warning)">
             {t("shared.promos.teams.demo.joined")}
           </span>
         }
@@ -103,7 +103,7 @@ function SharedTerminalDemo() {
         </div>
         <div className="promo-out-2 text-(--t-text-muted)">● api.service active (running)</div>
       </DemoPane>
-      <div className="promo-fixed absolute left-1/2 top-[98px] -translate-x-1/2 h-7 px-3 rounded-full flex items-center gap-1.5 whitespace-nowrap text-[11px] font-semibold text-(--t-text-bright) bg-(--t-bg-elevated) ring-1 ring-(--t-border) shadow-lg">
+      <div className="promo-fixed absolute left-1/2 top-[98px] -translate-x-1/2 h-7 px-3 rounded-full flex items-center gap-1.5 whitespace-nowrap text-2xs font-semibold text-(--t-text-bright) bg-(--t-bg-elevated) ring-1 ring-(--t-border)">
         <Icon icon="lucide:check" width={12} className="text-(--t-status-connected)" />
         {t("shared.promos.teams.demo.fixed")}
       </div>
@@ -129,9 +129,9 @@ function TeamVaultPreview() {
       <div className="flex flex-col border-t border-(--t-border)">
         {VAULT_HOSTS.map((h) => (
           <div key={h.name} className="h-10 flex items-center gap-2.5 border-b border-(--t-border)">
-            <span className={`w-[7px] h-[7px] rounded-full ${h.status}`} />
-            <span className="text-[13px] text-(--t-text-primary)">{h.name}</span>
-            <span className="ml-auto text-[11px] text-(--t-text-muted)">{t(`shared.promos.teams.demo.${h.role}`)}</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${h.status}`} />
+            <span className="text-xs text-(--t-text-primary)">{h.name}</span>
+            <span className="ml-auto text-2xs text-(--t-text-muted)">{t(`shared.promos.teams.demo.${h.role}`)}</span>
           </div>
         ))}
       </div>

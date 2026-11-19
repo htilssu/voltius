@@ -262,7 +262,7 @@ export default function BottomSheet({ onClose, children, title, footer }: {
         className="absolute inset-0"
         data-mobile-sheet-scrim
         style={{
-          background: "rgba(0,0,0,0.5)",
+          background: "var(--t-scrim)",
           opacity: entered && !closing ? 1 : 0,
           transition: scrimTransition,
         }}

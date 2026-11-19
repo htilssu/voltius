@@ -1,10 +1,8 @@
 import { writeClipboard } from "../../utils/clipboard";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { invoke } from "@/lib/invoke";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
 import { ContextMenu, useContextMenu, type ContextMenuItem } from "@/components/shared/ContextMenu";
 import { useDragStore, shouldSuppressDragClick } from "@/stores/dragStore";
 import { useHostPingStore } from "@/stores/hostPingStore";
@@ -16,7 +14,7 @@ import { APP_SOURCE, useNotificationStore } from "@/stores/notificationStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useTeamSessionStore } from "@/stores/teamSessionStore";
 import { useConnection } from "@/hooks/useAllConnections";
-import { getConnectionIcon, getConnectionIconColor, getDistroColor, getDistroIcon, getDistroLabel } from "@/utils/icons";
+import { getConnectionIcon, getConnectionIconColor, getDistroColor, getDistroLabel } from "@/utils/icons";
 import { sshGetSystemInfo, type SystemInfo } from "@/services/ssh";
 import { closeSessionTabs } from "@/services/closeSession";
 import { TabCloseControl } from "@/components/shared/TabCloseControl";
@@ -27,62 +25,13 @@ import { focusSession } from "@/hooks/useTerminal";
 import { InlineNameEditor } from "@/components/shared/InlineNameEditor";
 import { StatusDot } from "@/components/shared/StatusDot";
 import { SessionTypeBadge } from "@/components/panes/SessionTypeBadge";
+import { SessionIconTile } from "@/components/panes/SessionIconTile";
 import { latencyColor, sessionStatusTone } from "@/utils/statusTone";
 import type { TerminalSession } from "@/types";
 import { useCopiedFlash } from "@/hooks/useCopiedFlash";
+import { HOVER_CARD_CLASS, LatencySparkline, SystemInfoCard, localSystemLabel, localSystemVisual, pushLatencySample, systemInfoCopyText, useLocalSystemInfo } from "@/components/terminal/hoverInfo";
 
-interface ConnectedSystemInfo {
-  os_name: string;
-  os_version: string;
-  kernel_version: string;
-  host_name: string;
-  arch: string;
-}
-
-function localSystemIcon(osName: string): string {
-  const os = osName.toLowerCase();
-  if (os.includes("darwin") || os.includes("mac")) return "lucide:apple";
-  if (os.includes("windows")) return "lucide:monitor";
-  return getDistroIcon(osName || "linux");
-}
-
-function localSystemColor(osName: string): string {
-  const os = osName.toLowerCase();
-  if (os.includes("darwin") || os.includes("mac")) return "var(--t-text-secondary)";
-  if (os.includes("windows")) return "#0078D4";
-  return getDistroColor(osName || "linux");
-}
-
-function localSystemLabel(info: ConnectedSystemInfo | null, t: TFunction): string {
-  if (!info) return t("panes.header.localSystem");
-  const version = info.os_version ? ` ${info.os_version}` : "";
-  return `${info.os_name || t("panes.header.localSystem")}${version}`;
-}
-
-const SPARKLINE_MAX = 20;
-
-function sparklinePoints(values: number[], width: number, height: number): string {
-  if (values.length < 2) return "";
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  return values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - ((v - min) / range) * (height - 2) - 1;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-}
-
-const tooltipStyle: React.CSSProperties = {
-  position: "fixed",
-  background: "var(--t-bg-card)",
-  border: "1px solid var(--t-border)",
-  borderRadius: 8,
-  padding: "8px 10px",
-  zIndex: 100,
-  boxShadow: "var(--t-elev-1)",
-  pointerEvents: "none",
-};
+const tooltipClass = `fixed z-[100] ${HOVER_CARD_CLASS}`;
 
 export function PaneHeader({ paneId, session, active }: { paneId: string; session: TerminalSession; active: boolean }) {
   const { t } = useTranslation();
@@ -114,7 +63,7 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
   const [showDistroInfo, setShowDistroInfo] = useState(false);
   const { copied: copiedDistro, flash: flashCopiedDistro } = useCopiedFlash(1200);
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
-  const [localSystemInfo, setLocalSystemInfo] = useState<ConnectedSystemInfo | null>(null);
+  const localSystemInfo = useLocalSystemInfo(session.id, session.type, session.status === "connected", session.connectionName);
   const systemInfoFetchedRef = useRef(false);
   const distroTriggerRef = useRef<HTMLSpanElement>(null);
   const [distroRect, setDistroRect] = useState<DOMRect | null>(null);
@@ -130,10 +79,11 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
   const excludedFromBroadcast = broadcastActive && (session.type === "multiplayer" || (!!mpState && mpState.controlHolder !== "" && mpState.controlHolder !== mpState.myUserId));
   const connectionIcon = session.type === "ssh" && connection ? (connection.icon || connection.distro) : null;
   const displayConnectionIcon = connectionIcon ? getConnectionIcon(connectionIcon) : null;
-  const localOsName = localSystemInfo?.os_name ?? "linux";
+  const localVisual = localSystemVisual(localSystemInfo?.os_name ?? "linux");
+  const localLabel = localSystemLabel(localSystemInfo, t("panes.header.localSystem"));
   const showDistroPopover = !!connection?.distro || session.type === "local";
-  const icon = displayConnectionIcon ?? (session.type === "local" ? localSystemIcon(localOsName) : session.type === "serial" ? "lucide:ethernet-port" : "lucide:radio-tower");
-  const iconBg = connectionIcon ? getConnectionIconColor(connectionIcon) : session.type === "local" ? localSystemColor(localOsName) : undefined;
+  const icon = displayConnectionIcon ?? (session.type === "local" ? localVisual.icon : session.type === "serial" ? "lucide:ethernet-port" : "lucide:radio-tower");
+  const iconBg = connectionIcon ? getConnectionIconColor(connectionIcon) : session.type === "local" ? localVisual.color : undefined;
   const subtitle = session.type === "serial" && session.serialConfig
     ? `${session.serialConfig.port} · ${session.serialConfig.baud}`
     : session.type === "ssh" && connection
@@ -144,31 +94,13 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
 
   useEffect(() => {
     if (pingStatus === "up" && latencyMs !== undefined) {
-      const buf = latencyHistoryRef.current;
-      buf.push(latencyMs);
-      if (buf.length > SPARKLINE_MAX) buf.shift();
+      pushLatencySample(latencyHistoryRef.current, latencyMs);
     }
   }, [latencyMs, pingStatus]);
 
   useEffect(() => {
     if (showSparkline) setSparklineSnapshot([...latencyHistoryRef.current]);
   }, [showSparkline]);
-
-  useEffect(() => {
-    if (session.type !== "local" || session.status !== "connected") {
-      setLocalSystemInfo(null);
-      return;
-    }
-    let cancelled = false;
-    invoke<ConnectedSystemInfo>("get_connected_system_info", {
-      sessionId: session.id,
-      sessionType: session.type,
-      sessionName: session.connectionName,
-    }).then((info) => {
-      if (!cancelled) setLocalSystemInfo(info);
-    }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [session.id, session.type, session.status, session.connectionName]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -183,13 +115,9 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
 
   const handleDistroClick = () => {
     const text = session.type === "local"
-      ? localSystemInfo
-        ? `${localSystemLabel(localSystemInfo, t)}${localSystemInfo.kernel_version ? ` · ${localSystemInfo.kernel_version} ${localSystemInfo.arch}` : ""}`
-        : t("panes.header.localSystem")
+      ? systemInfoCopyText(localLabel, localSystemInfo?.kernel_version, localSystemInfo?.arch)
       : connection?.distro
-      ? systemInfo
-        ? `${systemInfo.pretty_name || getDistroLabel(connection.distro)}${systemInfo.kernel ? ` · ${systemInfo.kernel} ${systemInfo.arch}` : ""}`
-        : getDistroLabel(connection.distro)
+      ? systemInfoCopyText(systemInfo?.pretty_name || getDistroLabel(connection.distro), systemInfo?.kernel, systemInfo?.arch)
       : "";
     if (!text) return;
     writeClipboard(text).catch(() => {});
@@ -272,15 +200,6 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
     useDragStore.getState().beginPaneDrag(paneId, session.id, e.clientX, e.clientY);
   };
 
-  // ── Sparkline stats ───────────────────────────────────────────────────────
-
-  const spMin = sparklineSnapshot.length ? Math.min(...sparklineSnapshot) : 0;
-  const spMax = sparklineSnapshot.length ? Math.max(...sparklineSnapshot) : 0;
-  const spAvg = sparklineSnapshot.length
-    ? Math.round(sparklineSnapshot.reduce((a, b) => a + b, 0) / sparklineSnapshot.length)
-    : 0;
-  const spPoints = sparklinePoints(sparklineSnapshot, 80, 20);
-
   return (
     <div
       onContextMenu={open}
@@ -298,20 +217,16 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
       }}
     >
       <div onMouseDown={beginDrag} className="min-w-0 flex-1 flex items-center gap-2 cursor-grab active:cursor-grabbing self-stretch">
-        <span
+        <SessionIconTile
           ref={distroTriggerRef}
-          className={`size-5 rounded-md flex items-center justify-center shrink-0 transition-opacity${showDistroPopover ? " hover:opacity-75 cursor-pointer" : ""}`}
-          style={{
-            background: iconBg ?? "var(--t-bg-elevated)",
-            color: iconBg ? "#fff" : "var(--t-text-secondary)",
-          }}
+          icon={icon}
+          bg={iconBg}
+          className={`transition-opacity${showDistroPopover ? " hover:opacity-75 cursor-pointer" : ""}`}
           onMouseEnter={showDistroPopover ? handleDistroMouseEnter : undefined}
           onMouseLeave={showDistroPopover ? () => setShowDistroInfo(false) : undefined}
           onMouseDown={showDistroPopover ? (e) => e.stopPropagation() : undefined}
           onClick={showDistroPopover ? handleDistroClick : undefined}
-        >
-          <Icon icon={icon} width={13} />
-        </span>
+        />
         {renaming ? (
           <InlineNameEditor
             value={sessionLabel(session)}
@@ -414,42 +329,25 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
 
       {/* System info popover — portal to escape overflow-hidden pane */}
       {showDistroInfo && distroRect && showDistroPopover && createPortal(
-        <div style={{ ...tooltipStyle, top: distroRect.bottom + 6, left: distroRect.left, display: "flex", alignItems: "center", gap: 10, whiteSpace: "nowrap" }}>
-          <Icon
-            icon={icon}
-            width={22}
-            style={{
-              color: session.type === "local" ? localSystemColor(localOsName) : getDistroColor(connection?.distro ?? "linux"),
-              flexShrink: 0,
-            }}
-          />
-          {copiedDistro ? (
-            <span style={{ color: "var(--t-text-primary)", fontSize: 11 }}>{t("panes.header.copied")}</span>
-          ) : session.type === "local" ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ color: "var(--t-text-primary)", fontSize: 11 }}>
-                {localSystemLabel(localSystemInfo, t)}
-              </span>
-              {localSystemInfo?.kernel_version ? (
-                <span style={{ color: "var(--t-text-dim)", fontSize: 10 }}>{localSystemInfo.kernel_version} · {localSystemInfo.arch}</span>
-              ) : !localSystemInfo ? (
-                <span style={{ color: "var(--t-text-dim)", fontSize: 10 }}>{t("panes.header.loading")}</span>
-              ) : null}
-              {localSystemInfo?.host_name && (
-                <span style={{ color: "var(--t-text-dim)", fontSize: 10 }}>{localSystemInfo.host_name}</span>
-              )}
-            </div>
+        <div className={tooltipClass} style={{ top: distroRect.bottom + 6, left: distroRect.left }}>
+          {session.type === "local" ? (
+            <SystemInfoCard
+              icon={icon}
+              color={localVisual.color}
+              copiedLabel={copiedDistro ? t("panes.header.copied") : undefined}
+              title={localLabel}
+              details={[localSystemInfo?.kernel_version && `${localSystemInfo.kernel_version} · ${localSystemInfo.arch}`, localSystemInfo?.host_name]}
+              loadingLabel={localSystemInfo ? undefined : t("panes.header.loading")}
+            />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ color: "var(--t-text-primary)", fontSize: 11 }}>
-                {systemInfo?.pretty_name || getDistroLabel(connection!.distro!)}
-              </span>
-              {systemInfo?.kernel ? (
-                <span style={{ color: "var(--t-text-dim)", fontSize: 10 }}>{systemInfo.kernel} · {systemInfo.arch}</span>
-              ) : !systemInfo ? (
-                <span style={{ color: "var(--t-text-dim)", fontSize: 10 }}>{t("panes.header.loading")}</span>
-              ) : null}
-            </div>
+            <SystemInfoCard
+              icon={icon}
+              color={getDistroColor(connection?.distro ?? "linux")}
+              copiedLabel={copiedDistro ? t("panes.header.copied") : undefined}
+              title={systemInfo?.pretty_name || getDistroLabel(connection!.distro!)}
+              details={[systemInfo?.kernel && `${systemInfo.kernel} · ${systemInfo.arch}`]}
+              loadingLabel={systemInfo ? undefined : t("panes.header.loading")}
+            />
           )}
         </div>,
         document.body,
@@ -457,22 +355,13 @@ export function PaneHeader({ paneId, session, active }: { paneId: string; sessio
 
       {/* Latency sparkline popover — portal to escape overflow-hidden pane */}
       {showSparkline && latencyRect && sparklineSnapshot.length >= 2 && createPortal(
-        <div style={{ ...tooltipStyle, top: latencyRect.bottom + 6, left: latencyRect.left }}>
-          <svg width={80} height={20} style={{ display: "block" }}>
-            <polyline
-              points={spPoints}
-              fill="none"
-              stroke={latencyColor(spAvg)}
-              strokeWidth={1.5}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          </svg>
-          <div style={{ marginTop: 4, display: "flex", gap: 8, color: "var(--t-text-dim)", fontSize: 10, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-            <span>{t("panes.header.sparkline.min", { ms: spMin })}</span>
-            <span>{t("panes.header.sparkline.avg", { ms: spAvg })}</span>
-            <span>{t("panes.header.sparkline.max", { ms: spMax })}</span>
-          </div>
+        <div className={tooltipClass} style={{ top: latencyRect.bottom + 6, left: latencyRect.left }}>
+          <LatencySparkline
+            values={sparklineSnapshot}
+            formatMin={(ms) => t("panes.header.sparkline.min", { ms })}
+            formatAvg={(ms) => t("panes.header.sparkline.avg", { ms })}
+            formatMax={(ms) => t("panes.header.sparkline.max", { ms })}
+          />
         </div>,
         document.body,
       )}

@@ -26,6 +26,8 @@ import BottomSheet from "@/components/mobile/sheets/BottomSheet";
 import { SheetActionRow } from "@/components/mobile/sheets/SheetActionRow";
 import { DYNAMIC_THEME_ID } from "@/themes/dynamic";
 
+const THEME_CARD_ACTION = "p-1 rounded-sm opacity-0 group-hover:opacity-50 group-focus-within:opacity-50 [@media(hover:none)]:opacity-100 hover:opacity-100! focus-visible:opacity-100 transition-opacity text-(--t-text-muted) hover:text-(--t-text-primary)";
+
 function exportTheme(theme: AppTheme) {
   void saveTextFile(
     `${theme.name.toLowerCase().replace(/\s+/g, "-")}.voltius-theme.json`,
@@ -197,17 +199,11 @@ export default function AppearanceSection() {
                 key={theme.id}
                 data-theme-card={theme.id}
                 onClick={() => setTheme(theme.id)}
-                className="group relative flex flex-col gap-2.5 p-3 rounded-xl text-left transition-all"
-                style={{
-                  background: isActive ? "var(--t-bg-elevated)" : "var(--t-bg-card)",
-                  border: `1.5px solid ${isActive ? "var(--t-accent)" : "var(--t-border)"}`,
-                }}
-                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-border-hover)"; }}
-                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-border)"; }}
+                className={`group relative flex flex-col gap-2.5 p-3 rounded-lg text-left transition-colors border-[1.5px] ${isActive ? "bg-(--t-bg-elevated) border-(--t-accent)" : "bg-(--t-bg-card) border-(--t-border) hover:border-(--t-border-hover)"}`}
               >
                 {isActive && (
                   <span className="absolute top-2 right-2 w-4 h-4 rounded-full flex items-center justify-center bg-(--t-accent)">
-                    <Icon icon="lucide:check" width={9} className="text-white" />
+                    <Icon icon="lucide:check" width={9} className="text-(--t-on-accent)" />
                   </span>
                 )}
                 <ThemeCardSwatches colors={paletteOf(theme).ui} />
@@ -215,7 +211,7 @@ export default function AppearanceSection() {
                   {theme.name}
                 </span>
                 {theme.id === DYNAMIC_THEME_ID && (
-                  <span data-theme-dynamic className="-mt-2 text-[11px] leading-tight text-(--t-text-dim)">
+                  <span data-theme-dynamic className="-mt-2 text-2xs leading-tight text-(--t-text-dim)">
                     {t("settings.appearance.dynamicThemeHint")}
                   </span>
                 )}
@@ -238,19 +234,15 @@ export default function AppearanceSection() {
                       <>
                       <button
                         onClick={(e) => { e.stopPropagation(); exportTheme(theme); }}
-                        className="p-1 rounded-sm opacity-0 group-hover:opacity-50 hover:opacity-100! transition-opacity text-(--t-text-muted)"
+                        className={THEME_CARD_ACTION}
                         title={t("settings.appearance.exportTheme")}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
                       >
                         <Icon icon="lucide:share" width={11} />
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); openThemeCreator(theme.id); }}
-                        className="p-1 rounded-sm opacity-0 group-hover:opacity-50 hover:opacity-100! transition-opacity text-(--t-text-muted)"
+                        className={THEME_CARD_ACTION}
                         title={t("settings.appearance.editTheme")}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
                       >
                         <Icon icon="lucide:pencil" width={11} />
                       </button>
@@ -259,7 +251,7 @@ export default function AppearanceSection() {
                     <button
                       onClick={(e) => { e.stopPropagation(); removal.remove(); }}
                       disabled={removal.disabledReason !== null}
-                      className="p-1 rounded-sm opacity-0 group-hover:opacity-50 hover:opacity-100! disabled:opacity-0 disabled:group-hover:opacity-30! disabled:cursor-not-allowed transition-opacity text-(--t-status-error)"
+                      className="p-1 rounded-sm opacity-0 group-hover:opacity-50 group-focus-within:opacity-50 [@media(hover:none)]:opacity-100 hover:opacity-100! focus-visible:opacity-100 disabled:opacity-0 disabled:group-hover:opacity-30! disabled:cursor-not-allowed transition-opacity text-(--t-status-error)"
                       title={removal.disabledReason ?? removalLabel(removal)}
                     >
                       <Icon icon="lucide:trash-2" width={11} />
@@ -272,10 +264,7 @@ export default function AppearanceSection() {
 
           <button
             onClick={() => openThemeCreator()}
-            className="flex flex-col gap-2.5 p-3 rounded-xl text-left transition-all text-(--t-text-muted)"
-            style={{ background: "var(--t-bg-card)", border: "1.5px dashed var(--t-border)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-accent)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-accent)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-border)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
+            className="flex flex-col gap-2.5 p-3 rounded-lg text-left transition-colors text-(--t-text-muted) bg-(--t-bg-card) border-[1.5px] border-dashed border-(--t-border) hover:border-(--t-accent) hover:text-(--t-accent)"
           >
             <div className="h-5 flex items-center">
               <Icon icon="lucide:plus" width={14} />
@@ -302,7 +291,7 @@ export default function AppearanceSection() {
                   aria-disabled={disabled || busy}
                   title={item.disabledReason ?? undefined}
                   onClick={() => { if (!disabled) marketplace.get(item); }}
-                  className="flex flex-col gap-2.5 p-3 rounded-xl text-left transition-all bg-(--t-bg-card) border-[1.5px] border-(--t-border) enabled:hover:border-(--t-border-hover) aria-disabled:cursor-not-allowed"
+                  className="flex flex-col gap-2.5 p-3 rounded-lg text-left transition-all bg-(--t-bg-card) border-[1.5px] border-(--t-border) enabled:hover:border-(--t-border-hover) aria-disabled:cursor-not-allowed"
                 >
                   <div className={disabled ? "opacity-40" : undefined}>
                     <ThemeCardSwatches colors={item.preview?.ui ?? null} />
@@ -311,14 +300,14 @@ export default function AppearanceSection() {
                     <span className="text-xs font-medium leading-tight truncate text-(--t-text-primary)">{item.entry.name}</span>
                     <span className="flex items-center gap-1.5 min-w-0">
                       <span
-                        className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium shrink-0 bg-(--t-accent) text-(--t-bg-base) ${disabled ? "opacity-40" : ""}`}
+                        className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-medium shrink-0 bg-(--t-accent) text-(--t-bg-base) ${disabled ? "opacity-40" : ""}`}
                       >
                         <Icon icon={busy ? "lucide:loader" : "lucide:download"} width={11} className={busy ? "animate-spin" : undefined} />
                         {t("settings.appearance.marketplace.get")}
                       </span>
                       <MarketplaceSourceBadge sourceName={item.sourceName} />
                     </span>
-                    {item.disabledReason && <span className="text-[11px] leading-tight text-(--t-text-dim)">{item.disabledReason}</span>}
+                    {item.disabledReason && <span className="text-2xs leading-tight text-(--t-text-dim)">{item.disabledReason}</span>}
                   </span>
                 </button>
               );

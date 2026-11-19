@@ -51,34 +51,23 @@ export function DistroIconPicker({
                 key={option.id}
                 type="button"
                 onClick={() => { onPick(option.id); onClose(); }}
-                className="flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-colors"
-                style={{
-                  background: selected
-                    ? "color-mix(in srgb, var(--t-accent) 18%, var(--t-bg-input))"
-                    : "var(--t-bg-input)",
-                  borderColor: selected ? "var(--t-accent)" : "var(--t-border)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!selected) {
-                    e.currentTarget.style.background = "var(--t-bg-input-hover)";
-                    e.currentTarget.style.borderColor = "var(--t-border-hover)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!selected) {
-                    e.currentTarget.style.background = "var(--t-bg-input)";
-                    e.currentTarget.style.borderColor = "var(--t-border)";
-                  }
-                }}
+                aria-pressed={selected}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-colors ${
+                  selected
+                    ? "border-(--t-accent)"
+                    : "bg-(--t-bg-input) border-(--t-border) hover:bg-(--t-bg-input-hover) hover:border-(--t-border-hover)"
+                }`}
+                style={selected ? { background: "color-mix(in srgb, var(--t-accent) 18%, var(--t-bg-input))" } : undefined}
                 title={option.label}
               >
+                {/* Brand-colored distro tile: white glyph is part of the logo treatment. */}
                 <span
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
                   style={glossyTileStyle(getConnectionIconColor(option.id))}
                 >
                   <Icon icon={getConnectionIcon(option.id)} width={16} />
                 </span>
-                <span className="text-[10px] text-(--t-text-dim) truncate max-w-full">
+                <span className="text-2xs text-(--t-text-dim) truncate max-w-full">
                   {getConnectionIconLabel(option.id)}
                 </span>
               </button>
@@ -99,7 +88,7 @@ export function DistroIconPicker({
           {t("connections.distroIconPicker.autoDetectOs")}
         </button>
         {distroError && (
-          <p className="text-[11px] text-red-400 leading-snug">{distroError}</p>
+          <p className="text-xs text-(--t-status-error) leading-snug">{distroError}</p>
         )}
       </div>
     </PickerSurface>

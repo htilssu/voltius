@@ -56,7 +56,7 @@ export function UserSearchField({
   return (
     <div className="relative">
       <div
-        className={`flex items-center gap-2 px-3 transition-colors border ${md ? "py-2.5 rounded-xl" : "py-2 rounded-lg"}`}
+        className={`flex items-center gap-2 px-3 transition-colors border ${md ? "py-2.5 rounded-lg" : "py-2 rounded-lg"}`}
         style={{ background: "var(--t-bg-input)", borderColor: open ? "var(--t-accent)" : "var(--t-border)" }}
       >
         {searching
@@ -92,10 +92,8 @@ export function UserSearchField({
           {results.map((user) => (
             <button
               key={user.user_id}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors enabled:hover:bg-(--t-bg-elevated) disabled:opacity-(--disabled-opacity)"
               style={{ color: "var(--t-text-primary)" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "transparent")}
               disabled={!!adding || actionsDisabled}
               onClick={() => onAdd(user)}
             >
@@ -111,14 +109,12 @@ export function UserSearchField({
           ))}
           {showEmail && emailOption && (
             <button
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors${emailOption.separator ? " border-t" : ""}`}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors enabled:hover:bg-(--t-bg-elevated) disabled:opacity-(--disabled-opacity)${emailOption.separator ? " border-t" : ""}`}
               style={{
                 color: "var(--t-text-primary)",
                 borderColor: emailOption.separator ? "var(--t-border)" : undefined,
                 borderTop: !emailOption.separator && results.length > 0 ? "1px solid var(--t-border)" : undefined,
               }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "transparent")}
               disabled={emailOption.sending || actionsDisabled}
               onClick={emailOption.onInvite}
             >

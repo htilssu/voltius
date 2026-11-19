@@ -53,7 +53,7 @@ export default function NavBar() {
       style={{
         height: "2.75rem",
         background: "transparent",
-        borderColor: "color-mix(in srgb, #ffffff 5%, transparent)",
+        borderColor: "var(--t-border)",
       }}
     >
       {NAV_ITEMS.map((item) => {
@@ -86,19 +86,9 @@ function NavTabButton({
       onClick={onClick}
       title={item.lockedReason}
       onPointerDown={createRipple}
-      className="relative flex items-center gap-2 px-3.5 h-full text-sm font-medium shrink-0 transition-colors overflow-hidden"
-      style={{
-        color: isActive ? "var(--t-text-primary)" : "var(--t-text-dim)",
-        background: "transparent",
-      }}
-      onMouseEnter={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        if (!isActive)
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-      }}
+      className={`relative flex items-center gap-2 px-3.5 h-full text-sm font-medium shrink-0 transition-colors overflow-hidden bg-transparent ${
+        isActive ? "text-(--t-text-primary)" : "text-(--t-text-dim) hover:text-(--t-text-primary)"
+      }`}
     >
       {rippleEls}
       <Icon icon={item.icon} width={15} className="shrink-0" />

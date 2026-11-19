@@ -47,7 +47,7 @@ function ColHeader({
   return (
     <button
       onClick={() => onClick(col)}
-      className="flex items-center gap-0.5 text-[10px] font-medium transition-colors"
+      className="flex items-center gap-0.5 text-2xs font-medium transition-colors"
       style={{
         color: active ? "var(--t-text-primary)" : "var(--t-text-muted)",
         justifyContent: align === "right" ? "flex-end" : "flex-start",
@@ -95,7 +95,7 @@ function ProcessRow({
     >
       {/* Name */}
       <span
-        className="text-[11px] font-mono truncate"
+        className="text-2xs font-mono truncate"
         style={{
           flex: 1,
           minWidth: 0,
@@ -107,7 +107,7 @@ function ProcessRow({
 
       {/* User */}
       <span
-        className="text-[10px] truncate"
+        className="text-2xs truncate"
         style={{ width: COL.user, color: "var(--t-text-muted)", flexShrink: 0 }}
       >
         {entry.user}
@@ -115,7 +115,7 @@ function ProcessRow({
 
       {/* CPU% */}
       <span
-        className="text-[10px] font-mono text-right tabular-nums"
+        className="text-2xs font-mono text-right tabular-nums"
         style={{
           width: COL.cpu,
           flexShrink: 0,
@@ -127,7 +127,7 @@ function ProcessRow({
 
       {/* MEM */}
       <span
-        className="text-[10px] font-mono text-right tabular-nums"
+        className="text-2xs font-mono text-right tabular-nums"
         style={{ width: COL.mem, color: "var(--t-text-muted)", flexShrink: 0 }}
       >
         {fmtMem(entry.mem_kb)}
@@ -139,15 +139,13 @@ function ProcessRow({
           <>
             <button
               onClick={() => onKillConfirm(entry.pid)}
-              className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
-              style={{ background: "var(--t-status-error)", color: "#fff" }}
+              className="btn btn-danger text-2xs px-1.5 py-0.5 rounded-sm font-medium"
             >
               {t("confirmKill")}
             </button>
             <button
               onClick={onKillCancel}
-              className="text-[10px] px-1.5 py-0.5 rounded-sm"
-              style={{ color: "var(--t-text-muted)", background: "var(--t-bg-elevated)" }}
+              className="btn btn-secondary text-2xs px-1.5 py-0.5 rounded-sm"
             >
               {t("cancel")}
             </button>
@@ -155,10 +153,8 @@ function ProcessRow({
         ) : (
           <button
             onClick={() => onKillRequest(entry.pid)}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded-sm transition-all"
-            style={{ color: "var(--t-text-muted)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-status-error)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}
+            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 p-1 rounded-sm transition-all text-(--t-text-muted) hover:text-(--t-status-error) focus-visible:text-(--t-status-error)"
+            aria-label={t("killProcessTitle", { pid: entry.pid })}
             title={t("killProcessTitle", { pid: entry.pid })}
           >
             <Icon icon="lucide:circle-x" width={11} />
@@ -206,8 +202,8 @@ export function createProcessPanel(api: PluginAPI): FC {
 
     if (!activeSession || activeSession.status !== "connected" || activeSession.type === "serial") {
       return (
-        <div className="flex items-center justify-center h-full opacity-40">
-          <p className="text-sm text-(--t-text-muted)">{t("noActiveSession")}</p>
+        <div className="flex items-center justify-center h-full">
+          <p className="text-sm text-(--t-text-dim)">{t("noActiveSession")}</p>
         </div>
       );
     }
@@ -215,7 +211,7 @@ export function createProcessPanel(api: PluginAPI): FC {
     if (localUnsupported) {
       return (
         <div className="flex h-full items-center justify-center px-6 text-center">
-          <p className="max-w-[240px] text-[11px] leading-4 text-(--t-text-muted)">
+          <p className="max-w-[240px] text-2xs leading-4 text-(--t-text-muted)">
             {t("androidUnavailable")}
           </p>
         </div>
@@ -231,10 +227,10 @@ export function createProcessPanel(api: PluginAPI): FC {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder={t("filterPlaceholder")}
-            className="flex-1 bg-transparent text-[11px] text-(--t-text-primary) placeholder:text-(--t-text-dim) outline-hidden"
+            className="flex-1 bg-transparent text-2xs text-(--t-text-primary) placeholder:text-(--t-text-dim) outline-hidden"
           />
           {snapshot && (
-            <span className="text-[10px] text-(--t-text-dim) shrink-0">
+            <span className="text-2xs text-(--t-text-dim) shrink-0">
               {entries.length}/{snapshot.entries.length}
             </span>
           )}
@@ -253,7 +249,7 @@ export function createProcessPanel(api: PluginAPI): FC {
         </div>
 
         {killError && (
-          <div className="px-3 py-1.5 text-[10px] text-(--t-status-error) border-b border-(--t-border) shrink-0 flex items-center justify-between gap-2">
+          <div className="px-3 py-1.5 text-2xs text-(--t-status-error) border-b border-(--t-border) shrink-0 flex items-center justify-between gap-2">
             <span className="truncate">{killError}</span>
             <button onClick={() => setKillError(null)} className="shrink-0">
               <Icon icon="lucide:x" width={10} />
@@ -264,8 +260,8 @@ export function createProcessPanel(api: PluginAPI): FC {
         {/* Virtualized list */}
         <div ref={scrollParentRef} className="flex-1 overflow-y-auto min-h-0">
           {entries.length === 0 && snapshot ? (
-            <div className="flex items-center justify-center h-16 opacity-40">
-              <p className="text-[11px] text-(--t-text-muted)">{t("noProcessesFound")}</p>
+            <div className="flex items-center justify-center h-16">
+              <p className="text-2xs text-(--t-text-dim)">{t("noProcessesFound")}</p>
             </div>
           ) : (
             <div style={{ height: rowVirtualizer.getTotalSize(), position: "relative" }}>

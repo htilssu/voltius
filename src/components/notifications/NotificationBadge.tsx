@@ -11,7 +11,7 @@ interface Origin {
   host?: ToastHost;
 }
 
-const TILE = "flex items-center justify-center size-[18px] rounded-[5px] shrink-0";
+const TILE = "flex items-center justify-center size-[18px] rounded-sm shrink-0";
 const NEUTRAL = { background: "var(--t-bg-elevated)", color: "var(--t-text-secondary)" };
 
 function useTile({ source, host }: Origin): { icon: string; style: CSSProperties } | null {
@@ -19,7 +19,7 @@ function useTile({ source, host }: Origin): { icon: string; style: CSSProperties
   if (host) {
     const key = connection?.icon || connection?.distro;
     return key
-      ? { icon: getConnectionIcon(key), style: { background: getConnectionIconColor(key), color: "#fff" } }
+      ? { icon: getConnectionIcon(key), style: { background: getConnectionIconColor(key), color: "#fff" } } // white glyph on the connection type's brand colour
       : { icon: "lucide:server", style: NEUTRAL };
   }
   if (source.kind === "plugin") return { icon: source.icon ?? "lucide:puzzle", style: NEUTRAL };
@@ -61,7 +61,7 @@ export function NotificationSourceLabel({ source, host, className = "" }: Origin
   if (!name) return null;
   return (
     <span
-      className={`truncate text-[11.5px] text-(--t-text-dim) ${host ? "font-mono" : ""} ${className}`}
+      className={`truncate text-2xs text-(--t-text-dim) ${host ? "font-mono" : ""} ${className}`}
       title={name}
     >
       {name}

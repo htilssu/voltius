@@ -159,7 +159,7 @@ function ItemList({ title, titleClass, items }: { title: string; titleClass: str
   return (
     <div>
       <div className={`text-xs font-semibold mb-2 ${titleClass}`}>{title}</div>
-      <ul className="m-0 p-0 list-none flex flex-col gap-1.5 text-[13px] text-(--t-text-primary)">
+      <ul className="m-0 p-0 list-none flex flex-col gap-1.5 text-xs text-(--t-text-primary)">
         {items.map((k) => <li key={k}>{t(`shared.promos.ended.${k}`)}</li>)}
       </ul>
     </div>
@@ -173,7 +173,7 @@ function HostsRecap() {
   if (hosts === 0) return null;
   return (
     <div className="promo-rise mt-5 py-4 flex items-baseline gap-3 border-y border-(--t-border)">
-      <span className="text-[28px] leading-none font-bold tabular-nums text-(--t-text-bright)">{hosts}</span>
+      <span className="text-xl leading-none font-semibold tabular-nums text-(--t-text-bright)">{hosts}</span>
       <span className="text-xs text-(--t-text-muted)">{t("shared.promos.ended.recapHosts")}</span>
     </div>
   );
@@ -181,7 +181,7 @@ function HostsRecap() {
 
 /** Sync leaving the laptop and pausing halfway to the phone. */
 function SyncStopped() {
-  const tile = "w-10 h-10 rounded-[12px] bg-(--t-bg-elevated) flex items-center justify-center text-(--t-text-secondary)";
+  const tile = "w-10 h-10 rounded-lg bg-(--t-bg-elevated) flex items-center justify-center text-(--t-text-secondary)";
   return (
     <div aria-hidden="true" className="flex items-center mb-5.5">
       <span className={tile}><Icon icon="lucide:monitor" width={20} /></span>

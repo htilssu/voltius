@@ -14,8 +14,8 @@ export function TabDragGhost() {
         maxWidth: "220px",
         background: "var(--t-bg-card)",
         border: "1px solid var(--t-border)",
-        color: "var(--t-text)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+        color: "var(--t-text-primary)",
+        boxShadow: "var(--t-elev-2)",
       }}
     >
       {sem.label}

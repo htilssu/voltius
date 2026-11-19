@@ -9,6 +9,7 @@ import type { usePluginInstaller } from "@/components/settings/usePluginInstalle
 import { useAvailableSyncProviders } from "@/hooks/useAvailableSyncProviders";
 import { AvailableSyncProviderRow } from "@/components/shared/AvailableSyncProviderRow";
 import { LocalNetworkSection } from "@/components/shared/LocalNetworkSection";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { providerLang, SyncHeaderButton, SyncInlineAction, SyncSectionHeader } from "@/components/shared/SyncSectionParts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -46,10 +47,7 @@ function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAct
       {provider.availability === "locked" && (
         <button
           onClick={act}
-          className="w-full flex items-center gap-1.5 text-left"
-          style={{ color: "var(--t-accent)" }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "0.75")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "1")}
+          className="w-full flex items-center gap-1.5 text-left text-(--t-accent) hover:opacity-75 transition-opacity"
         >
           <Icon icon="lucide:log-in" width={11} />
           <span className="text-xs">{t("layout.sync.signInForSync")}</span>
@@ -62,7 +60,7 @@ function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAct
       {status && (
         <>
           {status.reason && (
-            <p className="text-[10px] leading-relaxed break-words" style={{ color: status.color }}>
+            <p className="text-2xs leading-relaxed break-words" style={{ color: status.color }}>
               {status.reason}
             </p>
           )}
@@ -70,7 +68,7 @@ function SyncSection({ provider, onAction }: { provider: SyncProviderView; onAct
           {provider.state.blobSizeBytes !== null && (
             <div className="flex items-center gap-1" style={{ color: "var(--t-text-muted)" }}>
               <Icon icon="lucide:lock" width={10} />
-              <span className="text-[10px]">{t("layout.sync.encryptedBlob", { size: formatBytes(provider.state.blobSizeBytes) })}</span>
+              <span className="text-2xs">{t("layout.sync.encryptedBlob", { size: formatBytes(provider.state.blobSizeBytes) })}</span>
             </div>
           )}
         </>
@@ -86,7 +84,7 @@ function EntityCounts() {
     <ContentCounts
       counts={useVaultContents()}
       className="px-3 py-2 flex flex-wrap gap-1.5"
-      itemClassName="flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px]"
+      itemClassName="flex items-center gap-1 px-2 py-0.5 rounded-sm text-2xs"
       itemStyle={{ background: "var(--t-bg-elevated)", color: "var(--t-text-secondary)", border: "1px solid var(--t-border)" }}
       iconWidth={10}
     />
@@ -102,9 +100,7 @@ function MoreSyncProviders({ installer }: { installer: SyncInstaller }) {
 
   return (
     <div className="px-3 py-2.5 space-y-2" style={{ borderTop: "1px solid var(--t-border)" }}>
-      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--t-text-dim)" }}>
-        {t("layout.sync.moreProviders")}
-      </span>
+      <SectionHeader compact label={t("layout.sync.moreProviders")} className="" />
       {available.map((plugin) => (
         <AvailableSyncProviderRow
           key={plugin.id}
@@ -155,10 +151,7 @@ export function SyncDropdown({ anchorRef, open, onClose, providers, installer }:
         </span>
         <button
           onClick={onClose}
-          className="p-0.5 rounded-sm transition-colors"
-          style={{ color: "var(--t-text-dim)" }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)")}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)")}
+          className="p-0.5 rounded-sm transition-colors text-(--t-text-dim) hover:text-(--t-text-primary)"
         >
           <Icon icon="lucide:x" width={13} />
         </button>

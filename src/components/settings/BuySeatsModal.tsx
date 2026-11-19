@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
+import { Modal, ModalCard } from "@/components/shared/Modal";
 import { invoke } from "@/lib/invoke";
 import { useSubscriptionStore } from "@/stores/subscriptionStore";
 import { useTeamStore } from "@/stores/teamStore";
@@ -65,15 +66,8 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.6)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="w-full max-w-sm mx-4 rounded-2xl p-6 space-y-5"
-        style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
-      >
+    <Modal onClose={() => { if (!loading) onClose(); }}>
+      <ModalCard solid className="w-[min(24rem,calc(100vw-2rem))] p-6 space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold" style={{ color: "var(--t-text-primary)" }}>
@@ -84,20 +78,19 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
               {pendingUser && <> · {t("settings.account.buySeats.inviting")} <span className="font-medium">{pendingUser.handle}</span></>}
             </p>
           </div>
-          <button onClick={onClose} className="shrink-0 mt-0.5" style={{ color: "var(--t-text-dim)" }}>
+          <button onClick={onClose} aria-label={t("common.action.close")} className="shrink-0 mt-0.5 text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors">
             <Icon icon="lucide:x" width={16} />
           </button>
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--t-text-dim)" }}>
+          <label className="block mb-2 text-2xs font-semibold uppercase tracking-wider text-(--t-text-dim)">
             {t("settings.account.buySeats.additionalSeats")}
           </label>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setAdditionalSeats((n) => Math.max(1, n - 1))}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors"
-              style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
+              className="btn btn-secondary w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
             >
               −
             </button>
@@ -106,8 +99,7 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
             </span>
             <button
               onClick={() => setAdditionalSeats((n) => n + 1)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold transition-colors"
-              style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
+              className="btn btn-secondary w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
             >
               +
             </button>
@@ -117,7 +109,7 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
           </div>
         </div>
 
-        <div className="rounded-xl px-4 py-3 space-y-1" style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}>
+        <div className="rounded-lg px-4 py-3 space-y-1" style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}>
           <div className="flex items-center justify-between text-xs">
             <span style={{ color: "var(--t-text-secondary)" }}>
               {t("settings.account.buySeats.priceRow", { count: newTotal, price: SEAT_PRICE_MONTHLY })}
@@ -126,7 +118,7 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
               {t("settings.account.buySeats.totalPerMonth", { amount: monthlyCost })}
             </span>
           </div>
-          <p className="text-[11px]" style={{ color: "var(--t-text-dim)" }}>
+          <p className="text-2xs" style={{ color: "var(--t-text-dim)" }}>
             {t("settings.account.buySeats.proratedNote")}
           </p>
         </div>
@@ -146,7 +138,6 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
             onClick={() => void handleConfirm()}
             disabled={loading}
             className="btn btn-primary flex-1 px-3 py-2 rounded-lg text-sm font-medium"
-            style={{ opacity: loading ? 0.6 : 1 }}
           >
             {loading
               ? <span className="flex items-center justify-center gap-1.5">
@@ -157,7 +148,7 @@ export default function BuySeatsModal({ teamId, pendingUser, pendingRole, pendin
             }
           </button>
         </div>
-      </div>
-    </div>
+      </ModalCard>
+    </Modal>
   );
 }

@@ -102,6 +102,7 @@ export default function AccountSection() {
   const { t } = useTranslation();
   const [mode, setMode] = useState<string | null>(null);
   const [step, setStep] = useState<AccountStep>("idle");
+  const [wiping, setWiping] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [currentEmail, setCurrentEmail] = useState<string | null>(null);
@@ -282,7 +283,7 @@ export default function AccountSection() {
                   type="button"
                   disabled={!emailVerified || handleManaged}
                   onClick={() => handleField.start(handleIsCustom ? (handle ?? "") : "")}
-                  className="text-xs px-2.5 py-1 rounded-md font-medium bg-(--t-accent) text-(--t-on-accent) hover:opacity-85 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:opacity-50"
+                  className="btn btn-primary text-xs px-2.5 py-1 rounded-md font-medium"
                 >
                   {handleIsCustom ? t("settings.account.handle.change") : t("settings.account.handle.choose")}
                 </button>
@@ -375,35 +376,12 @@ export default function AccountSection() {
               icon="lucide:log-out"
               label={t("settings.account.signOut.label")}
               sub={t("settings.account.signOut.sub")}
-              danger
               onClick={() => {
                 setError("");
                 requestSignOut();
               }}
             />
           )}
-          {mode === "server" && (
-            <ActionItem
-              icon="lucide:user-x"
-              label={t("shared.deleteAccount.action")}
-              sub={t("shared.deleteAccount.actionSub")}
-              danger
-              onClick={() => {
-                setError("");
-                setShowDeleteAccount(true);
-              }}
-            />
-          )}
-          <ActionItem
-            icon="lucide:trash-2"
-            label={t("settings.account.wipeData.label")}
-            sub={t("settings.account.wipeData.sub")}
-            danger
-            onClick={() => {
-              reset();
-              setStep("confirm-wipe");
-            }}
-          />
         </div>
       )}
 
@@ -415,6 +393,39 @@ export default function AccountSection() {
             {t("shared.vaultBackups.title")}
           </p>
           <VaultBackups currentReadable />
+        </div>
+      )}
+
+      {/* Danger zone: destructive, irreversible actions, kept apart from the routine ones above. */}
+      {(step === "idle" || step === "confirm-wipe") && (
+        <div className="space-y-2 pt-4 border-t border-(--t-border)">
+          <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-status-error)">
+            {t("members.dangerZone")}
+          </h3>
+          {mode === "server" && (
+            <ActionItem
+              icon="lucide:user-x"
+              label={t("shared.deleteAccount.action")}
+              sub={t("shared.deleteAccount.actionSub")}
+              danger
+              disabled={step !== "idle"}
+              onClick={() => {
+                setError("");
+                setShowDeleteAccount(true);
+              }}
+            />
+          )}
+          <ActionItem
+            icon="lucide:trash-2"
+            label={t("settings.account.wipeData.label")}
+            sub={t("settings.account.wipeData.sub")}
+            danger
+            disabled={step !== "idle"}
+            onClick={() => {
+              reset();
+              setStep("confirm-wipe");
+            }}
+          />
         </div>
       )}
 
@@ -438,30 +449,35 @@ export default function AccountSection() {
         <ChangeMasterPasswordModal twoFactorEnabled={!!twoFactorEnabled} onClose={() => setShowChangePassword(false)} />
       )}
 
-      {step === "confirm-wipe" && (
+      {(step === "confirm-wipe" || wiping) && (
         <div className="space-y-3">
           <p className="text-xs text-(--t-text-muted)">
             <Trans i18nKey="settings.account.confirmWipe.desc" components={{ strong: <strong /> }} />
           </p>
           <div className="flex gap-2">
             <button
-              className="flex-1 text-xs px-3 py-1.5 rounded-sm bg-(--t-bg-elevated) text-(--t-text-muted) hover:text-(--t-text-base) transition-colors"
+              className="btn btn-secondary flex-1 text-xs px-3 py-1.5 rounded-md"
               onClick={reset}
+              disabled={wiping}
             >
               {t("settings.shared.cancel")}
             </button>
             <button
-              className="flex-1 text-xs px-3 py-1.5 rounded-sm bg-(--t-status-error) text-white hover:opacity-80 transition-opacity font-medium"
+              className="btn btn-danger flex-1 inline-flex items-center justify-center gap-1.5 text-xs px-3 py-1.5 rounded-md font-medium"
+              disabled={wiping}
+              aria-busy={wiping}
               onClick={() => {
-                setStep("loading");
+                setWiping(true);
                 resetVault()
                   .then(() => window.location.reload())
                   .catch((e) => {
                     setError(e instanceof Error ? e.message : String(e));
+                    setWiping(false);
                     setStep("idle");
                   });
               }}
             >
+              {wiping && <Icon icon="lucide:loader-circle" width={12} className="animate-spin" />}
               {t("settings.account.confirmWipe.confirm")}
             </button>
           </div>
@@ -520,7 +536,7 @@ export function PlansSection() {
       {t("settings.account.plan.manageBilling")}
     </button>
   );
-  const badgeColor = plan.premium ? "#f59e0b" : "var(--t-text-muted)";
+  const badgeColor = plan.premium ? "var(--t-status-warning)" : "var(--t-text-muted)";
   const renewalDate = formatOptionalDate(renewsAt, SHORT_DATE);
   const cancellationDate = formatOptionalDate(endsAt ?? renewsAt, SHORT_DATE);
 

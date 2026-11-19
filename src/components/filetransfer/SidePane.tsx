@@ -17,24 +17,11 @@ import { routeLabel } from "@/services/myDevices";
 import { hostPresentation } from "./hostPresentation";
 import { useReadOnlyTip } from "@/services/deviceReadOnly";
 import { ReadOnlyBadge } from "@/components/shared/ReadOnlyBadge";
-
-const SPARKLINE_MAX = 20;
-
-function sparklinePoints(values: number[], width: number, height: number): string {
-  if (values.length < 2) return "";
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
-  return values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - ((v - min) / range) * (height - 2) - 1;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
-}
+import { HOVER_CARD_CLASS, LatencySparkline, pushLatencySample } from "@/components/terminal/hoverInfo";
 
 export function SidePane({
   host, phase, refreshTick,
-  onPick, onNavigate, onSelect, onRefresh, onChangeHost, side, onDropFiles,
+  onPick, onNavigate, onSelect, onRefresh, onChangeHost, onRetry, side, onDropFiles,
   onTransferToTarget, canTransferToTarget, onOpenInTerminal,
   selected = [], onUpload, onDownloadFiles, onMoveWithin, onPaste,
 }: {
@@ -46,6 +33,8 @@ export function SidePane({
   onSelect: (files: FileEntry[]) => void;
   onRefresh: () => void;
   onChangeHost: () => void;
+  /** Reconnect to the same host after a failed connect. */
+  onRetry: () => void;
   side: "left" | "right";
   onDropFiles: (files: FileEntry[], fromSide: "left" | "right" | "panel", targetFolder?: string) => void;
   onTransferToTarget?: (files: FileEntry[]) => void;
@@ -93,11 +82,7 @@ export function SidePane({
   const [latencyRect, setLatencyRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
-    if (pingStatus === "up" && latencyMs !== undefined) {
-      const buf = latencyHistoryRef.current;
-      buf.push(latencyMs);
-      if (buf.length > SPARKLINE_MAX) buf.shift();
-    }
+    if (pingStatus === "up" && latencyMs !== undefined) pushLatencySample(latencyHistoryRef.current, latencyMs);
   }, [latencyMs, pingStatus]);
 
   useEffect(() => {
@@ -160,14 +145,12 @@ export function SidePane({
       <div className="flex items-center gap-2 px-2 py-2 shrink-0 border-b border-b-(--t-border) bg-(--t-bg-card)">
         <button
           onClick={canChangeHost ? onChangeHost : undefined}
-          className={`flex items-center gap-1.5 px-1.5 py-1 rounded-lg transition-all bg-(--t-bg-elevated) border border-(--t-border) ${canChangeHost ? "cursor-pointer" : "cursor-default"}`}
-          onMouseEnter={(e) => { if (canChangeHost) { e.currentTarget.style.borderColor = "var(--t-border-hover)"; e.currentTarget.style.background = "var(--t-bg-card-hover)"; } }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--t-border)"; e.currentTarget.style.background = "var(--t-bg-elevated)"; }}
+          className={`flex items-center gap-1.5 px-1.5 py-1 rounded-lg transition-colors bg-(--t-bg-elevated) border border-(--t-border) ${canChangeHost ? "cursor-pointer hover:border-(--t-border-hover) hover:bg-(--t-bg-card-hover)" : "cursor-default"}`}
         >
           <AvatarTile
             base={shown?.base}
-            className="rounded-md text-white"
-            style={{ width: "1.333rem", height: "1.333rem", ...(host ? {} : { background: "var(--t-bg-input)", boxShadow: "none" }) }}
+            className="rounded-md w-5 h-5 text-(--t-on-accent)"
+            style={host ? undefined : { background: "var(--t-bg-input)", boxShadow: "none" }}
           >
             {phase.tag === "connecting"
               ? <Icon icon="lucide:loader-circle" width={11} className="animate-spin" />
@@ -227,9 +210,7 @@ export function SidePane({
               ref={viewBtnRef}
               title={t("fileTransfer.side.viewOptions")}
               onClick={() => viewBtnRef.current && viewMenuOpener?.(viewBtnRef.current)}
-              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim)"
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary)"
             >
               <Icon icon="lucide:layout-list" width={14} />
             </button>
@@ -237,9 +218,7 @@ export function SidePane({
               ref={menuBtnRef}
               title={t("fileTransfer.side.moreOptions")}
               onClick={() => menuBtnRef.current && menuOpener?.(menuBtnRef.current)}
-              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim)"
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary)"
             >
               <Icon icon="lucide:ellipsis-vertical" width={14} />
             </button>
@@ -274,7 +253,8 @@ export function SidePane({
             {...overlayHost(phase.host ?? host)}
             steps={getSftpSteps()}
             stepEventName={`sftp-step-error-${side}`}
-            onRetry={onChangeHost}
+            onRetry={onRetry}
+            onDismiss={onChangeHost}
             className="flex items-center justify-center h-full bg-(--t-bg-base)"
           />
         )}
@@ -282,15 +262,15 @@ export function SidePane({
         {phase.tag === "error" && !isVaultErrorCode(phase.errorCode) && (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
             <Icon icon="lucide:wifi-off" width={24} className="text-(--t-status-error)" />
-            <p className="text-sm text-(--t-status-error)">{phase.message}</p>
-            <button
-              onClick={onChangeHost}
-              className="text-xs px-3 py-1.5 rounded-lg transition-colors bg-(--t-bg-elevated) text-(--t-text-secondary) border border-(--t-border)"
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-card-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-            >
-              {t("fileTransfer.side.tryAgain")}
-            </button>
+            <p className="text-sm text-(--t-status-error) wrap-break-word max-w-full">{phase.message}</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button onClick={onRetry} className="btn btn-secondary text-xs px-3 py-1.5">
+                {t("fileTransfer.side.tryAgain")}
+              </button>
+              <button onClick={onChangeHost} className="btn btn-ghost text-xs px-3 py-1.5">
+                {t("fileTransfer.side.chooseHost")}
+              </button>
+            </div>
           </div>
         )}
 
@@ -329,35 +309,14 @@ export function SidePane({
       </div>
 
       {showSparkline && latencyRect && sparklineSnapshot.length >= 2 && createPortal(
-        (() => {
-          const spMin = Math.min(...sparklineSnapshot);
-          const spMax = Math.max(...sparklineSnapshot);
-          const spAvg = Math.round(sparklineSnapshot.reduce((a, b) => a + b, 0) / sparklineSnapshot.length);
-          const spPoints = sparklinePoints(sparklineSnapshot, 80, 20);
-          return (
-            <div style={{
-              position: "fixed",
-              top: latencyRect.bottom + 6,
-              left: latencyRect.left,
-              background: "var(--t-bg-card)",
-              border: "1px solid var(--t-border)",
-              borderRadius: 8,
-              padding: "8px 10px",
-              zIndex: 100,
-              boxShadow: "var(--t-elev-1)",
-              pointerEvents: "none",
-            }}>
-              <svg width={80} height={20} style={{ display: "block" }}>
-                <polyline points={spPoints} fill="none" stroke={latencyColor(spAvg)} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
-              </svg>
-              <div style={{ marginTop: 4, display: "flex", gap: 8, color: "var(--t-text-dim)", fontSize: 10, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                <span>{t("fileTransfer.side.sparkline.min", { value: spMin })}</span>
-                <span>{t("fileTransfer.side.sparkline.avg", { value: spAvg })}</span>
-                <span>{t("fileTransfer.side.sparkline.max", { value: spMax })}</span>
-              </div>
-            </div>
-          );
-        })(),
+        <div className={`fixed ${HOVER_CARD_CLASS}`} style={{ top: latencyRect.bottom + 6, left: latencyRect.left }}>
+          <LatencySparkline
+            values={sparklineSnapshot}
+            formatMin={(v) => t("fileTransfer.side.sparkline.min", { value: v })}
+            formatAvg={(v) => t("fileTransfer.side.sparkline.avg", { value: v })}
+            formatMax={(v) => t("fileTransfer.side.sparkline.max", { value: v })}
+          />
+        </div>,
         document.body,
       )}
     </div>
@@ -366,9 +325,9 @@ export function SidePane({
 
 function LatencyReadout({ ms, label, ...rest }: { ms: number; label: string } & ComponentProps<"div">) {
   return (
-    <div className="flex items-center gap-1 px-1 cursor-default" style={{ fontSize: 11 }} {...rest}>
+    <div className="flex items-center gap-1 px-1 cursor-default text-2xs" {...rest}>
       <StatusDot tone={latencyTone(ms)} size="sm" />
-      <span style={{ color: latencyColor(ms), fontVariantNumeric: "tabular-nums" }}>{label}</span>
+      <span className="tabular-nums" style={{ color: latencyColor(ms) }}>{label}</span>
     </div>
   );
 }
@@ -379,10 +338,7 @@ function NavBtn({ icon, title, disabled, onClick }: { icon: string; title: strin
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors"
-      style={{ color: disabled ? "var(--t-text-dim)" : "var(--t-text-secondary)", opacity: disabled ? 0.35 : 1, cursor: disabled ? "default" : "pointer" }}
-      onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; } }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = disabled ? "var(--t-text-dim)" : "var(--t-text-secondary)"; }}
+      className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-secondary) hover:bg-(--t-bg-elevated) hover:text-(--t-text-primary) disabled:bg-transparent disabled:text-(--t-text-dim) disabled:opacity-(--disabled-opacity) disabled:cursor-default"
     >
       <Icon icon={icon} width={13} />
     </button>

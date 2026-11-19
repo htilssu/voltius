@@ -177,7 +177,7 @@ function Snackbar({ toast }: { toast: ToastEntry }) {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
-      className="fixed z-50 mx-auto flex items-center gap-1 rounded-[4px] min-h-12 pl-4 pr-2 py-1.5 shadow-lg"
+      className="fixed z-50 mx-auto flex items-center gap-1 rounded-md min-h-12 pl-4 pr-2 py-1.5"
       style={{
         left: `calc(var(--vt-safe-left) + ${gap}px)`,
         right: `calc(var(--vt-safe-right) + ${gap}px)`,
@@ -187,6 +187,7 @@ function Snackbar({ toast }: { toast: ToastEntry }) {
         // M3 inverse surface: the snackbar reads against any screen under it.
         background: "var(--t-text-bright)",
         color: "var(--t-bg-base)",
+        boxShadow: "var(--t-elev-2)",
       }}
     >
       <span className="flex-1 min-w-0 py-1.5 text-sm line-clamp-2 break-words" title={toast.message}>{toast.message}</span>

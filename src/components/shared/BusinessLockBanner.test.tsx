@@ -72,7 +72,7 @@ test("the line is one sentence with an upgrade link for the owner only", () => {
 test("the compact line matches 11 px section text, link included", () => {
   render(<BusinessLockLine teamId="t1" label="line" compact />);
   const line = screen.getByText("line", { exact: false });
-  expect(line.className).toContain("text-[11px]");
+  expect(line.className).toContain("text-2xs");
   expect(line.className).not.toContain("text-xs");
   expect(screen.getByText("shared.businessLock.upgrade").className).not.toContain("text-xs");
 });

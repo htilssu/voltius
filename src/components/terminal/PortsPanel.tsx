@@ -20,9 +20,11 @@ import { useRuleStartErrors } from "@/hooks/useRuleStartErrors";
 import { formatActiveTunnelLabel, formatRuleLabel, getLocalTunnelHttpUrl } from "@/utils/tunnelFormat";
 import type { ActiveTunnel, PortForwardingRule } from "@/types";
 import { PORT_FORWARDING_ICON } from "@/lib/conceptIcons";
+import { toastActionError } from "@/components/shared/actionError";
 
 export function PortsPanel() {
   const { t } = useTranslation();
+  const toastError = (e: unknown) => toastActionError(e, t);
   const { sessions, activeSessionId } = useSessionStore();
   const loadRules = usePortForwardingStore((s) => s.loadRules);
   const rules = useAllPortForwardingRules();
@@ -68,7 +70,7 @@ export function PortsPanel() {
       await openRuleTunnel(activeSessionId, rule);
       setRenamingRuleId(rule.id);
     } catch (e) {
-      console.error("save as rule failed:", e);
+      toastError(e);
     } finally {
       setBusyKey(key, false);
       savingTunnelsRef.current.delete(tunnel.id);
@@ -95,7 +97,7 @@ export function PortsPanel() {
       });
       await loadRules();
     } catch (e) {
-      console.error("rename rule failed:", e);
+      toastError(e);
     }
   }
 
@@ -128,7 +130,7 @@ export function PortsPanel() {
     if (!activeSessionId) return;
     setBusyKey(ruleId, true);
     try { await closePfTunnel(activeSessionId, tunnelId); }
-    catch (e) { console.error("pf_tunnel_close failed:", e); }
+    catch (e) { toastError(e); }
     finally { setBusyKey(ruleId, false); }
   }
 
@@ -139,7 +141,7 @@ export function PortsPanel() {
       if (activeTunnel) await closePfTunnel(activeSessionId, activeTunnel.id);
       await deletePfRule(rule.id);
       await loadRules();
-    } catch (e) { console.error("rule delete failed:", e); }
+    } catch (e) { toastError(e); }
     finally { setBusyKey(`del-${rule.id}`, false); }
   }
 
@@ -149,7 +151,7 @@ export function PortsPanel() {
     if (!activeSessionId) return;
     setBusyKey(`port-${port}`, true);
     try { await resumeAutoPort(activeSessionId, port); }
-    catch (e) { console.error("pf_tunnel_resume_auto failed:", e); }
+    catch (e) { toastError(e); }
     finally { setBusyKey(`port-${port}`, false); }
   }
 
@@ -157,7 +159,7 @@ export function PortsPanel() {
     if (!activeSessionId) return;
     setBusyKey(key, true);
     try { await closePfTunnel(activeSessionId, tunnelId); }
-    catch (e) { console.error("pf_tunnel_close failed:", e); }
+    catch (e) { toastError(e); }
     finally { setBusyKey(key, false); }
   }
 
@@ -167,7 +169,7 @@ export function PortsPanel() {
     try {
       await closePfTunnel(activeSessionId, tunnelId);
       hidePort(port);
-    } catch (e) { console.error("pf_tunnel_close failed:", e); }
+    } catch (e) { toastError(e); }
     finally { setBusyKey(`del-${key}`, false); }
   }
 
@@ -213,7 +215,7 @@ export function PortsPanel() {
 
       {/* Saved rules */}
       {rules.length > 0 && (
-        <div className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wide text-(--t-text-dim)">
+        <div className="px-3 pt-2 pb-1 text-2xs font-semibold tracking-wide text-(--t-text-dim)">
           {t("terminal.ports.sectionSaved")}
         </div>
       )}
@@ -253,7 +255,7 @@ export function PortsPanel() {
       {(visibleUnclaimed.length > 0 || suppressedRows.length > 0) && (
         <>
           {visibleUnclaimed.length > 0 && (
-            <div className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wide text-(--t-text-dim)">
+            <div className="px-3 pt-2 pb-1 text-2xs font-semibold tracking-wide text-(--t-text-dim)">
               {t("terminal.ports.sectionActive")}
             </div>
           )}
@@ -288,7 +290,7 @@ export function PortsPanel() {
           })}
 
           {suppressedRows.length > 0 && (
-            <div className="px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wide text-(--t-text-dim)">
+            <div className="px-3 pt-2 pb-1 text-2xs font-semibold tracking-wide text-(--t-text-dim)">
               {t("terminal.ports.sectionSuppressed")}
             </div>
           )}

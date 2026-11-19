@@ -173,7 +173,7 @@ export function DiffTab({ doc }: { doc: DiffDoc }) {
 
   if (error)
     return (
-      <div className="p-4 text-sm" style={{ color: "var(--t-error, #ef4444)" }}>
+      <div className="p-4 text-sm" style={{ color: "var(--t-status-error)" }}>
         {error}
       </div>
     );
@@ -253,7 +253,7 @@ function SideControls({
         title={saving ? t("common.state.saving") : t("fileTransfer.editor.common.saveCtrlS")}
         onClick={() => { if (!saving) onSave(); }}
       />
-      {dirty && <span className="shrink-0" style={{ color: "var(--t-accent-warn, #f59e0b)" }}>●</span>}
+      {dirty && <span className="shrink-0" style={{ color: "var(--t-status-warning)" }}>●</span>}
       <span className="truncate min-w-0" style={{ color: "var(--t-text-dim)" }}>
         {meta.hostLabel}:{meta.path}
       </span>

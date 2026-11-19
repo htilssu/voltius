@@ -49,7 +49,7 @@ test("business + MANAGE_ROLES → 'New role' button renders", async () => {
 });
 
 test("business but NO MANAGE_ROLES → greyed 'New role' button, read-only empty state", async () => {
-  api.listRoles.mockResolvedValue([role("r1", PERM_BITS.VIEW_SECRETS)]);
+  api.listRoles.mockResolvedValue([role("r1", PERM_BITS.VIEW_SECRETS, true)]);
   api.listMembers.mockResolvedValue([member("me", ["r1"])]);
   render(<TeamRolesPanel teamId="t1" />);
   expect(await screen.findByText("settings.vaults.rolesPanel.noCustomRoles")).toBeTruthy();
@@ -71,7 +71,7 @@ test("a locked team lists custom roles under the Business card, delete-only", as
   expect(screen.queryByTitle("settings.vaults.rolesPanel.dragToReorder")).toBeNull();
 
   fireEvent.click(screen.getByTitle("settings.vaults.rolesPanel.deleteRoleTitle"));
-  fireEvent.click(screen.getByTitle("settings.vaults.rolesPanel.clickToConfirm"));
+  fireEvent.click(screen.getByText("common.action.delete"));
   await waitFor(() => expect(api.deleteRole).toHaveBeenCalledWith("t1", "auditor"));
 });
 

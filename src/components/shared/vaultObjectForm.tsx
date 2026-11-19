@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
+import { toastActionError } from "@/components/shared/actionError";
 import type { Folder, FolderFormData, NewObjectPlacement } from "@/types";
 import { useFolderStore } from "@/stores/folderStore";
 import { useTeamStore } from "@/stores/teamStore";
@@ -83,6 +84,7 @@ export function useVaultObjectFormShell({
   objectType: PinObjectType;
   pin: (id: string, pinned: boolean | null) => Promise<void>;
 }): VaultObjectFormShell {
+  const { t } = useTranslation();
   const defaultVaultId = useDefaultVaultId();
   const start = initial ? undefined : placement;
   const [vaultId, setVaultId] = useState<string>(() => initial?.vault_id ?? start?.vaultId ?? defaultVaultId);
@@ -108,8 +110,9 @@ export function useVaultObjectFormShell({
   const isTeamVault = useTeamStore((s) => (initial ? s.teams.some((team) => team.id === initial.vault_id) : false));
   const togglePin = useCallback(() => {
     if (!initial) return;
-    pin(initial.id, isTeamVault ? nextPersonalPinValue(pinSource) : !isPinned).catch(() => {});
-  }, [initial, isPinned, isTeamVault, pin, pinSource]);
+    pin(initial.id, isTeamVault ? nextPersonalPinValue(pinSource) : !isPinned)
+      .catch((e: unknown) => toastActionError(e, t));
+  }, [initial, isPinned, isTeamVault, pin, pinSource, t]);
 
   const pickVault = useCallback((id: string, markDirty: () => void) => {
     vaultPickerTouched.current = true;

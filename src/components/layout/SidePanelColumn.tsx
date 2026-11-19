@@ -59,7 +59,7 @@ export function SidePanelColumn({ open, side, columnWidth, cardWidth, resize, te
       <aside
         ref={cardRef}
         data-testid={testId ? `${testId}-card` : undefined}
-        className={`flex flex-col absolute inset-y-2 ${side === "right" ? "right-2" : "left-2"} bg-(--t-bg-modal) border border-(--t-border) overflow-hidden rounded-[0.8rem]`}
+        className={`flex flex-col absolute inset-y-2 ${side === "right" ? "right-2" : "left-2"} bg-(--t-bg-modal) border border-(--t-border) overflow-hidden rounded-[var(--r-md)]`}
         style={cardStyle}
         inert={!open}
         aria-hidden={!open}

@@ -167,12 +167,11 @@ export function ToolbarDropdown<T extends string>({
 
   if (onAction) {
     const isAccent = variant === "accent";
-    const actionBg = isAccent ? "var(--t-accent)" : "var(--t-bg-input)";
-    const actionBgHover = isAccent ? "var(--t-accent-hover)" : "var(--t-bg-input-hover)";
-    const actionText = isAccent ? "var(--t-bg-terminal)" : "var(--t-text-primary)";
-    const actionBorder = isAccent ? "var(--t-accent-hover)" : "var(--t-border-hover)";
-    const chevronBg = isAccent ? "var(--t-accent)" : "var(--t-bg-input)";
-    const chevronBgHover = isAccent ? "var(--t-accent-hover)" : "var(--t-bg-input-hover)";
+    // Shared by both halves of the split button: fill, text, border, and hover fill.
+    const tone = isAccent
+      ? "bg-(--t-accent) text-(--t-on-accent) border-(--t-accent-hover)"
+      : "bg-(--t-bg-input) text-(--t-text-primary) border-(--t-border-hover)";
+    const hover = isAccent ? "hover:bg-(--t-accent-hover)" : "hover:bg-(--t-bg-input-hover)";
 
     return (
       <div className={`relative flex items-center gap-px ${className}`} ref={ref}>
@@ -180,13 +179,7 @@ export function ToolbarDropdown<T extends string>({
           type="button"
           onClick={onAction}
           disabled={disabled}
-          className={`flex items-center gap-2 px-3 h-8 text-sm font-bold tracking-wider transition-colors shrink-0 whitespace-nowrap relative overflow-hidden border ${hasContent ? "border-r-0 rounded-tl-[0.533rem] rounded-bl-[0.533rem]" : "rounded-[0.533rem]"}`}
-          style={{
-            background: actionBg, color: actionText, borderColor: actionBorder,
-            opacity: disabled ? 0.4 : 1, cursor: disabled ? "not-allowed" : "pointer",
-          }}
-          onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.background = actionBgHover; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = actionBg; }}
+          className={`flex items-center gap-2 px-3 h-8 text-sm font-bold tracking-wider transition-colors shrink-0 whitespace-nowrap relative overflow-hidden border ${tone} ${disabled ? "" : hover} disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed ${hasContent ? "border-r-0 rounded-tl-lg rounded-bl-lg" : "rounded-lg"}`}
         >
           <Icon icon={icon} width={20} />
           {label}
@@ -196,10 +189,7 @@ export function ToolbarDropdown<T extends string>({
           onClick={() => { if (!menuLocked) setOpen((o) => !o); }}
           aria-disabled={menuLocked ? true : undefined}
           aria-label={menuLocked}
-          className="flex items-center justify-center w-8 h-8 transition-colors relative overflow-hidden border rounded-tr-[0.533rem] rounded-br-[0.533rem] aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
-          style={{ background: chevronBg, color: actionText, borderColor: actionBorder }}
-          onMouseEnter={(e) => { if (!menuLocked) e.currentTarget.style.background = chevronBgHover; }}
-          onMouseLeave={(e) => (e.currentTarget.style.background = chevronBg)}
+          className={`flex items-center justify-center w-8 h-8 transition-colors relative overflow-hidden border rounded-tr-lg rounded-br-lg aria-disabled:opacity-(--disabled-opacity) aria-disabled:cursor-not-allowed ${tone} ${menuLocked ? "" : hover}`}
           title={menuLocked ?? t("common.action.moreOptions")}
         >
           <span className="[&_path]:stroke-3">
@@ -221,8 +211,7 @@ export function ToolbarDropdown<T extends string>({
           <Icon icon={icon} width={24} />
           {selectionCount > 0 && (
             <span
-              className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] flex items-center justify-center rounded-full text-[9px] font-bold px-0.5 leading-none"
-              style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+              className="absolute -top-1.5 -right-1.5 min-w-3.5 h-3.5 flex items-center justify-center rounded-full text-2xs font-bold px-0.5 leading-none bg-(--t-accent) text-(--t-on-accent)"
             >
               {selectionCount}
             </span>

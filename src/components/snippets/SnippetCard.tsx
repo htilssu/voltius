@@ -26,6 +26,7 @@ import {
   useEffectivePinSource,
   nextPersonalPinValue,
 } from "@/hooks/useEffectivePinned";
+import { toastActionError } from "@/components/shared/actionError";
 
 interface Props {
   snippet: Snippet;
@@ -88,7 +89,7 @@ function SnippetCardBody({
   const updateSnippet = useSnippetStore((s) => s.updateSnippet);
   const rename = useInlineRename(snippet.id, !!canEdit, snippet.name, (name) => { void updateSnippet(snippet.id, { ...snippetToFormData(snippet), name }); });
   const handlePinClick = whenWritableOn(snippetTarget(snippet.id), () => {
-    pinSnippet(snippet.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch(() => {});
+    pinSnippet(snippet.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch((e: unknown) => toastActionError(e, t));
   });
   const pinColor =
     pinSource === "personal" || pinSource === "team+personal"
@@ -128,7 +129,7 @@ function SnippetCardBody({
     ...(canEdit && isTeamVault ? [{
       label: snippet.favorite ? t("snippets.card.unpinForTeam") : t("snippets.card.pinForTeam"),
       icon: "lucide:users",
-      onClick: whenWritableOn(snippetTarget(snippet.id), () => pinSnippetForTeam(snippet.id, !snippet.favorite).catch(() => {})),
+      onClick: whenWritableOn(snippetTarget(snippet.id), () => pinSnippetForTeam(snippet.id, !snippet.favorite).catch((e: unknown) => toastActionError(e, t))),
     }] : []),
     ...(onToggleSync ? [{
       label: syncEnabled ? t("common.objectSync.disable") : t("common.objectSync.enable"),
@@ -183,10 +184,10 @@ function SnippetCardBody({
                   {pinAlwaysVisible && <CardPinButton color={pinColor} title={pinLabel} onClick={handlePinClick} />}
                   <PreviewHint type="snippet" id={snippet.id} layout="grid" />
                   {snippet.tags.slice(0, 2).map((tag) => (
-                    <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-[10px]" />
+                    <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-2xs" />
                   ))}
                   {snippet.tags.length > 2 && (
-                    <span className="text-[10px] text-(--t-text-dim) shrink-0">+{snippet.tags.length - 2}</span>
+                    <span className="text-2xs text-(--t-text-dim) shrink-0">+{snippet.tags.length - 2}</span>
                   )}
                 </div>
                 {/* Description */}
@@ -203,13 +204,8 @@ function SnippetCardBody({
               className="rounded-md overflow-hidden w-full"
               style={{ background: "var(--t-bg-terminal)" }}
             >
-              <div className="flex items-center gap-1 px-2.5 pt-2 pb-1">
-                <span className="w-2 h-2 rounded-full bg-[#ff5f56]" />
-                <span className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
-                <span className="w-2 h-2 rounded-full bg-[#27c93f]" />
-              </div>
               <p
-                className="px-2.5 pb-2.5 text-[11px] leading-relaxed break-all"
+                className="px-2.5 py-2 text-2xs leading-relaxed break-all"
                 style={{
                   fontFamily: "var(--t-terminal-font-family)",
                   color: snippetSearchText(snippet) ? "var(--t-terminal-foreground)" : "var(--t-text-dim)",
@@ -260,7 +256,7 @@ function SnippetCardBody({
     <>
       <BaseCard isList {...cardProps}>
         <AvatarTile icon="lucide:braces" iconSize={14} className="w-7 h-7 rounded-lg" />
-        <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">{rename.editor ?? snippet.name}</p>
+        <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">{rename.editor ?? snippet.name}</p>
         <p className={`text-xs truncate flex-1 min-w-0 text-(--t-text-secondary) ${snippet.description ? "" : "font-mono"}`}>
           {snippet.description || <SnippetPreview snippet={snippet} />}
         </p>

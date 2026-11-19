@@ -18,7 +18,7 @@ export function DiskSection({
 }) {
   return (
     <div className="px-4 pt-3 pb-3 border-b border-(--t-border)">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-(--t-text-dim) mb-2">
+      <p className="text-2xs font-semibold uppercase tracking-widest text-(--t-text-dim) mb-2">
         {t("disk")}
       </p>
       {loading ? (
@@ -39,10 +39,10 @@ export function DiskSection({
         disks.map((disk) => {
           const pct = disk.total_kb > 0 ? Math.round((disk.used_kb / disk.total_kb) * 100) : 0;
           const barColor =
-            pct > 90 ? "var(--t-status-error)" : pct > 75 ? "#f59e0b" : "var(--t-accent)";
+            pct > 90 ? "var(--t-status-error)" : pct > 75 ? "var(--t-status-warning)" : "var(--t-accent)";
           return (
             <div key={disk.mount} className="mb-2.5 last:mb-0">
-              <div className="flex justify-between text-[11px] mb-1">
+              <div className="flex justify-between text-2xs mb-1">
                 <span className="font-mono text-(--t-text-secondary) truncate max-w-[120px]">
                   {disk.mount}
                 </span>

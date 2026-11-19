@@ -76,7 +76,7 @@ export function VaultBackups({ currentReadable, hideWhenEmpty, className }: Prop
             <Icon icon="lucide:archive-restore" width={14} className="shrink-0 text-(--t-text-dim)" />
             <div className="flex-1 min-w-0">
               <p className="text-xs truncate text-(--t-text-primary)">{b.file}</p>
-              <p className="text-[11px] text-(--t-text-dim)">
+              <p className="text-2xs text-(--t-text-dim)">
                 {formatDateTime(b.stamp_millis)} · {formatSize(b.size)}
               </p>
             </div>
@@ -93,7 +93,7 @@ export function VaultBackups({ currentReadable, hideWhenEmpty, className }: Prop
 
           {confirming === b.file && (
             <div className="mt-2 space-y-2">
-              <p className="text-[11px] leading-relaxed text-(--t-text-muted)">
+              <p className="text-2xs leading-relaxed text-(--t-text-muted)">
                 {t(currentReadable ? "shared.vaultBackups.warnReadable" : "shared.vaultBackups.warn")}
               </p>
               <div className="flex gap-2">

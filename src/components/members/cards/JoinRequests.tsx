@@ -13,7 +13,7 @@ import { whenWritable } from "@/services/previewGuard";
 import { useTeamStore } from "@/stores/teamStore";
 import { isMobileShell } from "@/utils/platform";
 
-const SMALL_BTN = "btn px-2.5 py-1 rounded-lg text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed shrink-0";
+const SMALL_BTN = "btn px-2.5 py-1 rounded-lg text-xs font-medium disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed shrink-0";
 const NO_REQUESTS: JoinRequest[] = [];
 
 interface RowProps {
@@ -60,11 +60,11 @@ function RequestRow(props: RowProps) {
           <PresenceAvatar handle={name} size={26} online={false} />
           <span className="text-xs text-(--t-text-primary) break-all flex-1 basis-32 min-w-0">
             {name}
-            {r.display_name && <span className="block text-[11px] text-(--t-text-dim)">{r.email}</span>}
+            {r.display_name && <span className="block text-2xs text-(--t-text-dim)">{r.email}</span>}
           </span>
         </div>
         <div className="flex items-center gap-2 pl-[2.3rem]">
-          <span className="text-[11px] flex-1 min-w-0" style={{ color: noSeat ? "var(--t-status-warning)" : "var(--t-text-secondary)" }}>
+          <span className="text-2xs flex-1 min-w-0" style={{ color: noSeat ? "var(--t-status-warning)" : "var(--t-text-secondary)" }}>
             {noSeat && <Icon icon="lucide:triangle-alert" width={11} className="inline align-[-1px] mr-1" />}
             {status}
           </span>
@@ -83,7 +83,7 @@ function RequestRow(props: RowProps) {
         {t("members.joinRequests.via")}
       </p>
       <span
-        className="text-[10px] px-2 py-0.5 rounded-full shrink-0"
+        className="text-2xs px-2 py-0.5 rounded-full shrink-0"
         style={{
           color: noSeat ? "var(--t-status-warning)" : "var(--t-text-dim)",
           background: noSeat ? "color-mix(in srgb, var(--t-status-warning) 12%, transparent)" : "var(--t-bg-elevated)",

@@ -16,6 +16,10 @@ import { ResetAllButton, SettingsList, sectionOf, useSearchHits } from "@/compon
 import { ChangedSettingsProvider, useChangedSettings } from "@/components/settings/useChangedSettings";
 import { Toggle } from "@/components/shared/Toggle";
 
+/** One look for every settings nav row: selected rows are filled, the rest tint on hover. */
+const navItemClass = (active: boolean) =>
+  `rounded-lg text-sm text-left transition-colors ${active ? "bg-(--t-bg-input) text-(--t-text-bright) font-medium" : "text-(--t-text-secondary) hover:bg-(--t-bg-card-hover)"}`;
+
 export default function SettingsModal() {
   const open = useUIStore((s) => s.settingsOpen);
   const isMobile = useIsMobile();
@@ -59,13 +63,12 @@ function DesktopSettings() {
       <div
         className="surface-modal-solid rounded-[var(--r-lg)] flex overflow-hidden animate-fadeIn"
         style={{
-          width: "min(60rem, 92vw)",
+          width: "min(60rem, calc(100vw - 2rem))",
           height: "min(38.667rem, 88vh)",
         }}
       >
         <nav
-          className="flex flex-col shrink-0 py-4 bg-(--t-bg-toolbar) border-r border-r-(--t-border)"
-          style={{ width: "15rem" }}
+          className="flex flex-col shrink-0 py-4 bg-(--t-bg-toolbar) border-r border-r-(--t-border) w-[clamp(11rem,28%,15rem)]"
         >
           <div className="px-5 mb-3">
             <span className="text-xs font-bold uppercase tracking-widest text-(--t-text-dim)">
@@ -80,18 +83,11 @@ function DesktopSettings() {
             <button
               data-settings-nav="changed"
               onClick={() => { useUIStore.getState().setSettingsQuery(""); setChangedOnly(true); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-colors"
-              style={{
-                background: changedView ? "var(--t-bg-input)" : "transparent",
-                color: changedView ? "var(--t-text-bright)" : "var(--t-text-secondary)",
-                fontWeight: changedView ? 500 : 400,
-              }}
-              onMouseEnter={(e) => { if (!changedView) e.currentTarget.style.background = "var(--t-bg-card-hover)"; }}
-              onMouseLeave={(e) => { if (!changedView) e.currentTarget.style.background = "transparent"; }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 ${navItemClass(changedView)}`}
             >
               <Icon icon="lucide:list-restart" width={15} className="shrink-0" style={{ color: changedView ? "var(--t-accent)" : "inherit" }} />
               <span className="flex-1 min-w-0">{t("settings.search.changed")}</span>
-              <span className="text-[10px] font-semibold tabular-nums px-1.5 rounded-full bg-(--t-bg-input) text-(--t-text-dim)">{changedCount}</span>
+              <span className="text-2xs font-semibold tabular-nums px-1.5 rounded-full bg-(--t-bg-input) text-(--t-text-dim)">{changedCount}</span>
             </button>
             <div className="mx-3 my-1.5 border-t border-t-(--t-border)" />
             {nav.map((item) => {
@@ -108,20 +104,13 @@ function DesktopSettings() {
                     setSection(item.id);
                     if (isPlugins) setNavExpanded(true); // navigating never collapses
                   }}
-                  className="flex-1 min-w-0 flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-left transition-colors"
+                  className={`flex-1 min-w-0 flex items-center gap-2.5 px-3 py-2 ${navItemClass(active)}`}
                   data-settings-nav={item.id}
-                  style={{
-                    background: active ? "var(--t-bg-input)" : "transparent",
-                    color: active ? "var(--t-text-bright)" : "var(--t-text-secondary)",
-                    fontWeight: active ? 500 : 400,
-                    opacity: searching && matches === 0 ? 0.45 : undefined,
-                  }}
-                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "var(--t-bg-card-hover)"; }}
-                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+                  style={{ opacity: searching && matches === 0 ? 0.45 : undefined }}
                 >
                   <Icon icon={item.icon} width={15} className="shrink-0" style={{ color: active ? "var(--t-accent)" : "inherit" }} />
                   <span className="flex-1 min-w-0">{item.label}</span>
-                  {searching && matches > 0 && <span className="text-[10px] tabular-nums text-(--t-text-dim)">{matches}</span>}
+                  {searching && matches > 0 && <span className="text-2xs tabular-nums text-(--t-text-dim)">{matches}</span>}
                 </button>
               );
 
@@ -134,9 +123,7 @@ function DesktopSettings() {
                         onClick={() => setNavExpanded(!navExpanded)}
                         aria-expanded={showChildren}
                         aria-label={t(showChildren ? "settings.chrome.collapsePluginGroup" : "settings.chrome.expandPluginGroup")}
-                        className="p-1 mr-1 rounded-md shrink-0 text-(--t-text-dim) transition-colors"
-                        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--t-text-bright)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = "var(--t-text-dim)"; }}
+                        className="p-1 mr-1 rounded-md shrink-0 text-(--t-text-dim) hover:text-(--t-text-bright) transition-colors"
                       >
                         <Icon icon={showChildren ? "lucide:chevron-down" : "lucide:chevron-right"} width={13} />
                       </button>
@@ -151,14 +138,7 @@ function DesktopSettings() {
                           <button
                             key={child.pageId}
                             onClick={() => selectPluginPage(child.pageId)}
-                            className="w-full flex items-center gap-2 pl-8 pr-3 py-1.5 rounded-lg text-sm text-left transition-colors"
-                            style={{
-                              background: childActive ? "var(--t-bg-input)" : "transparent",
-                              color: childActive ? "var(--t-text-bright)" : "var(--t-text-secondary)",
-                              fontWeight: childActive ? 500 : 400,
-                            }}
-                            onMouseEnter={(e) => { if (!childActive) e.currentTarget.style.background = "var(--t-bg-card-hover)"; }}
-                            onMouseLeave={(e) => { if (!childActive) e.currentTarget.style.background = "transparent"; }}
+                            className={`w-full flex items-center gap-2 pl-8 pr-3 py-1.5 ${navItemClass(childActive)}`}
                           >
                             <Icon icon={child.icon} width={14} className="shrink-0" style={{ color: childActive ? "var(--t-accent)" : "inherit" }} />
                             <span className="min-w-0 wrap-break-word">{child.label}</span>
@@ -198,9 +178,8 @@ function DesktopSettings() {
             )}
             <button
               onClick={() => setOpen(false)}
-              className="p-1.5 rounded-lg transition-colors text-(--t-text-muted)"
-              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--t-text-bright)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--t-text-muted)"; }}
+              aria-label={t("common.action.close")}
+              className="p-1.5 rounded-lg transition-colors text-(--t-text-muted) hover:text-(--t-text-bright)"
             >
               <Icon icon="lucide:x" width={15} />
             </button>

@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import type { TeamMember } from "@/services/teamService";
 import { departConsequences, departMembers, type DepartMode } from "@/services/teamOffboarding";
 import { memberLabel } from "@/services/memberLabel";
+import { userFacingReason } from "@/services/errorReason";
+import { Modal, ModalCard } from "@/components/shared/Modal";
+import { statusSurface } from "@/components/shared/statusSurface";
 
 interface OffboardingDialogProps {
   members: TeamMember[];
@@ -21,36 +24,33 @@ interface OffboardingDialogProps {
 export function OffboardingDialog({ members, teamId, mode, onClose, onDone }: OffboardingDialogProps) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const consequences = departConsequences(mode, members.map((m) => memberLabel(m)));
 
   const confirm = async () => {
     setBusy(true);
+    setError(null);
     try {
       await departMembers(teamId, members, { mode, onDone });
-    } catch {
-      // runTeamAction's toast already reports the failure.
+      onClose();
+    } catch (e) {
+      // runTeamAction's toast reports it too; the dialog stays so the user can retry or cancel.
+      setError(userFacingReason(e));
     } finally {
       setBusy(false);
-      onClose();
     }
   };
+  const close = () => { if (!busy) onClose(); };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.6)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        className="w-full max-w-sm mx-4 rounded-2xl p-6 space-y-5"
-        style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
-      >
+    <Modal onClose={close}>
+      <ModalCard className="w-[min(24rem,calc(100vw-2rem))] p-6 space-y-5">
         <div className="flex items-start gap-3">
           <span
-            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)" }}
+            className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+            style={statusSurface("error")}
           >
-            <Icon icon={mode === "leave" ? "lucide:log-out" : "lucide:user-minus"} width={16} style={{ color: "var(--t-status-error)" }} />
+            <Icon icon={mode === "leave" ? "lucide:log-out" : "lucide:user-minus"} width={16} />
           </span>
           <h2 className="text-base font-semibold mt-1" style={{ color: "var(--t-text-primary)" }}>
             {consequences.title}
@@ -66,25 +66,27 @@ export function OffboardingDialog({ members, teamId, mode, onClose, onDone }: Of
           ))}
         </ul>
 
+        {error && (
+          <p role="alert" className="flex gap-2 px-3 py-2 rounded-lg text-xs" style={statusSurface("error")}>
+            <Icon icon="lucide:circle-alert" width={13} className="shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </p>
+        )}
+
         <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-3 py-2 rounded-lg text-xs font-medium transition-colors"
-            style={{ background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)", color: "var(--t-text-primary)" }}
-          >
+          <button onClick={close} disabled={busy} className="btn btn-secondary px-3 py-2 rounded-lg text-xs font-medium">
             {t("settings.shared.cancel")}
           </button>
           <button
             onClick={() => void confirm()}
             disabled={busy}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-opacity"
-            style={{ background: "var(--t-status-error)", color: "#fff", opacity: busy ? 0.6 : 1 }}
+            className="btn btn-danger flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
           >
             {busy && <Icon icon="lucide:loader-circle" width={12} className="animate-spin" />}
             {consequences.confirmLabel}
           </button>
         </div>
-      </div>
-    </div>
+      </ModalCard>
+    </Modal>
   );
 }

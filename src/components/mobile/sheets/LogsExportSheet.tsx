@@ -30,7 +30,7 @@ export default function LogsExportSheet({ context, onClose }: {
     <BottomSheet title={t("mobile.sheets.logsExport.title")} onClose={onClose}>
       <button
         data-logs-export="csv"
-        className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left active:bg-(--t-bg-card)"
+        className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-left active:bg-(--t-bg-card)"
         style={{ color: "var(--t-text-primary)" }}
         disabled={exporting}
         onClick={() => void handleExport("csv")}
@@ -44,7 +44,7 @@ export default function LogsExportSheet({ context, onClose }: {
       </button>
       <button
         data-logs-export="json"
-        className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left active:bg-(--t-bg-card)"
+        className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-left active:bg-(--t-bg-card)"
         style={{ color: "var(--t-text-primary)" }}
         disabled={exporting}
         onClick={() => void handleExport("json")}

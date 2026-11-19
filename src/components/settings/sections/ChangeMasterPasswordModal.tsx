@@ -146,7 +146,7 @@ export default function ChangeMasterPasswordModal({ twoFactorEnabled, onClose }:
                   type="button"
                   onClick={() => void verifyWithDevice()}
                   disabled={verifying}
-                  className="flex items-center gap-1.5 px-1 text-xs text-(--t-accent) hover:underline disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-1 text-xs text-(--t-accent) hover:underline disabled:opacity-(--disabled-opacity)"
                 >
                   <Icon icon="lucide:fingerprint" width={13} />
                   {t("settings.account.changeMasterPassword.verifyWithDevice", { method: t(systemAuthMethodKey(platform)) })}

@@ -81,7 +81,7 @@ export function EditorTabStrip() {
                 className="group relative flex items-center gap-1.5 shrink-0 pl-2.5 pr-1.5 cursor-pointer transition-colors"
                 style={{
                   maxWidth: "200px",
-                  color: active ? "var(--t-text)" : "var(--t-text-dim)",
+                  color: active ? "var(--t-text-primary)" : "var(--t-text-dim)",
                   background: active ? "var(--t-bg-card)" : "transparent",
                   borderTop: active ? "2px solid var(--t-accent)" : "2px solid transparent",
                   borderRight: "1px solid var(--t-border)",
@@ -104,12 +104,12 @@ export function EditorTabStrip() {
                 {tab.dirty && (
                   <span
                     className="shrink-0"
-                    style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--t-accent-warn, #f59e0b)" }}
+                    style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--t-status-warning)" }}
                   />
                 )}
                 <span className="truncate min-w-0">{name}</span>
                 <button
-                  className="shrink-0 ml-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="shrink-0 ml-0.5 rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity"
                   title={t("common.action.close")}
                   style={{ color: "var(--t-text-dim)" }}
                   onPointerDown={(e) => e.stopPropagation()}

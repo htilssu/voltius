@@ -67,7 +67,7 @@ export function InviteControl({ teamId, roles, existingIds, seats, onInvited }: 
     <div className="flex flex-col gap-4">
       {ownerInviteConfirm}
       <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] uppercase tracking-wider text-(--t-text-secondary)">
+        <span className="text-2xs uppercase tracking-wider text-(--t-text-secondary)">
           {t("members.invite.searchOrInviteLabel")}
         </span>
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-(--t-bg-input) border border-(--t-border)">
@@ -88,8 +88,7 @@ export function InviteControl({ teamId, roles, existingIds, seats, onInvited }: 
                 <span className="text-xs flex-1 text-(--t-text-primary) break-all">{u.handle}</span>
                 <button
                   onClick={() => invite(u.user_id, u.handle)}
-                  className="px-3 py-1 rounded-lg text-[11px] font-medium"
-                  style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+                  className="btn btn-primary px-3 py-1 rounded-lg text-2xs font-medium"
                 >
                   {t("members.invite.inviteAction")}
                 </button>
@@ -99,16 +98,16 @@ export function InviteControl({ teamId, roles, existingIds, seats, onInvited }: 
         )}
 
         {isEmail && (
-          <button onClick={inviteEmail} className="px-3 py-1.5 rounded-lg text-[11px] border border-(--t-border) text-(--t-text-secondary) self-start">
+          <button onClick={inviteEmail} className="px-3 py-1.5 rounded-lg text-2xs border border-(--t-border) text-(--t-text-secondary) self-start">
             {t("members.invite.sendInviteLabel")} <span className="font-medium">{search.query.trim()}</span>
           </button>
         )}
 
-        <p className="text-[11px] text-(--t-text-secondary)">{t("members.invite.handleRule")}</p>
+        <p className="text-2xs text-(--t-text-secondary)">{t("members.invite.handleRule")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-[10px] uppercase tracking-wider text-(--t-text-secondary)">
+        <span className="text-2xs uppercase tracking-wider text-(--t-text-secondary)">
           {t("members.invite.joinsAs")}
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -122,10 +121,10 @@ export function InviteControl({ teamId, roles, existingIds, seats, onInvited }: 
             />
           ))}
         </div>
-        {role && <p className="text-[11px] text-(--t-text-secondary)">{t(`members.roleBlurb.${role.name}`, { defaultValue: "" })}</p>}
+        {role && <p className="text-2xs text-(--t-text-secondary)">{t(`members.roleBlurb.${role.name}`, { defaultValue: "" })}</p>}
       </div>
 
-      <span className="text-[11px] text-(--t-text-secondary)">
+      <span className="text-2xs text-(--t-text-secondary)">
         {seatsSummaryText(t, seats)}
       </span>
     </div>

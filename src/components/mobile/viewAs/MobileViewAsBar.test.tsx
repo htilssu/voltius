@@ -171,7 +171,7 @@ test("close_is_greyed_while_saving_and_says_why", () => {
   render(<MobileViewAsBar />);
   const close = document.querySelector<HTMLElement>("[data-view-as-close]")!;
   expect(close.getAttribute("aria-disabled")).toBe("true");
-  expect(close.className).toContain("aria-disabled:opacity-40");
+  expect(close.className).toContain("aria-disabled:opacity-(--disabled-opacity)");
   fireEvent.click(close);
   expect(toast).toHaveBeenCalledWith("info", "common.state.saving");
   expect(usePreviewStore.getState().session).not.toBeNull();

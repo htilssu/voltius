@@ -19,7 +19,7 @@ interface Props {
 }
 
 const COSTS: { icon: string; color: string; key: string }[] = [
-  { icon: "lucide:triangle-alert", color: "var(--t-warn, #f59e0b)", key: "members.convert.offlineWarning" },
+  { icon: "lucide:triangle-alert", color: "var(--t-status-warning)", key: "members.convert.offlineWarning" },
   { icon: "lucide:key-round", color: "var(--t-text-dim)", key: "members.convert.keyCustody" },
   { icon: "lucide:arrow-right", color: "var(--t-text-dim)", key: "members.convert.change" },
 ];
@@ -60,7 +60,7 @@ export function ConvertToTeamGate({ vaultId, vaultName, onCancel, onConverted, i
 
       <ul className="flex flex-col gap-2">
         {COSTS.map(({ icon, color, key }) => (
-          <li key={key} className={`flex items-start gap-2 text-(--t-text-secondary) ${inline ? "text-[10.5px]" : "text-xs"}`}>
+          <li key={key} className={`flex items-start gap-2 text-(--t-text-secondary) ${inline ? "text-2xs" : "text-xs"}`}>
             <Icon icon={icon} width={13} style={{ color, flexShrink: 0, marginTop: 1 }} />
             <span>{t(key)}</span>
           </li>
@@ -80,8 +80,7 @@ export function ConvertToTeamGate({ vaultId, vaultName, onCancel, onConverted, i
         <button
           onClick={() => void go()}
           disabled={busy}
-          className={`btn rounded-lg font-medium ${inline ? "flex-1 px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"}`}
-          style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+          className={`btn btn-primary rounded-lg font-medium ${inline ? "flex-1 px-3 py-1.5 text-xs" : "px-4 py-2 text-sm"}`}
         >
           {t("members.convert.confirm")}
         </button>
@@ -95,7 +94,7 @@ export function ConvertToTeamGate({ vaultId, vaultName, onCancel, onConverted, i
 
   return (
     <Modal onClose={() => onCancel?.()} onEnter={() => void go()}>
-      <ModalCard className="p-6 flex flex-col gap-4 min-w-[21.333rem] max-w-[35rem]">
+      <ModalCard className="p-6 flex flex-col gap-4 w-[min(35rem,calc(100vw-2rem))] min-w-[min(21.333rem,calc(100vw-2rem))]">
         {content}
       </ModalCard>
     </Modal>

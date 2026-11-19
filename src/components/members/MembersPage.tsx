@@ -38,6 +38,7 @@ import { InvitePanel } from "@/components/members/panels/InvitePanel";
 import { memberLabel, memberNamingSupported } from "@/services/memberLabel";
 import { ROLE_MODE_ICONS, useMembersModel } from "@/components/members/useMembersModel";
 import { useViewAsGate } from "@/components/preview/useViewAsEntry";
+import { LoadErrorRow } from "@/components/members/LoadErrorRow";
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
@@ -420,8 +421,7 @@ const vaultTabs = selectedVaultIds.length > 1
                 {roleFilter.length > 0 && (
                   <button
                     onClick={() => setRoleFilter([])}
-                    className="text-[10px] px-2 py-0.5 rounded-full transition-colors"
-                    style={{ color: "var(--t-text-dim)", background: "var(--t-bg-elevated)", border: "1px solid var(--t-border)" }}
+                    className="text-2xs px-2 py-0.5 rounded-full transition-colors text-(--t-text-dim) hover:text-(--t-text-primary) bg-(--t-bg-elevated) border border-(--t-border)"
                   >
                     {t("members.toolbar.clear")}
                   </button>
@@ -437,11 +437,20 @@ const vaultTabs = selectedVaultIds.length > 1
                 aside={myMember && <RoleBadges member={myMember} roles={teamRoles} />}
               />
 
-              {sortedMembers.length === 0 && members.length === 0 && (
+              {model.loading && (
                 <p className="text-xs py-3 text-(--t-text-dim)">{t("members.loading")}</p>
+              )}
+              {model.loadFailed && (
+                <LoadErrorRow message={t("members.share.loadFailed")} onRetry={() => model.retryLoad?.()} />
               )}
               {sortedMembers.length === 0 && members.length > 0 && searchLower && (
                 <p className="text-xs py-3 text-(--t-text-dim)">{t("members.noMatch", { search })}</p>
+              )}
+              {sortedMembers.length === 0 && members.length > 0 && !searchLower && roleFilter.length > 0 && (
+                <p className="flex items-center gap-2 text-xs py-3 text-(--t-text-dim)">
+                  {t("common.state.noResults")}
+                  <button type="button" onClick={() => setRoleFilter([])} className="text-(--t-accent) hover:underline">{t("members.toolbar.clear")}</button>
+                </p>
               )}
 
               <div

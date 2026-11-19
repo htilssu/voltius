@@ -158,7 +158,7 @@ export function KeywordRulesEditor() {
         type="button"
         disabled={rules.length >= MAX_KEYWORD_RULES}
         onClick={addRule}
-        className="flex items-center gap-1.5 text-xs text-(--t-text-secondary) hover:text-(--t-text-primary) transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1.5 text-xs text-(--t-text-secondary) hover:text-(--t-text-primary) transition-colors disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
       >
         <Icon icon="lucide:plus" width={12} />
         {t(`${K}.addRule`)}

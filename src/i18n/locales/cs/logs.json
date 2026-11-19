@@ -158,6 +158,8 @@
       "pageOf": "Stránka {{page}} / {{totalPages}}"
     },
     "emptyState": "Filtrům neodpovídají žádné události.",
+
+    "searchNoResults": "Žádné události na této stránce neodpovídají „{{search}}“. Hledání prochází jen načtenou stránku.",
     "error": {
       "retry": "Zkusit znovu"
     }

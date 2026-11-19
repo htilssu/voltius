@@ -34,6 +34,8 @@ export function MembersStack({
   open: openProp,
   onOpenChange,
   hasTeam = true,
+  status,
+  onRetry,
 }: {
   members: TeamMember[];
   vaultId: string;
@@ -44,11 +46,13 @@ export function MembersStack({
   /** False for a private vault: the trigger reads "Share" (not "Invite") and opens
    *  the convert-to-team gate, not a members peek, so it must not open on a passing hover. */
   hasTeam?: boolean;
+  /** Members list state while `members` is not yet known: a placeholder while loading, a retry on failure. */
+  status?: "loading" | "error";
+  onRetry?: () => void;
 }) {
   const { t } = useTranslation();
   const openMembersPanel = useUIStore((s) => s.openMembersPanel);
   const previewing = usePreviewStore((s) => s.session !== null);
-  const [invHovered, setInvHovered] = useState(false);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = openProp ?? uncontrolledOpen;
   const setOpen = (value: boolean | ((o: boolean) => boolean)) => {
@@ -128,27 +132,37 @@ export function MembersStack({
         </button>
       )}
 
+      {members.length === 0 && status === "loading" && (
+        <span
+          role="status"
+          aria-label={t("common.state.loading")}
+          className="w-6 h-6 rounded-full bg-(--t-bg-elevated) animate-pulse"
+        />
+      )}
+      {members.length === 0 && status === "error" && onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          title={t("common.action.retry")}
+          aria-label={t("common.action.retry")}
+          className="btn btn-ghost w-6 h-6 rounded-full flex items-center justify-center text-(--t-status-warning)"
+        >
+          <Icon icon="lucide:refresh-cw" width={12} />
+        </button>
+      )}
+
       <button
         type="button"
         onClick={toggleOpen}
-        onMouseEnter={() => {
-          setInvHovered(true);
-          openPopover();
-        }}
-        onMouseLeave={() => setInvHovered(false)}
+        onMouseEnter={openPopover}
         aria-haspopup="dialog"
         aria-expanded={open}
         title={t("members.share.title", { vault: vaultName })}
-        className="flex items-center gap-1 rounded-full transition-all shrink-0"
-        style={{
-          height: 26,
-          padding: "0 0.625rem",
-          border: hasTeam ? "1px solid transparent" : `2px dashed ${invHovered ? "var(--t-accent)" : "var(--t-border)"}`,
-          background: hasTeam
-            ? (invHovered ? "var(--t-accent)" : "var(--t-bg-elevated)")
-            : (invHovered ? "rgba(var(--t-accent-rgb, 99,102,241), 0.1)" : "transparent"),
-          color: hasTeam ? (invHovered ? "var(--t-on-accent, #fff)" : "var(--t-text-secondary)") : (invHovered ? "var(--t-accent)" : "var(--t-text-dim)"),
-        }}
+        className={`focus-ring flex items-center gap-1 h-[26px] px-2.5 rounded-full transition-colors shrink-0 ${
+          hasTeam
+            ? "border border-transparent bg-(--t-bg-elevated) text-(--t-text-secondary) hover:bg-(--t-accent) hover:text-(--t-on-accent)"
+            : "border-2 border-dashed border-(--t-border) text-(--t-text-dim) hover:border-(--t-accent) hover:bg-[color-mix(in_srgb,var(--t-accent)_10%,transparent)] hover:text-(--t-accent)"
+        }`}
       >
         <Icon icon="lucide:plus" width={12} />
         <span className="text-xs font-semibold">
@@ -209,10 +223,13 @@ export default function VaultHeader() {
   const contentVaultId = team?.id ?? activeVaultId ?? "personal";
   const counts = useVaultContents(contentVaultId);
 
+  const [membersFailed, setMembersFailed] = useState(false);
+  const fetchMembers = (teamId: string) => {
+    setMembersFailed(false);
+    loadMembers(teamId).catch(() => setMembersFailed(true));
+  };
   useEffect(() => {
-    if (team && !membersByTeam[team.id]) {
-      loadMembers(team.id).catch(() => {});
-    }
+    if (team && !membersByTeam[team.id]) fetchMembers(team.id);
   }, [team?.id]);
 
   const target: VaultAdminTarget | null = vault
@@ -256,13 +273,8 @@ export default function VaultHeader() {
       {/* Left zone: icon + vault info */}
       <div className="flex items-center gap-4 min-w-0">
         <div
-          className="flex items-center justify-center shrink-0 rounded-xl text-base font-bold text-white"
-          style={{
-            width: 40,
-            height: 40,
-            background: "linear-gradient(145deg, color-mix(in srgb, var(--t-accent) 78%, #ffffff 22%) 0%, var(--t-accent) 55%, color-mix(in srgb, var(--t-accent) 82%, #000000 18%) 100%)",
-            boxShadow: "var(--t-ring), 0 6px 14px -6px color-mix(in srgb, var(--t-accent) 55%, transparent), var(--t-highlight)",
-          }}
+          className="flex items-center justify-center shrink-0 w-10 h-10 rounded-lg text-base font-bold bg-(--t-accent) text-(--t-on-accent)"
+          style={{ boxShadow: "var(--t-ring)" }}
         >
           {initial}
         </div>
@@ -308,42 +320,14 @@ export default function VaultHeader() {
       {/* Center zone: command palette */}
       <button
         onClick={() => setOmniOpen(true)}
-        className="flex items-center gap-2 px-3.5 h-9 rounded-lg transition-colors justify-self-center w-[clamp(11rem,30vw,27.5rem)]"
-        style={{
-          background: "var(--t-bg-chrome-field)",
-          color: "var(--t-text-secondary)",
-          border: "1px solid var(--t-chrome-field-border)",
-          boxShadow: "inset 0 1px 0 color-mix(in srgb, #ffffff 6%, transparent)",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-chrome-field-hover)";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-accent)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-chrome-field)";
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-chrome-field-border)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-        }}
-        onFocus={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-accent)";
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = "inset 0 1px 0 color-mix(in srgb, #ffffff 6%, transparent), 0 0 0 3px color-mix(in srgb, var(--t-accent) 25%, transparent)";
-        }}
-        onBlur={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--t-chrome-field-border)";
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = "inset 0 1px 0 color-mix(in srgb, #ffffff 6%, transparent)";
-        }}
+        className="focus-ring flex items-center gap-2 px-3.5 h-9 rounded-lg transition-colors justify-self-center w-[clamp(11rem,30vw,27.5rem)] border bg-(--t-bg-chrome-field) text-(--t-text-secondary) border-(--t-chrome-field-border) hover:bg-(--t-bg-chrome-field-hover) hover:border-(--t-accent) hover:text-(--t-text-bright) focus-visible:border-(--t-accent)"
+        style={{ boxShadow: "var(--t-chrome-highlight)" }}
       >
         <Icon icon="lucide:search" width={14} className="shrink-0" />
         <span className="text-sm flex-1 text-left">{t("layout.vaultHeader.jumpTo")}</span>
         {omniHint && (
           <kbd
-            className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-md"
-            style={{
-              background: "color-mix(in srgb, #000000 22%, transparent)",
-              color: "var(--t-text-secondary)",
-              border: "1px solid color-mix(in srgb, #ffffff 7%, transparent)",
-            }}
+            className="flex items-center gap-0.5 text-2xs px-1.5 py-0.5 rounded-sm border border-(--t-border) bg-(--t-bg-base) text-(--t-text-secondary)"
           >
             {omniHint}
           </kbd>
@@ -362,6 +346,8 @@ export default function VaultHeader() {
             open={admin.shareOpen}
             onOpenChange={admin.setShareOpen}
             hasTeam={!!team}
+            status={team && !members ? (membersFailed ? "error" : "loading") : undefined}
+            onRetry={team ? () => fetchMembers(team.id) : undefined}
           />
         )}
       </div>

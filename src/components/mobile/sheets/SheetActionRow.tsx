@@ -27,8 +27,8 @@ export function SheetActionRow({ attr, it }: { attr: string; it: SheetAction }) 
     <button
       {...{ [`data-${attr}`]: slug }}
       disabled={isSheetActionDisabled(it)}
-      className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left active:bg-(--t-bg-card) disabled:opacity-50"
-      style={{ color: it.danger ? "var(--t-danger, #e5484d)" : "var(--t-text-primary)" }}
+      className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-left active:bg-(--t-bg-card) disabled:opacity-(--disabled-opacity)"
+      style={{ color: it.danger ? "var(--t-status-error)" : "var(--t-text-primary)" }}
       onClick={() => {
         // The confirming step of a destructive action (slug `delete-confirm`, …).
         if (it.danger && slug.endsWith("-confirm")) haptic("confirm");

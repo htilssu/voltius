@@ -54,6 +54,8 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
       className="shrink-0 border-t border-t-(--t-border) bg-(--t-bg-elevated)"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false); }}
     >
       {/* Compact header — always visible */}
       <div className="relative flex items-center justify-between gap-2 px-3.5 py-2 select-none">
@@ -64,9 +66,9 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
             className={`shrink-0 ${hasActive ? "animate-spin" : ""}`}
             style={{ color: hasActive ? "var(--t-accent)" : "var(--t-text-dim)" }}
           />
-          <span className="text-xs font-bold uppercase tracking-widest text-(--t-text-dim)">{t("fileTransfer.queue.title")}</span>
+          <span className="text-2xs font-semibold uppercase tracking-wider text-(--t-text-dim)">{t("fileTransfer.queue.title")}</span>
           <span
-            className="shrink-0 min-w-[1.1rem] h-[1.1rem] px-1 inline-flex items-center justify-center rounded-full text-[0.625rem] font-bold tabular-nums leading-none"
+            className="shrink-0 min-w-[1.1rem] h-[1.1rem] px-1 inline-flex items-center justify-center rounded-full text-2xs font-bold tabular-nums leading-none"
             style={{
               background: hasActive ? "color-mix(in srgb, var(--t-accent) 18%, transparent)" : "var(--t-bg-card)",
               color: hasActive ? "var(--t-accent)" : "var(--t-text-dim)",
@@ -95,9 +97,7 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
             <button
               onClick={onCancelAll}
               title={t("fileTransfer.queue.cancelAll")}
-              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim)"
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-card-hover)"; e.currentTarget.style.color = "var(--t-status-error)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+              className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) hover:bg-(--t-bg-card-hover) hover:text-(--t-status-error)"
             >
               <Icon icon="lucide:circle-x" width={13} />
             </button>
@@ -105,9 +105,7 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
           <button
             onClick={onClear}
             title={t("fileTransfer.queue.clearFinished")}
-            className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim)"
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--t-bg-card-hover)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
+            className="flex items-center justify-center w-6 h-6 rounded-md shrink-0 transition-colors text-(--t-text-dim) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary)"
           >
             <Icon icon="lucide:list-x" width={13} />
           </button>
@@ -160,9 +158,7 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
                         <button
                           onClick={() => onRetry(tr.id)}
                           title={t("fileTransfer.queue.retryTransfer")}
-                          className="flex items-center justify-center w-4 h-4 rounded-sm transition-colors text-(--t-text-dim)"
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-accent)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-dim)")}
+                          className="flex items-center justify-center w-4 h-4 rounded-sm transition-colors text-(--t-text-dim) hover:text-(--t-accent)"
                         >
                           <Icon icon="lucide:rotate-cw" width={10} />
                         </button>
@@ -171,9 +167,7 @@ export function TransferQueue({ transfers, onClear, onCancel, onCancelAll, onRet
                         <button
                           onClick={() => onCancel(tr.id)}
                           title={t("fileTransfer.queue.cancelTransfer")}
-                          className="flex items-center justify-center w-4 h-4 rounded-sm transition-colors text-(--t-text-dim)"
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-status-error)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-dim)")}
+                          className="flex items-center justify-center w-4 h-4 rounded-sm transition-colors text-(--t-text-dim) hover:text-(--t-status-error)"
                         >
                           <Icon icon="lucide:x" width={10} />
                         </button>

@@ -32,11 +32,11 @@ export function MobileNotificationBell() {
         <span
           data-mobile-notifications-badge
           aria-hidden
-          className="absolute flex items-center justify-center rounded-full font-semibold text-white leading-none"
+          className="absolute flex items-center justify-center rounded-full text-2xs font-semibold text-(--t-on-status) leading-none"
           style={{
             // M3 large badge: 16 dp tall, anchored on the icon's top-right corner.
             top: 8, left: 26, minWidth: 16, height: 16, padding: "0 4px",
-            fontSize: 11, background: "var(--t-status-error)",
+            background: "var(--t-status-error)",
           }}
         >
           {badgeLabel(unread)}

@@ -109,7 +109,7 @@ export function InvitationEntry({ state, inputClassName = INPUT_CLASS }: { state
                 invalid={!!state.error} onChange={state.edit} className={`${inputClassName} font-mono`} />
             </div>
             <button type="button" onClick={state.check} disabled={state.checking || !state.text.trim()}
-              className="btn btn-secondary shrink-0 px-3 rounded-lg text-xs font-medium disabled:opacity-60">
+              className="btn btn-secondary shrink-0 px-3 rounded-lg text-xs font-medium">
               {state.checking ? t("layout.auth.invitation.checking") : t("layout.auth.invitation.use")}
             </button>
           </div>

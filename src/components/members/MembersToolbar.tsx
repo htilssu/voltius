@@ -4,6 +4,7 @@ import { ToolbarViewControls } from "@/components/shared/ToolbarViewControls";
 import type { LayoutMode, SortMode } from "@/components/shared/ToolbarViewControls";
 import type { MembersPanel } from "@/stores/uiStore";
 import { GREYED_CLASS, useGreyedUnless, type Greyed } from "@/hooks/useGreyedUnless";
+import { CountBadge } from "@/components/notifications/CountBadge";
 
 export interface MembersToolbarProps {
   search: string;
@@ -38,7 +39,7 @@ export function MembersToolbar({
   const greyedUnless = useGreyedUnless();
   return (
     <div
-      className="flex items-center gap-2 px-5 py-2.5 shrink-0"
+      className="flex flex-wrap items-center gap-2 px-5 py-2.5 shrink-0"
       style={{ borderBottom: "1px solid var(--t-border)", background: "var(--t-bg-toolbar)" }}
     >
       <div className="flex items-center gap-2 min-w-0">
@@ -48,11 +49,7 @@ export function MembersToolbar({
               <button
                 key={id}
                 onClick={() => onSelectVault(id)}
-                className="px-2.5 py-1 rounded-lg text-xs font-medium transition-colors"
-                style={{
-                  background: id === primaryVaultId ? "var(--t-accent)" : "var(--t-bg-elevated)",
-                  color: id === primaryVaultId ? "#fff" : "var(--t-text-dim)",
-                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${id === primaryVaultId ? "bg-(--t-accent) text-(--t-on-accent)" : "bg-(--t-bg-elevated) text-(--t-text-dim) hover:text-(--t-text-primary)"}`}
               >
                 {name}
               </button>
@@ -74,7 +71,7 @@ export function MembersToolbar({
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-2 shrink-0">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
         {selectedCount > 1 && (
           <span className="text-xs text-(--t-text-dim) shrink-0">
             {t("members.toolbar.selectedCount", { count: selectedCount })}
@@ -92,25 +89,13 @@ export function MembersToolbar({
         <button
           onClick={() => onTogglePanel("invite")}
           {...greyedUnless(canInvite)}
-          className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0 ${GREYED_CLASS}`}
-          style={{
-            background: activePanel === "invite" ? "var(--t-accent-hover)" : "var(--t-accent)",
-            color: "var(--t-on-accent, #fff)",
-            border: "1px solid var(--t-accent-hover)",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-accent-hover)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = activePanel === "invite" ? "var(--t-accent-hover)" : "var(--t-accent)")}
+          aria-pressed={activePanel === "invite"}
+          className="btn btn-primary relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0"
+          style={activePanel === "invite" ? { background: "var(--t-accent-hover)" } : undefined}
         >
           <Icon icon="lucide:user-plus" width={13} />
           {t("members.toolbar.inviteBtn")}
-          {!!pendingCount && (
-            <span
-              className="absolute -top-1.5 -right-1.5 flex items-center justify-center text-[9px] font-bold rounded-full min-w-[16px] h-4 px-0.5"
-              style={{ background: "var(--t-status-error)", color: "#fff" }}
-            >
-              {pendingCount}
-            </span>
-          )}
+          <CountBadge count={pendingCount ?? 0} tone="inverse" className="absolute -top-1.5 -right-1.5" />
         </button>
       </div>
     </div>

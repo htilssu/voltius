@@ -119,7 +119,7 @@ export function TerminalPasswordSuggestions({ sessionId, enabled }: { sessionId:
 
   return createPortal(
     <div ref={popup} role="dialog" aria-label={t("terminal.passwordSuggestions.title")}
-      className="fixed z-50 w-80 max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border shadow-xl text-sm"
+      className="fixed z-50 w-80 max-w-[calc(100vw-16px)] overflow-hidden rounded-lg border shadow-(--t-elev-2) text-sm"
       style={{ left: Math.max(8, Math.min(prompt.x, window.innerWidth - 328)),
         top: Math.max(8, prompt.y + height + 12 > window.innerHeight ? prompt.y - height - 24 : prompt.y + 4),
         background: "var(--t-bg-card)", borderColor: "var(--t-border)", color: "var(--t-text-primary)" }}>
@@ -132,7 +132,7 @@ export function TerminalPasswordSuggestions({ sessionId, enabled }: { sessionId:
       <div role="listbox" aria-label={t("terminal.passwordSuggestions.title")} className="max-h-44 overflow-auto">
         {choices.map((choice, index) => <button key={`${choice.kind}:${choice.id}`} type="button" role="option"
           aria-selected={selected === index} disabled={busy}
-          className="flex w-full items-center gap-3 px-3 py-1.5 text-left disabled:opacity-50"
+          className="flex w-full items-center gap-3 px-3 py-1.5 text-left disabled:opacity-(--disabled-opacity)"
           style={{ background: selected === index ? "var(--t-bg-elevated)" : undefined }}
           onMouseEnter={() => highlight(index)} onFocus={() => highlight(index)} onClick={() => void select(choice)}>
           <Icon icon="lucide:key-round" className="shrink-0" />
@@ -140,7 +140,7 @@ export function TerminalPasswordSuggestions({ sessionId, enabled }: { sessionId:
           {selected === index && <Icon icon="lucide:corner-down-left" className="shrink-0" />}
         </button>)}
         <button type="button" role="option" aria-selected={selected === choices.length} disabled={busy}
-          className="flex w-full items-center gap-3 px-3 py-1.5 text-left disabled:opacity-50"
+          className="flex w-full items-center gap-3 px-3 py-1.5 text-left disabled:opacity-(--disabled-opacity)"
           style={{ background: selected === choices.length ? "var(--t-bg-elevated)" : undefined }}
           onMouseEnter={() => highlight(choices.length)} onFocus={() => highlight(choices.length)} onClick={add}>
           <Icon icon="lucide:circle-plus" className="shrink-0" />

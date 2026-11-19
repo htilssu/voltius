@@ -36,9 +36,7 @@ function ThemesSection() {
     <div className="flex flex-col h-full">
       {/* Font row */}
       <div
-        className="flex items-center justify-between px-4 py-3 cursor-pointer transition-colors border-b border-b-(--t-border)"
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        className="flex items-center justify-between px-4 py-3 border-b border-b-(--t-border)"
       >
         <div className="flex items-center gap-3">
           <Icon icon="lucide:type" width={15} className="text-(--t-text-muted)" />
@@ -49,7 +47,6 @@ function ThemesSection() {
             </p>
           </div>
         </div>
-        <Icon icon="lucide:chevron-right" width={14} className="text-(--t-text-dim)" />
       </div>
 
       <div className="px-4 pt-4 pb-2 shrink-0">
@@ -65,10 +62,7 @@ function ThemesSection() {
             <div
               key={theme.id}
               onClick={() => setTheme(theme.id)}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-b-(--t-border)"
-              style={{ background: isActive ? "var(--t-bg-elevated)" : "transparent" }}
-              onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "var(--t-bg-card)"; }}
-              onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+              className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-b-(--t-border) ${isActive ? "bg-(--t-bg-elevated)" : "hover:bg-(--t-bg-card)"}`}
             >
               <div className="relative">
                 <ThemeTerminalPreview colors={paletteOf(theme).terminal} />
@@ -90,9 +84,7 @@ function ThemesSection() {
                 {!theme.builtIn && (
                   <button
                     onClick={(e) => { e.stopPropagation(); openThemeCreator(theme.id); }}
-                    className="p-1.5 rounded-sm transition-colors text-(--t-text-muted)"
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}
+                    className="p-1.5 rounded-sm transition-colors text-(--t-text-muted) hover:text-(--t-text-primary)"
                     title={t("common.action.edit")}
                   >
                     <Icon icon="lucide:pencil" width={12} />
@@ -104,7 +96,7 @@ function ThemesSection() {
                     title={removal.disabledReason ?? removalLabel}
                     disabled={removal.disabledReason !== null}
                     onClick={(e) => { e.stopPropagation(); removal.remove(); }}
-                    className="p-1.5 rounded-sm transition-colors text-(--t-text-muted) enabled:hover:text-(--t-status-error) disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded-sm transition-colors text-(--t-text-muted) enabled:hover:text-(--t-status-error) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
                   >
                     <Icon icon="lucide:trash-2" width={12} />
                   </button>
@@ -116,9 +108,7 @@ function ThemesSection() {
 
         <button
           onClick={() => openThemeCreator()}
-          className="w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-(--t-accent)"
-          onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-card)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          className="w-full flex items-center gap-3 px-4 py-3.5 transition-colors text-(--t-accent) hover:bg-(--t-bg-card)"
         >
           <Icon icon="lucide:circle-plus" width={15} />
           <span className="text-sm font-medium">{t("terminal.rightPanel.createNewTheme")}</span>
@@ -218,20 +208,16 @@ function PanelContent() {
               <button
                 key={s.id}
                 onClick={() => toggleRightPanel(s.id)}
-                className="relative w-8 h-8 flex items-center justify-center rounded-lg transition-all"
-                style={{
-                  background: isActive ? "var(--t-tab-active-bg)" : "transparent",
-                  color: isActive ? "var(--t-tab-active-text)" : "var(--t-text-muted)",
-                }}
+                className={`relative w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
+                  isActive ? "bg-(--t-tab-active-bg) text-(--t-tab-active-text)" : "text-(--t-text-muted) hover:text-(--t-text-primary)"
+                }`}
                 title={s.title}
-                onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-                onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"; }}
               >
                 <Icon icon={s.icon} width={15} />
                 {s.id === "ports" && tunnelCount > 0 && (
                   <span
                     className="absolute -top-0.5 -right-0.5 min-w-3.5 h-3.5 px-0.5 flex items-center justify-center
-                      rounded-full text-[9px] font-semibold leading-none"
+                      rounded-full text-2xs font-semibold leading-none"
                     style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
                   >
                     {tunnelCount}
@@ -246,9 +232,7 @@ function PanelContent() {
         </div>
         <button
           onClick={() => toggleRightPanel()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-(--t-text-muted)"
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}
+          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-(--t-text-muted) hover:text-(--t-text-primary)"
           title={t("terminal.rightPanel.closePanelTitle")}
         >
           <Icon icon="lucide:x" width={13} />

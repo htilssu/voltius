@@ -14,8 +14,8 @@ interface Props {
 }
 
 const SIZE = {
-  sm: "text-[11px] px-1 py-0 gap-0.5",
-  md: "text-[12px] px-2 py-1 gap-1",
+  sm: "text-2xs px-1 py-0 gap-0.5",
+  md: "text-xs px-2 py-1 gap-1",
 } as const;
 
 export function PortChips({ ports, sessionId, isRemote, limit, size = "sm", onOverflow }: Props) {
@@ -68,7 +68,7 @@ export function PortChips({ ports, sessionId, isRemote, limit, size = "sm", onOv
             className={`flex items-center rounded-sm font-mono shrink-0 ${SIZE[size]} ${
               inert
                 ? "bg-(--t-bg-card-hover) text-(--t-text-muted) opacity-50 cursor-default"
-                : "bg-(--t-bg-card-hover) text-(--t-text) hover:text-(--t-accent) hover:bg-(--t-bg-elevated)"
+                : "bg-(--t-bg-card-hover) text-(--t-text-primary) hover:text-(--t-accent) hover:bg-(--t-bg-elevated)"
             }`}
           >
             <span className="truncate">{limit ? c.short : c.full}</span>
@@ -86,7 +86,7 @@ export function PortChips({ ports, sessionId, isRemote, limit, size = "sm", onOv
         <button
           onClick={(e) => { e.stopPropagation(); onOverflow?.(); }}
           title={t("showAllPorts")}
-          className={`rounded-sm font-mono shrink-0 bg-(--t-bg-card-hover) text-(--t-text-muted) hover:text-(--t-text) ${SIZE[size]}`}
+          className={`rounded-sm font-mono shrink-0 bg-(--t-bg-card-hover) text-(--t-text-muted) hover:text-(--t-text-primary) ${SIZE[size]}`}
         >
           +{hidden}
         </button>

@@ -31,6 +31,7 @@ import {
   nextPersonalPinValue,
 } from "@/hooks/useEffectivePinned";
 import { formatDate, SHORT_DATE } from "@/utils/localeFormat";
+import { toastActionError } from "@/components/shared/actionError";
 
 // ─────────────────────────────────────────────────────────────────
 // Small shared display components
@@ -39,7 +40,7 @@ import { formatDate, SHORT_DATE } from "@/utils/localeFormat";
 export function DraftCard({ icon, label }: { icon: string; label: string }) {
   return (
     <div className={`${dashedCardClass("grid")} border-(--t-accent) opacity-50`}>
-      <AvatarTile icon={icon} iconSize={24} className="rounded-lg w-[3.2rem] h-[3.2rem]" iconClassName="text-(--t-text-dim)" />
+      <AvatarTile icon={icon} iconSize={18} className="rounded-lg w-10 h-10" iconClassName="text-(--t-text-dim)" />
       <p className="text-sm font-medium text-(--t-text-dim)">{label}</p>
     </div>
   );
@@ -64,7 +65,7 @@ export function KeyCardContent({ sshKey, avatarSize, iconSize, isList, name = ss
     return (
       <>
         {avatar}
-        <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">
+        <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">
           {name}
         </p>
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -156,14 +157,14 @@ function KeyCardBody({
         ? "lucide:pin-off"
         : "lucide:pin",
       onClick: whenWritableOn(keyTarget(sshKey.id), () => {
-        pinKey(sshKey.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch(() => {});
+        pinKey(sshKey.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch((e: unknown) => toastActionError(e, t));
       }),
       divider: true as const,
     },
     ...(canEdit && isTeamVault ? [{
       label: sshKey.pinned ? t("keychain.cards.pin.unpinForTeam") : t("keychain.cards.pin.pinForTeam"),
       icon: "lucide:users",
-      onClick: whenWritableOn(keyTarget(sshKey.id), () => pinKeyForTeam(sshKey.id, !sshKey.pinned).catch(() => {})),
+      onClick: whenWritableOn(keyTarget(sshKey.id), () => pinKeyForTeam(sshKey.id, !sshKey.pinned).catch((e: unknown) => toastActionError(e, t))),
     }] : []),
     ...contributions.map((a, i) => ({ ...a, icon: a.icon ?? "lucide:chevron-right", divider: i === 0 })),
     ...vaultMenuItems(vaults, canEdit,
@@ -220,14 +221,14 @@ function KeyCardBody({
       ) : (
         <div className="flex-1 min-w-0 self-start flex flex-col gap-2.5">
           <div className="flex items-start gap-2 min-w-0">
-            <AvatarTile icon="lucide:key-round" iconSize={16} size={30} className="rounded-lg" />
+            <AvatarTile icon="lucide:key-round" iconSize={16} className="w-8 h-8 rounded-lg" />
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <p className="text-sm font-bold truncate flex-1 min-w-0 text-(--t-text-bright)">
                   {rename.editor ?? sshKey.name}
                 </p>
                 {sshKey.key_type && (
-                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[11px] font-mono bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
+                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-2xs font-mono bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
                     {sshKey.key_type}
                   </span>
                 )}
@@ -245,10 +246,10 @@ function KeyCardBody({
           <div className="flex items-center justify-between gap-2 -mt-0.5">
             <div className="flex items-center gap-1 min-w-0 overflow-hidden">
               {sshKey.tags.slice(0, 3).map((tag) => (
-                <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-[10px]" />
+                <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-2xs" />
               ))}
               {sshKey.tags.length > 3 && (
-                <span className="text-[10px] text-(--t-text-dim) shrink-0">+{sshKey.tags.length - 3}</span>
+                <span className="text-2xs text-(--t-text-dim) shrink-0">+{sshKey.tags.length - 3}</span>
               )}
             </div>
             <div className="flex items-center gap-0.5 shrink-0">
@@ -416,14 +417,14 @@ function IdentityCardBody({
         ? "lucide:pin-off"
         : "lucide:pin",
       onClick: whenWritableOn(identityTarget(identity.id), () => {
-        pinIdentity(identity.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch(() => {});
+        pinIdentity(identity.id, isTeamVault ? nextPersonalPinValue(pinSource) : !effPinned).catch((e: unknown) => toastActionError(e, t));
       }),
       divider: true as const,
     },
     ...(canEdit && isTeamVault ? [{
       label: identity.pinned ? t("keychain.cards.pin.unpinForTeam") : t("keychain.cards.pin.pinForTeam"),
       icon: "lucide:users",
-      onClick: whenWritableOn(identityTarget(identity.id), () => pinIdentityForTeam(identity.id, !identity.pinned).catch(() => {})),
+      onClick: whenWritableOn(identityTarget(identity.id), () => pinIdentityForTeam(identity.id, !identity.pinned).catch((e: unknown) => toastActionError(e, t))),
     }] : []),
     ...contributions.map((a, i) => ({ ...a, icon: a.icon ?? "lucide:chevron-right", divider: i === 0 })),
     ...vaultMenuItems(vaults, canEdit,
@@ -465,7 +466,7 @@ function IdentityCardBody({
       {isList ? (
         <>
           <AvatarTile icon="lucide:id-card" iconSize={iconSize} size={avatarSize} className="rounded-lg" />
-          <p className="text-sm font-medium-bold truncate w-52 shrink-0 text-(--t-text-bright)">
+          <p className="text-sm font-medium-bold truncate basis-52 shrink min-w-0 text-(--t-text-bright)">
             {rename.editor ?? identityName}
           </p>
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -506,19 +507,19 @@ function IdentityCardBody({
       ) : (
         <div className="flex-1 min-w-0 self-start flex flex-col gap-2.5">
           <div className="flex items-start gap-2 min-w-0">
-            <AvatarTile icon="lucide:id-card" iconSize={16} size={30} className="rounded-lg" />
+            <AvatarTile icon="lucide:id-card" iconSize={16} className="w-8 h-8 rounded-lg" />
             <div className="flex flex-col gap-0.5 flex-1 min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <p className="text-sm font-bold truncate flex-1 min-w-0 text-(--t-text-bright)">
                   {rename.editor ?? identityName}
                 </p>
                 {linkedKey ? (
-                  <span className="shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
+                  <span className="shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-2xs bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
                     <Icon icon="lucide:key-round" width={10} />
                     {linkedKey.name ?? t("common.entity.key")}
                   </span>
                 ) : (
-                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-[11px] bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
+                  <span className="shrink-0 px-1.5 py-0.5 rounded-md text-2xs bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border)">
                     {t("keychain.cards.passwordBadge")}
                   </span>
                 )}
@@ -540,10 +541,10 @@ function IdentityCardBody({
           <div className="flex items-center justify-between gap-2 -mt-0.5">
             <div className="flex items-center gap-1 min-w-0 overflow-hidden">
               {identity.tags.slice(0, 3).map((tag) => (
-                <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-[10px]" />
+                <TagBadge key={tag} tag={tag} className="rounded-md shrink-0 py-0 text-2xs" />
               ))}
               {identity.tags.length > 3 && (
-                <span className="text-[10px] text-(--t-text-dim) shrink-0">+{identity.tags.length - 3}</span>
+                <span className="text-2xs text-(--t-text-dim) shrink-0">+{identity.tags.length - 3}</span>
               )}
             </div>
             <div className="flex items-center gap-0.5 shrink-0">

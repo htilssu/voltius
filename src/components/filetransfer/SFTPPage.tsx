@@ -22,7 +22,8 @@ import { useFileClipboardStore, type FileEndpoint } from "@/stores/fileClipboard
 import { buildPasteDeps, executePaste } from "./pasteService";
 import { connectTarget } from "@/services/useSftpDir";
 import { readOnlyTip, refuseReadOnly, useReadOnlyFlips } from "@/services/deviceReadOnly";
-import type { BackendErrorCode } from "@/services/backendErrors";
+import { type BackendErrorCode } from "@/services/backendErrors";
+import { appToast } from "@/services/appToast";
 import { hostPresentation } from "./hostPresentation";
 import { idToRelease, relinkOf } from "./sideRelink";
 import { cancelKnownHostPrompt } from "@/services/knownHosts";
@@ -45,6 +46,7 @@ import { EditorTabStrip } from "./editor/EditorTabStrip";
 import { lazyNamed } from "@/utils/lazyNamed";
 import { EditorDropOverlay } from "./editor/EditorDropOverlay";
 import { isFileOnlyProtocol } from "@/utils/connectionType";
+import { toastActionError } from "@/components/shared/actionError";
 
 const EditorTab = lazyNamed(() => import("./editor/EditorTab"), "EditorTab");
 const DiffTab = lazyNamed(() => import("./editor/DiffTab"), "DiffTab");
@@ -333,7 +335,7 @@ export default function SFTPPage() {
       rename: (from, to) => isLocal ? fsRename(from, to) : sftpRename(sftpId!, from, to),
       setPending,
       onRefresh: side === "left" ? () => setLeftRefresh((n) => n + 1) : () => setRightRefresh((n) => n + 1),
-      onError: (m) => alert(m),
+      onError: (m) => appToast("error", m),
     });
   }, [leftPhase, rightPhase, leftHost, rightHost, setPending, refuseWrite]);
 
@@ -421,13 +423,10 @@ export default function SFTPPage() {
   const makeOpenInTerminal = useCallback((host: HostChoice | null) => {
     if (!host || host.kind === "device" || (host.kind === "remote" && isFileOnlyProtocol(host.connection))) return undefined;
     return (path: string) => {
-      if (host.kind === "local") {
-        connectLocalAt(path).catch(() => {});
-      } else {
-        connectAt(host.connection.id, path).catch(() => {});
-      }
+      const opened = host.kind === "local" ? connectLocalAt(path) : connectAt(host.connection.id, path);
+      opened.catch((e: unknown) => toastActionError(e, t));
     };
-  }, [connectLocalAt, connectAt]);
+  }, [connectLocalAt, connectAt, t]);
 
   const leftSelected  = leftPhase.tag  === "connected" ? leftPhase.selected  : [];
   const rightSelected = rightPhase.tag === "connected" ? rightPhase.selected : [];
@@ -478,7 +477,7 @@ export default function SFTPPage() {
         <EditorDropOverlay />
       </div>
       <div className={`flex flex-1 min-h-0 gap-3 p-3${activeTab !== null ? " hidden" : ""}`}>
-        <div className="flex-1 min-w-0 rounded-xl overflow-hidden border border-(--t-border)">
+        <div className="flex-1 min-w-0 rounded-[var(--r-lg)] overflow-hidden border border-(--t-border)">
           <SidePane
             host={leftHost} phase={leftPhase} refreshTick={leftRefresh}
             onPick={(h) => { setLeftHost(h); connectSide(h, "left"); }}
@@ -486,6 +485,7 @@ export default function SFTPPage() {
             onSelect={(files) => setLeftPhase((prev) => prev.tag === "connected" ? { ...prev, selected: files } : prev)}
             onRefresh={() => setLeftRefresh((n) => n + 1)}
             onChangeHost={() => { disconnectSide("left"); setLeftHost(null); }}
+            onRetry={reconnectSide("left", leftPhase)}
             side="left"
             onDropFiles={(files, fromSide, targetFolder) => { if (fromSide !== "panel") void triggerTransfer(files, fromSide, targetFolder); }}
             onTransferToTarget={(files) => void triggerTransfer(files, "left")}
@@ -500,14 +500,14 @@ export default function SFTPPage() {
         </div>
 
         <div className="flex flex-col items-center justify-center shrink-0 w-10">
-          <div className="flex flex-col gap-1.5 p-1.5 rounded-xl border border-(--t-border) bg-(--t-bg-elevated)">
+          <div className="flex flex-col gap-1.5 p-1.5 rounded-lg border border-(--t-border) bg-(--t-bg-elevated)">
             <TransferBtn icon="lucide:arrow-right" title={transferLRTitle} disabled={!canTransferLR} onClick={() => transfer("LR")} />
             <TransferBtn icon="lucide:arrow-left"  title={transferRLTitle} disabled={!canTransferRL} onClick={() => transfer("RL")} />
             <TransferBtn icon="lucide:diff"        title={canCompare ? t("fileTransfer.page.compareTitle", { leftName: leftSingleFile!.name, rightName: rightSingleFile!.name }) : t("fileTransfer.page.compareHint")} disabled={!canCompare} onClick={handleCompare} />
           </div>
         </div>
 
-        <div className="flex-1 min-w-0 rounded-xl overflow-hidden border border-(--t-border)">
+        <div className="flex-1 min-w-0 rounded-[var(--r-lg)] overflow-hidden border border-(--t-border)">
           <SidePane
             host={rightHost} phase={rightPhase} refreshTick={rightRefresh}
             onPick={(h) => { setRightHost(h); connectSide(h, "right"); }}
@@ -515,6 +515,7 @@ export default function SFTPPage() {
             onSelect={(files) => setRightPhase((prev) => prev.tag === "connected" ? { ...prev, selected: files } : prev)}
             onRefresh={() => setRightRefresh((n) => n + 1)}
             onChangeHost={() => { disconnectSide("right"); setRightHost(null); }}
+            onRetry={reconnectSide("right", rightPhase)}
             side="right"
             onDropFiles={(files, fromSide, targetFolder) => { if (fromSide !== "panel") void triggerTransfer(files, fromSide, targetFolder); }}
             onTransferToTarget={(files) => void triggerTransfer(files, "right")}
@@ -543,16 +544,7 @@ function TransferBtn({ icon, title, disabled, onClick }: { icon: string; title: 
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="flex items-center justify-center w-6 h-6 rounded-md transition-all"
-      style={{
-        background: disabled ? "transparent" : "var(--t-bg-elevated)",
-        border: `1px solid ${disabled ? "var(--t-border)" : "var(--t-border-hover)"}`,
-        color: disabled ? "var(--t-text-dim)" : "var(--t-accent)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.4 : 1,
-      }}
-      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.background = "var(--t-bg-card-hover)"; }}
-      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.background = "var(--t-bg-elevated)"; }}
+      className="flex items-center justify-center w-6 h-6 rounded-md transition-colors border border-(--t-border-hover) bg-(--t-bg-elevated) text-(--t-accent) hover:bg-(--t-bg-card-hover) disabled:bg-transparent disabled:border-(--t-border) disabled:text-(--t-text-dim) disabled:cursor-not-allowed disabled:opacity-(--disabled-opacity)"
     >
       <Icon icon={icon} width={12} />
     </button>

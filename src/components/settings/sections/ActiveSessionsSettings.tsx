@@ -22,7 +22,7 @@ type Pending = { kind: "one"; session: SignedInSession } | { kind: "others" } | 
 const BUTTON_SHAPE = "shrink-0 h-8 px-3 rounded-lg text-xs font-medium disabled:cursor-not-allowed";
 const BUTTON = `btn btn-secondary ${BUTTON_SHAPE}`;
 const DANGER_BUTTON = `btn btn-danger ${BUTTON_SHAPE}`;
-const BADGE = "shrink-0 px-1.5 py-px rounded text-[10px] font-medium";
+const BADGE = "shrink-0 px-1.5 py-px rounded text-2xs font-medium";
 
 const message = (e: unknown) => (e instanceof Error ? e.message : String(e));
 

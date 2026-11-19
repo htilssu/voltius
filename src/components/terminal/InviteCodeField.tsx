@@ -23,7 +23,7 @@ export function InviteCodeField({ code, autoCopied = false }: { code: string; au
     <div className="flex items-center gap-2">
       <input
         readOnly
-        className="flex-1 text-[11px] px-2.5 py-1.5 rounded-md outline-hidden font-mono"
+        className="flex-1 text-2xs px-2.5 py-1.5 rounded-md outline-hidden font-mono"
         style={{
           background: "var(--t-bg-elevated)",
           border: "1px solid var(--t-border)",

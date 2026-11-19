@@ -34,7 +34,7 @@ export default function KeySelector({ value, keys, onChange, onGoToKeychain }: P
         open={open}
         onToggle={() => setOpen((o) => !o)}
         trailing={selected?.key_type ? (
-          <span className="text-[10px] text-(--t-text-dim) shrink-0">{selected.key_type}</span>
+          <span className="text-2xs text-(--t-text-dim) shrink-0">{selected.key_type}</span>
         ) : undefined}
       />
 
@@ -54,7 +54,7 @@ export default function KeySelector({ value, keys, onChange, onGoToKeychain }: P
             label={key.name ?? t("connections.keySelector.unnamedKey")}
             labelTone="primary"
             badge={key.key_type ? (
-              <span className="text-[10px] shrink-0 text-(--t-text-dim)">{key.key_type}</span>
+              <span className="text-2xs shrink-0 text-(--t-text-dim)">{key.key_type}</span>
             ) : undefined}
             active={value === key.id}
             onClick={() => { onChange(key.id); setOpen(false); }}

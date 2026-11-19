@@ -252,28 +252,20 @@ export default function PanelSftpSection() {
           disabled={!canDownload}
           onClick={handleDownload}
         />
-        <button
+        <HeaderBtn
           ref={viewBtnRef}
+          icon="lucide:layout-list"
           title={t("terminal.sftp.viewOptions")}
           disabled={!isReady}
           onClick={() => viewBtnRef.current && viewMenuOpener?.(viewBtnRef.current)}
-          className="flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors text-(--t-text-dim) disabled:opacity-40"
-          onMouseEnter={(e) => { if (isReady) { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; } }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
-        >
-          <Icon icon="lucide:layout-list" width={14} />
-        </button>
-        <button
+        />
+        <HeaderBtn
           ref={menuBtnRef}
+          icon="lucide:ellipsis-vertical"
           title={t("terminal.sftp.moreOptions")}
           disabled={!isReady}
           onClick={() => menuBtnRef.current && menuOpener?.(menuBtnRef.current)}
-          className="flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors text-(--t-text-dim) disabled:opacity-40"
-          onMouseEnter={(e) => { if (isReady) { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; } }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; }}
-        >
-          <Icon icon="lucide:ellipsis-vertical" width={14} />
-        </button>
+        />
       </div>
 
       {/* Body */}
@@ -328,23 +320,21 @@ export default function PanelSftpSection() {
   );
 }
 
-function HeaderBtn({ icon, title, disabled, active, onClick }: {
+function HeaderBtn({ ref, icon, title, disabled, active, onClick }: {
+  ref?: React.Ref<HTMLButtonElement>;
   icon: string; title: string; disabled?: boolean; active?: boolean; onClick: () => void;
 }) {
   return (
     <button
+      ref={ref}
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors"
-      style={{
-        color: disabled ? "var(--t-text-dim)" : active ? "var(--t-accent)" : "var(--t-text-dim)",
-        background: active ? "color-mix(in srgb, var(--t-accent) 14%, transparent)" : "transparent",
-        opacity: disabled ? 0.4 : 1,
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
-      onMouseEnter={(e) => { if (!disabled && !active) { e.currentTarget.style.background = "var(--t-bg-elevated)"; e.currentTarget.style.color = "var(--t-text-primary)"; } }}
-      onMouseLeave={(e) => { if (!disabled && !active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-dim)"; } }}
+      className={`flex items-center justify-center w-7 h-7 rounded-md shrink-0 transition-colors disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed ${
+        active
+          ? "text-(--t-accent) bg-(--t-accent)/15"
+          : "text-(--t-text-dim) enabled:hover:bg-(--t-bg-elevated) enabled:hover:text-(--t-text-primary)"
+      }`}
     >
       <Icon icon={icon} width={14} />
     </button>

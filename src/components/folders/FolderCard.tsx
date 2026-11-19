@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 import { AvatarTile } from "@/components/shared/AvatarTile";
 import { withGhost } from "@/components/preview/GhostCard";
 import { PreviewHint } from "@/components/preview/PreviewHint";
-import { GLASS_BG, GLASS_BG_HOVER, GLASS_SHADOW, GLASS_SHADOW_HOVER } from "@/components/shared/BaseCard";
 import { CardActionButton, CardMenuButton, CardMenuContext, CardPinButton } from "@/components/shared/CardActionButton";
 import { ContextMenu, useContextMenu, type ContextMenuItem } from "@/components/shared/ContextMenu";
 import { clipboardMenuItems } from "@/utils/clipboardMenuItems";
@@ -92,19 +91,12 @@ function FolderCardBody({
     ? "inset 0 0 0 2px var(--t-accent)"
     : undefined;
 
-  // Glossy depth in grid (objects-you-manipulate role); list stays calm/flat.
-  const glossy = !isList;
-  const restBg = isDragOver
-    ? "color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card))"
-    : glossy
-    ? GLASS_BG
-    : "var(--t-bg-card)";
-  const hoverBg = glossy ? GLASS_BG_HOVER : "var(--t-bg-card-hover)";
-  const restShadow =
-    [focusBoxShadow, glossy && !isDragOver ? GLASS_SHADOW : null].filter(Boolean).join(", ") || undefined;
-  const hoverShadow = glossy
-    ? GLASS_SHADOW_HOVER
-    : "inset 0 0 0 1px var(--t-card-ring), var(--t-card-shadow)";
+  // Same flat surface recipe as BaseCard: hairline ring in grid, CSS hover lift
+  // unless selection/focus/drag already owns the edge.
+  const ownsEdge = isDragOver || isSelected || isFocused;
+  const surfaceClass = isDragOver
+    ? ""
+    : `bg-(--t-bg-card) hover:bg-(--t-bg-card-hover) ${!isList ? "shadow-[var(--t-ring)]" : ""} ${ownsEdge ? "" : "hover:shadow-[var(--t-ring-strong),var(--t-elev-1)]"}`;
 
   return (
     <>
@@ -112,14 +104,11 @@ function FolderCardBody({
         data-folder-card="true"
         data-selectable-id={folder.id}
         data-drop-folder={dataDropFolder}
-        className={`group flex items-center px-4 cursor-pointer transition-all duration-150 ${isList ? "gap-2.5 py-2.5 rounded-xl" : "gap-4 py-4 rounded-2xl"} ${dimmed ? "opacity-50" : ""}`}
+        className={`group flex items-center px-4 cursor-pointer transition-[background-color,box-shadow] duration-150 ${isList ? "gap-2.5 py-2.5 rounded-[var(--r-md)]" : "gap-4 py-4 rounded-[var(--r-lg)]"} ${surfaceClass} ${dimmed ? "opacity-50" : ""}`}
         style={{
-          background: restBg,
           border: dragBorder,
-          boxShadow: restShadow,
-          ...(glossy
-            ? { backdropFilter: "blur(12px) saturate(1.5)", WebkitBackdropFilter: "blur(12px) saturate(1.5)" }
-            : {}),
+          ...(isDragOver ? { background: "color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card))" } : {}),
+          ...(focusBoxShadow ? { boxShadow: focusBoxShadow } : {}),
         }}
         onClick={(e) => {
           e.stopPropagation();
@@ -129,16 +118,6 @@ function FolderCardBody({
         }}
         onContextMenu={(e) => { e.stopPropagation(); e.preventDefault(); if (!isSelected) onSelect?.(folder.id, e); openCtx(e); }}
         onPointerDown={onPointerDown}
-        onMouseEnter={(e) => {
-          if (isDragOver) return;
-          e.currentTarget.style.background = hoverBg;
-          if (!isSelected && !isFocused) e.currentTarget.style.boxShadow = hoverShadow;
-        }}
-        onMouseLeave={(e) => {
-          if (isDragOver) return;
-          e.currentTarget.style.background = restBg;
-          e.currentTarget.style.boxShadow = restShadow ?? "";
-        }}
       >
         {/* Folder avatar */}
         <AvatarTile

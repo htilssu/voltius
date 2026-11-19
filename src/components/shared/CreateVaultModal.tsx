@@ -24,11 +24,11 @@ export function CreateVaultModal({ onConfirm, onCancel }: Props) {
 
   return (
     <Modal onClose={onCancel}>
-      <ModalCard className="p-6 flex flex-col gap-5" style={{ width: "22rem" }}>
+      <ModalCard className="p-6 flex flex-col gap-5 w-[min(22rem,calc(100vw-2rem))]">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
             style={{ background: "color-mix(in srgb, var(--t-accent) 18%, transparent)" }}
           >
             <Icon icon="lucide:vault" width={18} className="text-(--t-accent)" />
@@ -52,7 +52,7 @@ export function CreateVaultModal({ onConfirm, onCancel }: Props) {
               if (e.key === "Enter") submit();
               if (e.key === "Escape") onCancel();
             }}
-            className="form-input w-full px-3 py-2.5 rounded-xl text-sm outline-hidden"
+            className="form-input w-full px-3 py-2.5 rounded-lg text-sm outline-hidden"
             style={{
               background: "var(--t-bg-elevated)",
               color: "var(--t-text-primary)",

@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useEffectivePinned";
 import { useTeamStore } from "@/stores/teamStore";
 import { useCanConnect } from "@/hooks/useCanConnect";
+import { toastActionError } from "@/components/shared/actionError";
 import { HostPingDot, hostAddress, hostDisplayName } from "./hostDisplay";
 
 interface Props {
@@ -26,11 +27,9 @@ export function DashboardHostCard({ connection, onConnect }: Props) {
   const canConnect = useCanConnect(connection);
   const pinAlwaysVisible = pinSource !== "none" && pinSource !== "team-hidden";
   const handlePinClick = () => {
-    if (!isTeamVault) {
-      pinConnection(connection.id, !isPinned).catch(() => {});
-    } else {
-      pinConnection(connection.id, nextPersonalPinValue(pinSource)).catch(() => {});
-    }
+    const next = isTeamVault ? nextPersonalPinValue(pinSource) : !isPinned;
+    // The store only updates after the write succeeds, so a failure leaves the old pin state: just report it.
+    pinConnection(connection.id, next).catch((e: unknown) => toastActionError(e, t));
   };
   const pinIcon = pinSource === "team-hidden" ? "lucide:pin-off" : "lucide:pin";
   const pinColor =
@@ -46,7 +45,7 @@ export function DashboardHostCard({ connection, onConnect }: Props) {
       <button
         type="button"
         disabled={!canConnect}
-        className="surface-glass surface-glass-interactive flex flex-col items-center gap-2 w-full px-2 py-3 rounded-xl cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+        className="surface-glass surface-glass-interactive flex flex-col items-center gap-2 w-full px-2 py-3 rounded-[var(--r-md)] cursor-pointer disabled:cursor-not-allowed disabled:opacity-(--disabled-opacity)"
         title={canConnect ? undefined : t("common.error.connectNotAllowed")}
         onClick={() => onConnect(connection)}
       >
@@ -63,7 +62,7 @@ export function DashboardHostCard({ connection, onConnect }: Props) {
       </button>
       <button
         type="button"
-        className={`absolute top-1.5 right-1.5 transition-opacity p-0.5 rounded-sm ${pinAlwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}
+        className={`absolute top-1.5 right-1.5 transition-opacity p-0.5 rounded-sm ${pinAlwaysVisible ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100"}`}
         style={{ color: pinColor }}
         onClick={handlePinClick}
         title={isPinned ? t("home.hostCard.unpin") : t("home.hostCard.pin")}

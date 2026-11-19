@@ -25,7 +25,7 @@ export function GlobalTransferQueue() {
   // the right (destination) pane rather than the viewport edge, and round the
   // top corners so it reads as a detached card docked to the bottom.
   return (
-    <div className="fixed bottom-0 right-3 z-40 w-88 max-w-[90vw] rounded-t-xl overflow-hidden shadow-2xl">
+    <div className="fixed bottom-0 right-3 z-40 w-88 max-w-[calc(100vw-2rem)] rounded-t-[var(--r-lg)] overflow-hidden" style={{ boxShadow: "var(--t-elev-2)" }}>
       <TransferQueue transfers={transfers} onClear={clearCompleted} onCancel={cancelTransfer} onCancelAll={cancelAll} onRetry={retryTransfer} collapsible />
     </div>
   );

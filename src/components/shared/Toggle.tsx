@@ -17,25 +17,10 @@ export function Toggle({ checked, onChange, disabled, "aria-label": ariaLabel }:
       disabled={disabled}
       data-row-control
       onClick={() => { haptic(toggleHaptic(!checked)); onChange(!checked); }}
-      className="relative shrink-0 rounded-full transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-      style={{
-        width: "2.4rem",
-        height: "1.333rem",
-        background: checked ? "var(--t-accent)" : "var(--t-bg-input)",
-        boxShadow: "var(--t-ring)",
-      }}
+      className={`relative shrink-0 w-9 h-5 rounded-full transition-colors duration-200 shadow-(--t-ring) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed ${checked ? "bg-(--t-accent)" : "bg-(--t-bg-input)"}`}
     >
       <span
-        className="absolute rounded-full transition-transform duration-200"
-        style={{
-          width: "1.067rem",
-          height: "1.067rem",
-          top: "0.133rem",
-          left: "0.133rem",
-          transform: checked ? "translateX(1.067rem)" : "translateX(0)",
-          background: "#fff",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
-        }}
+        className={`absolute top-0.5 left-0.5 size-4 rounded-full transition-[transform,background-color] duration-200 ${checked ? "translate-x-4 bg-(--t-on-accent)" : "translate-x-0 bg-(--t-text-muted)"}`}
       />
     </button>
   );

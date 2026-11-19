@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Icon } from "@iconify/react";
 import { FormSelect } from "@/components/shared/FormSelect";
+import { Modal, ModalCard } from "@/components/shared/Modal";
 import {
   resolveTemplate,
   type ParsedVariable,
@@ -35,7 +36,7 @@ function VarInput({ variable, value, onChange }: VarInputProps) {
           style={{
             background: value === "true" ? "var(--t-accent)" : "var(--t-bg-input)",
             borderColor: value === "true" ? "var(--t-accent)" : "var(--t-border)",
-            color: value === "true" ? "var(--t-tab-active-text)" : "var(--t-text-muted)",
+            color: value === "true" ? "var(--t-on-accent)" : "var(--t-text-muted)",
           }}
         >
           <Icon
@@ -142,20 +143,9 @@ export function SnippetVariableModal({
     return val !== undefined && val !== "";
   });
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") onClose();
-  }
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.55)" }}
-      onKeyDown={handleKeyDown}
-    >
-      <div
-        className="w-[520px] max-h-[90vh] rounded-xl shadow-2xl border flex flex-col overflow-hidden"
-        style={{ background: "var(--t-bg-modal)", borderColor: "var(--t-border)" }}
-      >
+    <Modal onClose={onClose}>
+      <ModalCard solid className="w-[min(34.667rem,calc(100vw-2rem))] max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3 border-b shrink-0"
@@ -168,16 +158,14 @@ export function SnippetVariableModal({
                 {snippetName}
               </h2>
               {contextLabel && (
-                <p className="text-[11px] text-(--t-text-dim)">{contextLabel}</p>
+                <p className="text-2xs text-(--t-text-dim)">{contextLabel}</p>
               )}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
-            style={{ color: "var(--t-text-muted)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}
+            aria-label={t("common.action.cancel")}
+            className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors text-(--t-text-muted) hover:text-(--t-text-primary)"
           >
             <Icon icon="lucide:x" width={14} />
           </button>
@@ -187,11 +175,11 @@ export function SnippetVariableModal({
         <div className="flex flex-col gap-3 p-4 overflow-y-auto" ref={firstInputRef}>
           {userVars.map((v) => (
             <div key={v.name} className="flex flex-col gap-1">
-              <label className="text-[11px] font-medium" style={{ color: "var(--t-text-muted)" }}>
+              <label className="text-2xs font-medium" style={{ color: "var(--t-text-muted)" }}>
                 {v.label ?? v.name}
                 {v.type === "password" && (
                   <span
-                    className="ml-1.5 text-[10px] px-1 py-0.5 rounded-sm"
+                    className="ml-1.5 text-2xs px-1 py-0.5 rounded-sm"
                     style={{ background: "var(--t-bg-input)", color: "var(--t-text-muted)" }}
                   >
                     {t("terminal.snippetVariableModal.masked")}
@@ -209,14 +197,14 @@ export function SnippetVariableModal({
 
         {/* Preview */}
         <div
-          className="mx-4 mb-3 px-3 py-2 rounded-sm border text-[11px] font-mono break-all leading-relaxed"
+          className="mx-4 mb-3 px-3 py-2 rounded-sm border text-2xs font-mono break-all leading-relaxed"
           style={{
             background: "var(--t-bg-input)",
             borderColor: "var(--t-border)",
             color: "var(--t-text-secondary)",
           }}
         >
-          <span className="text-[10px] font-sans block mb-1" style={{ color: "var(--t-text-muted)" }}>
+          <span className="text-2xs font-sans block mb-1" style={{ color: "var(--t-text-muted)" }}>
             {t("terminal.snippetVariableModal.preview")}
           </span>
           {preview}
@@ -263,7 +251,7 @@ export function SnippetVariableModal({
             </>
           )}
         </div>
-      </div>
-    </div>
+      </ModalCard>
+    </Modal>
   );
 }

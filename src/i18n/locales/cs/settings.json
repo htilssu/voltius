@@ -944,7 +944,8 @@
         "builtinBadge": "Vestavěná",
         "dragToReorder": "Přetažením změníte pořadí",
         "deleteRoleTitle": "Smazat roli",
-        "clickToConfirm": "Klikněte znovu pro potvrzení",
+        "deleteRoleConfirm": "Smazat „{{name}}“? Počet členů s touto rolí: {{count}}. Přijdou o její oprávnění; ostatní role jim zůstanou.",
+        "loadFailed": "Role se nepodařilo načíst.",
         "failedToDelete": "Smazání se nezdařilo",
         "editRole": "Upravit roli",
         "newRole": "Nová vlastní role",
@@ -995,6 +996,9 @@
         "update": "Aktualizovat",
         "updating": "Aktualizace…",
         "updateTitle": "Aktualizovat na v{{version}}",
+        "confirmUninstall": {
+          "message": "{{name}} bude z tohoto zařízení odstraněn i s nastavením."
+        },
         "confirmUninstallSeeded": {
           "title": "Odinstalovat {{name}}?",
           "message": "{{name}} je vestavěný plugin. Odinstalováním ho odeberete ze seznamu — kdykoli ho můžete znovu nainstalovat na kartě Procházet.",

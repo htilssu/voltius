@@ -18,7 +18,7 @@
   width: 18px; height: 16px; line-height: 1; font-size: 11px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 3px; cursor: pointer;
-  color: var(--t-text); background: var(--t-bg-elevated);
+  color: var(--t-text-primary); background: var(--t-bg-elevated);
   border: 1px solid var(--t-border);
 }
 .cm-diff-ribbon-btn:hover { background: var(--t-bg-card); border-color: var(--t-accent); }

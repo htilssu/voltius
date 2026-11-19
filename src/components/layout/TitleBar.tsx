@@ -42,7 +42,7 @@ import { sessionLabel, splitTabLabel } from "@/utils/sessionLabel";
 import { focusSession } from "@/hooks/useTerminal";
 import { splitTabMenuItems } from "@/utils/splitTabMenuItems";
 import { fadeMask, useTabStripScroll } from "@/hooks/useTabStripScroll";
-import { TitlebarTab, sessionTabIcon, tabSurfaceStyle } from "@/components/layout/TitlebarTab";
+import { TitlebarTab, sessionTabIcon, tabSurfaceClass, TAB_ACTIVE_CLASS } from "@/components/layout/TitlebarTab";
 import { StackTab } from "@/components/layout/StackTab";
 import { buildTitlebarItems, stackGroupKey, titlebarKeyGroupOf, visibleTitlebarKeys } from "@/utils/titlebarItems";
 import { useToggle } from "@/stores/toggleSettingsStore";
@@ -268,72 +268,38 @@ export default function TitleBar() {
       <div
         className="flex items-center flex-1 h-full gap-1.5 px-1 min-w-0"
       >
-        {/* Vaults button */}
-        <button
+        <PageTabButton
+          className="ml-3"
+          active={isVaultsActive}
+          compact={isVaultCompact}
+          icon="lucide:vault"
+          label={t("common.entity.vaults")}
           onClick={() => {
             setSftpPanelOpen(false);
             setActiveNav("hosts");
           }}
-          className="flex items-center gap-2.5 h-9 shrink-0 transition-all"
-          style={{
-            marginLeft: "0.75rem",
-            background: isVaultsActive ? "var(--t-vault-tab-active-bg)" : "var(--t-vault-tab-bg)",
-            color: isVaultsActive ? "var(--t-text-primary)" : "var(--t-text-secondary)",
-            borderRadius: "0.667rem",
-            padding: isVaultCompact ? "0 0.667rem" : "0 1.067rem",
-          }}
-          onMouseEnter={(e) => {
-            if (!isVaultsActive) (e.currentTarget as HTMLButtonElement).style.background = "var(--t-vault-tab-active-bg)";
-          }}
-          onMouseLeave={(e) => {
-            if (!isVaultsActive) {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-              (e.currentTarget as HTMLButtonElement).style.background = "var(--t-vault-tab-bg)";
-            }
-          }}
-        >
-          <Icon icon="lucide:vault" width={20} />
-          {!isVaultCompact && <span>{t("common.entity.vaults")}</span>}
-        </button>
+        />
 
-        {/* SFTP button */}
-        <button
+        <PageTabButton
+          active={sftpPanelOpen}
+          compact={isSftpCompact}
+          icon={SFTP_TAB_ICON}
+          label={t("layout.titleBar.sftp")}
+          title={t("layout.titleBar.sftpTitle")}
           onClick={() => {
             const nextOpen = !sftpPanelOpen;
             if (nextOpen) setRightPanelOpen(false);
             setSftpPanelOpen(nextOpen);
           }}
-          className="flex items-center gap-2.5 h-9 shrink-0 transition-all"
-          style={{
-            background: sftpPanelOpen ? "var(--t-vault-tab-active-bg)" : "var(--t-vault-tab-bg)",
-            color: sftpPanelOpen ? "var(--t-text-primary)" : "var(--t-text-secondary)",
-            borderRadius: "0.667rem",
-            padding: isSftpCompact ? "0 0.667rem" : "0 1.067rem",
-          }}
-          title={t("layout.titleBar.sftpTitle")}
-          onMouseEnter={(e) => {
-            if (!sftpPanelOpen) {
-              (e.currentTarget as HTMLButtonElement).style.background = "var(--t-vault-tab-active-bg)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!sftpPanelOpen) {
-              (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-              (e.currentTarget as HTMLButtonElement).style.background = "var(--t-vault-tab-bg)";
-            }
-          }}
-        >
-          <Icon icon={SFTP_TAB_ICON} width={20} />
-          {!isSftpCompact && <span>{t("layout.titleBar.sftp")}</span>}
-        </button>
+        />
 
         {/* Separator */}
         {sessions.length > 0 && (
-          <div className="shrink-0 w-px h-[1.667rem] bg-(--t-bg-card-hover)" />
+          <div className="shrink-0 w-px h-7 bg-(--t-bg-card-hover)" />
         )}
 
         <div
-          className="flex items-center gap-1.5 flex-1 h-full min-w-0 rounded-xl transition-colors"
+          className="flex items-center gap-1.5 flex-1 h-full min-w-0 rounded-lg transition-colors"
           style={{
             background: titlebarDropActive
               ? "color-mix(in srgb, var(--t-accent) 10%, transparent)"
@@ -523,34 +489,21 @@ export default function TitleBar() {
           <button
             ref={shareButtonRef}
             onClick={() => setShareDropdownOpen((o) => !o)}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-all"
-            style={{
-              background: isActiveSessionSharing
-                ? "color-mix(in srgb, var(--t-accent) 15%, transparent)"
-                : shareDropdownOpen ? "var(--t-bg-elevated)" : "transparent",
-              color: isActiveSessionSharing ? "var(--t-accent)" : "var(--t-text-secondary)",
-              border: isActiveSessionSharing
-                ? "1px solid color-mix(in srgb, var(--t-accent) 30%, transparent)"
-                : "1px solid transparent",
-            }}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs border transition-colors ${
+              isActiveSessionSharing
+                ? "text-(--t-accent)"
+                : `border-transparent text-(--t-text-secondary) hover:text-(--t-text-primary) hover:bg-(--t-bg-elevated) ${shareDropdownOpen ? "bg-(--t-bg-elevated)" : ""}`
+            }`}
+            style={isActiveSessionSharing ? {
+              background: "color-mix(in srgb, var(--t-accent) 15%, transparent)",
+              borderColor: "color-mix(in srgb, var(--t-accent) 30%, transparent)",
+            } : undefined}
             title={
               isActiveSessionSharing        ? t("layout.titleBar.sharingCurrently") :
               accountMode !== "server"      ? t("layout.titleBar.signInToShare") :
               tier === "free"               ? t("layout.titleBar.sharingRequiresPro") :
                                               t("layout.titleBar.shareTerminal")
             }
-            onMouseEnter={(e) => {
-              if (!isActiveSessionSharing && !shareDropdownOpen) {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-                (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActiveSessionSharing && !shareDropdownOpen) {
-                (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-                (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-              }
-            }}
           >
             <Icon icon="lucide:radio" width={13} />
             {isActiveSessionSharing ? t("layout.titleBar.sharing") : t("layout.titleBar.share")}
@@ -577,15 +530,10 @@ export default function TitleBar() {
         <div className="flex items-center px-2 shrink-0">
           <button
             onClick={() => toggleRightPanel()}
-            className="p-1.5 rounded-md transition-all"
-            style={{
-              background: rightPanelOpen ? "var(--t-tab-active-bg)" : "transparent",
-              color: rightPanelOpen ? "var(--t-tab-active-text)" : "var(--t-text-secondary)",
-              border: rightPanelOpen ? "1px solid var(--t-tab-active-border)" : "1px solid transparent",
-            }}
+            className={`p-1.5 rounded-md border transition-colors ${
+              rightPanelOpen ? TAB_ACTIVE_CLASS : "border-transparent text-(--t-text-secondary) hover:text-(--t-text-bright) hover:bg-(--t-bg-elevated)"
+            }`}
             title={t("layout.titleBar.themesTools", { theme: activeThemeName })}
-            onMouseEnter={(e) => { if (!rightPanelOpen) { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)"; (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)"; } }}
-            onMouseLeave={(e) => { if (!rightPanelOpen) { (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)"; (e.currentTarget as HTMLButtonElement).style.background = "transparent"; } }}
           >
             <Icon icon="lucide:panel-right" width={16} />
           </button>
@@ -625,23 +573,9 @@ function NewTabButton() {
         ref={buttonRef}
         onClick={() => setOpen((o) => !o)}
         onPointerDown={createRipple}
-        className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0 transition-colors relative overflow-hidden"
-        style={{
-          color: open ? "var(--t-tab-active-text)" : "var(--t-text-dim)",
-          background: open ? "var(--t-bg-toolbar)" : "transparent",
-        }}
-        onMouseEnter={(e) => {
-          if (!open) {
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--t-tab-active-text)";
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-toolbar)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!open) {
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-          }
-        }}
+        className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 transition-colors relative overflow-hidden ${
+          open ? "text-(--t-tab-active-text) bg-(--t-bg-toolbar)" : "text-(--t-text-dim) hover:text-(--t-tab-active-text) hover:bg-(--t-bg-toolbar)"
+        }`}
         title={t("layout.titleBar.newSession")}
       >
         {rippleEls}
@@ -657,12 +591,38 @@ function DetachedPanePreview({ session }: { session: ReturnType<typeof useSessio
   const connection = connections.find((c) => c.id === session.connectionId);
   return (
     <div
-      className="pointer-events-none flex items-center gap-2 h-9 px-2 rounded-xl text-base font-medium-bold shrink-0 transition-all"
-      style={{ ...tabSurfaceStyle(true), boxShadow: "0 0 0 1px color-mix(in srgb, var(--t-accent) 35%, transparent)" }}
+      className={`pointer-events-none flex items-center gap-2 h-9 px-2 rounded-lg text-base font-medium-bold shrink-0 transition-all ${tabSurfaceClass(true)}`}
+      style={{ boxShadow: "0 0 0 1px color-mix(in srgb, var(--t-accent) 35%, transparent)" }}
     >
       {sessionTabIcon(session, connection, true, sessionStatusTone(session.status))}
       <span className="max-w-[140px] truncate">{sessionLabel(session)}</span>
     </div>
+  );
+}
+
+/** Fixed page tab at the head of the titlebar (Vaults, SFTP). */
+function PageTabButton({ active, compact, icon, label, title, onClick, className = "" }: {
+  active: boolean;
+  compact: boolean;
+  icon: string;
+  label: string;
+  title?: string;
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`flex items-center gap-2.5 h-9 shrink-0 rounded-lg transition-colors ${compact ? "px-2.5" : "px-4"} ${
+        active
+          ? "bg-(--t-vault-tab-active-bg) text-(--t-text-primary)"
+          : "bg-(--t-vault-tab-bg) text-(--t-text-secondary) hover:bg-(--t-vault-tab-active-bg)"
+      } ${className}`}
+    >
+      <Icon icon={icon} width={20} />
+      {!compact && <span>{label}</span>}
+    </button>
   );
 }
 
@@ -677,13 +637,7 @@ function TitleBarBtn({ onClick, title, children }: {
       onClick={onClick}
       onPointerDown={createRipple}
       title={title}
-      className="flex items-center justify-center size-8 rounded-md transition-colors text-(--t-text-dim) bg-transparent relative overflow-hidden"
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-      }}
+      className="flex items-center justify-center size-8 rounded-md transition-colors text-(--t-text-dim) bg-transparent hover:bg-(--t-bg-elevated) relative overflow-hidden"
     >
       {rippleEls}
       {children}
@@ -695,27 +649,16 @@ function TitleBarBtn({ onClick, title, children }: {
 export function SubscriptionBadge() {
   const openSettings = useUIStore((s) => s.openSettings);
   const plan = usePlanDisplay();
-  const [hovered, setHovered] = useState(false);
+  // Premium plans and an ending trial both read in the warning (amber) tone.
+  const tone = plan.trialEndingSoon || plan.premium
+    ? "text-(--t-status-warning)"
+    : "text-(--t-text-secondary) hover:text-(--t-accent) focus-visible:text-(--t-accent)";
 
   return (
     <div className="flex items-center px-1 shrink-0">
       <button
         onClick={() => (plan.trialOffer ? void startTrialOrCheckout("pro", "titlebar") : openSettings("account"))}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className="flex items-center gap-1.5 h-7 rounded-lg overflow-hidden transition-all"
-        style={{
-          maxWidth: hovered ? "10rem" : "2rem",
-          padding: hovered ? "0 0.5rem" : "0 0.375rem",
-          whiteSpace: "nowrap",
-          transition: "max-width 250ms ease, padding 250ms ease, color 150ms ease",
-          color: plan.trialEndingSoon
-            ? "var(--t-status-warning)"
-            : hovered
-              ? plan.premium ? "#f59e0b" : "var(--t-accent)"
-              : plan.premium ? "#f59e0b" : "var(--t-text-secondary)",
-          background: hovered ? "var(--t-bg-elevated)" : "transparent",
-        }}
+        className={`group flex items-center gap-1.5 h-7 rounded-lg overflow-hidden whitespace-nowrap max-w-8 px-1.5 hover:max-w-40 hover:px-2 hover:bg-(--t-bg-elevated) focus-visible:max-w-40 focus-visible:px-2 focus-visible:bg-(--t-bg-elevated) transition-[max-width,padding,color,background-color] duration-250 ease-out ${tone}`}
         title={plan.viaTooltip ?? plan.badge}
       >
         <Icon
@@ -723,7 +666,7 @@ export function SubscriptionBadge() {
           width={14}
           className="shrink-0"
         />
-        <span className="text-xs font-medium overflow-hidden" style={{ opacity: hovered ? 1 : 0, transition: "opacity 150ms ease" }}>
+        <span className="text-xs font-medium overflow-hidden opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-150">
           {plan.badge}
         </span>
       </button>
@@ -750,26 +693,15 @@ function SyncIndicator({ anchorRef, sync, active, onClick }: {
         ref={anchorRef}
         onClick={onClick}
         onPointerDown={createRipple}
-        className="flex items-center justify-center w-8 h-8 rounded-xl transition-colors relative overflow-hidden cursor-pointer"
-        style={{
-          color: active ? "var(--t-tab-active-text)" : color,
-          background: active ? "var(--t-tab-active-bg)" : "transparent",
-          border: active ? "1px solid var(--t-tab-active-border)" : "1px solid transparent",
-        }}
+        className={`flex items-center justify-center w-8 h-8 rounded-lg border transition-colors relative overflow-hidden cursor-pointer ${
+          active
+            ? TAB_ACTIVE_CLASS
+            : `border-transparent text-(--sync-color) hover:bg-(--t-bg-toolbar) ${status === "error" ? "hover:text-(--t-status-error)" : "hover:text-(--t-tab-active-text)"}`
+        }`}
+        // The status color is computed at runtime, so it rides in a local var
+        // that the class reads; an inline color would beat the hover class.
+        style={{ "--sync-color": color } as React.CSSProperties}
         title={title}
-        onMouseEnter={(e) => {
-          if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-toolbar)";
-            (e.currentTarget as HTMLButtonElement).style.color = status === "error"
-              ? "var(--t-status-error)" : "var(--t-tab-active-text)";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = color;
-          }
-        }}
       >
         {rippleEls}
         <EffectiveSyncIcon sync={sync} motion={motion} width={18} />

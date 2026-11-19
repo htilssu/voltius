@@ -64,7 +64,7 @@ export function SpokenCodeRow({ sessionId }: { sessionId: string }) {
       {code ? (
         <>
           <InviteCodeField code={code} />
-          <div className="flex items-center gap-2 text-[10px]" style={{ color: "var(--t-text-dim)" }}>
+          <div className="flex items-center gap-2 text-2xs" style={{ color: "var(--t-text-dim)" }}>
             <span>
               {t("terminal.share.readAloudHint")}
               {" · "}
@@ -99,7 +99,7 @@ export function SpokenCodeRow({ sessionId }: { sessionId: string }) {
             {expired ? t("terminal.share.codeExpired") : t("terminal.share.getSpokenCode")}
           </button>
           {error && (
-            <p className="text-[10px]" style={{ color: "var(--t-status-error)" }}>{error}</p>
+            <p className="text-2xs" style={{ color: "var(--t-status-error)" }}>{error}</p>
           )}
         </>
       )}

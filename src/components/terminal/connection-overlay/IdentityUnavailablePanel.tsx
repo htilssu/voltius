@@ -32,7 +32,7 @@ export function IdentityUnavailablePanel({
   return (
     <DecisionPanel
       tone="warning"
-      icon={<Icon icon="lucide:circle-alert" width={14} className="text-yellow-400" />}
+      icon={<Icon icon="lucide:circle-alert" width={14} className="text-(--t-status-warning)" />}
       title={t("terminal.overlay.identityPick.title")}
       description={
         issue.reason === "forbidden" && issue.identityName

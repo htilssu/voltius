@@ -18,7 +18,7 @@ const SIZES: Record<TabCloseVariant, { x: number; lock: number }> = {
 };
 
 const X_CLASS: Record<TabCloseVariant, string> = {
-  tab: "ml-0.5 opacity-0 group-hover:opacity-100 transition-opacity rounded-sm p-0.5 [&_path]:stroke-[2.1] hover:text-(--t-status-error)!",
+  tab: "ml-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity rounded-sm p-0.5 [&_path]:stroke-[2.1] hover:text-(--t-status-error)!",
   pane: "h-full px-1.5 flex items-center justify-center hover:bg-(--t-bg-card-hover) transition-colors text-(--t-text-dim) hover:text-(--t-status-error)",
   row: "p-1 rounded-sm text-(--t-text-muted) hover:text-(--t-status-error)",
   chip: "vt-hit opacity-70 h-8 w-8 rounded-full flex items-center justify-center",

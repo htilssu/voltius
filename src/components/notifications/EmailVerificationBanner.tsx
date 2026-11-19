@@ -86,7 +86,7 @@ export function EmailVerificationBanner() {
         {undeliverable ? (
           <button
             onClick={() => useUIStore.getState().openSettings("account")}
-            className="px-2.5 py-1 rounded-md text-xs font-medium bg-(--t-accent) text-(--t-on-accent) hover:opacity-90 transition-opacity"
+            className="btn btn-primary px-2.5 py-1 rounded-md text-xs font-medium"
           >
             {t("notifications.emailVerification.banner.changeEmail")}
           </button>
@@ -95,14 +95,14 @@ export function EmailVerificationBanner() {
             <button
               onClick={() => void handleResend()}
               disabled={resending}
-              className="px-2.5 py-1 rounded-md text-xs font-medium text-(--t-accent) hover:bg-(--t-bg-card) transition-colors disabled:opacity-60"
+              className="px-2.5 py-1 rounded-md text-xs font-medium text-(--t-accent) hover:bg-(--t-bg-card) transition-colors disabled:opacity-(--disabled-opacity)"
             >
               {resending ? t("notifications.emailVerification.banner.resending") : t("notifications.emailVerification.banner.resend")}
             </button>
             <button
               onClick={() => void handleVerified()}
               disabled={refreshing}
-              className="px-2.5 py-1 rounded-md text-xs font-medium bg-(--t-accent) text-(--t-on-accent) hover:opacity-90 transition-opacity disabled:opacity-60"
+              className="btn btn-primary px-2.5 py-1 rounded-md text-xs font-medium"
             >
               {refreshing ? t("notifications.emailVerification.banner.checking") : t("notifications.emailVerification.banner.verified")}
             </button>

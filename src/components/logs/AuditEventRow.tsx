@@ -34,56 +34,72 @@ export function actorTitle(log: AuditLog): string {
   return log.actor_member_name && name === log.actor_member_name ? `${name} (@${log.actor_name})` : name;
 }
 
+/** Event categories → theme tokens, so the log follows the theme and stays restrained. */
+const TONE = {
+  danger: "var(--t-status-error)",      // deletions / removals
+  sensitive: "var(--t-status-warning)", // roles, permissions, secrets, lock policy
+  live: "var(--t-status-connected)",    // something started running
+  ended: "var(--t-text-muted)",         // something stopped
+  change: "var(--t-accent)",            // ordinary create / update
+  secret: "var(--t-mcp)",               // vaults and keys
+  folder: "var(--t-file-folder)",
+} as const;
+
+/** Soft fill behind an action icon; inline because the colour is chosen at runtime. */
+export function actionTint(color: string): React.CSSProperties {
+  return { background: `color-mix(in srgb, ${color} 14%, transparent)`, color };
+}
+
 export const ACTION_META: Record<string, ActionMeta> = {
-  "member.invited":              { icon: "lucide:user-plus",              color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.memberInvited", { name: l.target_name ?? l.target_id ?? fallbackUser() }) },
-  "member.joined":               { icon: "lucide:user-check",              color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.memberJoined", { role: l.metadata?.role ?? fallbackRole() }) },
-  "member.removed":              { icon: "lucide:user-minus",              color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.memberRemoved", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
-  "member.renamed":              { icon: "lucide:id-card",                 color: "#3b82f6", label: (l) => {
+  "member.invited":              { icon: "lucide:user-plus",              color: TONE.change, label: (l) => i18n.t("logs.eventLabels.memberInvited", { name: l.target_name ?? l.target_id ?? fallbackUser() }) },
+  "member.joined":               { icon: "lucide:user-check",              color: TONE.change, label: (l) => i18n.t("logs.eventLabels.memberJoined", { role: l.metadata?.role ?? fallbackRole() }) },
+  "member.removed":              { icon: "lucide:user-minus",              color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.memberRemoved", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
+  "member.renamed":              { icon: "lucide:id-card",                 color: TONE.change, label: (l) => {
     const name = l.target_name ?? l.target_id ?? fallbackMember();
     const to = l.metadata?.new as string | null | undefined;
     return to ? i18n.t("logs.eventLabels.memberRenamed", { name, to }) : i18n.t("logs.eventLabels.memberNameRemoved", { name });
   } },
-  "member.role_changed":         { icon: "lucide:user-cog",                color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.memberRoleChanged", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
-  "member.permissions_changed":  { icon: "lucide:sliders-horizontal",      color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.memberPermissionsChanged", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
-  "vault.created":       { icon: "lucide:database",    color: "#8b5cf6", label: (l) => i18n.t("logs.eventLabels.vaultCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "vault.deleted":       { icon: "lucide:database",    color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.vaultDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "vault.renamed":       { icon: "lucide:database",    color: "#8b5cf6", label: (l) => i18n.t("logs.eventLabels.vaultRenamed", { name: l.target_name ?? l.target_id ?? "" }) },
-  "vault.key_rotated":   { icon: "lucide:key",         color: "#8b5cf6", label: (l) => i18n.t("logs.eventLabels.vaultKeyRotated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "role.created":        { icon: "lucide:shield",      color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.roleCreated", { name: l.target_name ?? "" }) },
-  "role.updated":        { icon: "lucide:shield",      color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.roleUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "role.deleted":        { icon: "lucide:shield-off",  color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.roleDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "permission.granted":  { icon: "lucide:shield-check",color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.permissionGranted", { name: l.target_name ?? l.target_id ?? fallbackResource() }) },
-  "permission.revoked":  { icon: "lucide:shield-x",    color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.permissionRevoked", { name: l.target_name ?? l.target_id ?? fallbackResource() }) },
-  "connection.created":  { icon: "lucide:server",      color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.connectionCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "connection.updated":  { icon: "lucide:server-cog",  color: "#3b82f6", label: (l) => i18n.t("logs.eventLabels.connectionUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "connection.deleted":  { icon: "lucide:server-off",  color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.connectionDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "connection.started":  { icon: "lucide:terminal",    color: "#10b981", label: (l) => i18n.t("logs.eventLabels.connectionStarted", { name: l.target_name ?? l.target_id ?? fallbackHost() }) },
-  "connection.ended":    { icon: "lucide:terminal",    color: "#6b7280", label: (l) => i18n.t("logs.eventLabels.connectionEnded", { name: l.target_name ?? l.target_id ?? fallbackHost() }) },
-  "identity.created":    { icon: "lucide:id-card",     color: "#14b8a6", label: (l) => i18n.t("logs.eventLabels.identityCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "identity.updated":    { icon: "lucide:id-card",     color: "#14b8a6", label: (l) => i18n.t("logs.eventLabels.identityUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "identity.deleted":    { icon: "lucide:id-card",     color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.identityDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "key.created":         { icon: "lucide:key-round",   color: "#8b5cf6", label: (l) => i18n.t("logs.eventLabels.keyCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "key.updated":         { icon: "lucide:key-round",   color: "#8b5cf6", label: (l) => i18n.t("logs.eventLabels.keyUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "key.deleted":         { icon: "lucide:key-round",   color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.keyDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "snippet.created":     { icon: "lucide:braces",      color: "#06b6d4", label: (l) => i18n.t("logs.eventLabels.snippetCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "snippet.updated":     { icon: "lucide:braces",      color: "#06b6d4", label: (l) => i18n.t("logs.eventLabels.snippetUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "snippet.deleted":     { icon: "lucide:braces",      color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.snippetDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "folder.created":      { icon: "lucide:folder-plus", color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.folderCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "folder.updated":      { icon: "lucide:folder-cog",  color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.folderUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "folder.deleted":      { icon: "lucide:folder-x",    color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.folderDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "port_forward.created":{ icon: "lucide:route",       color: "#10b981", label: (l) => i18n.t("logs.eventLabels.portForwardCreated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "port_forward.updated":{ icon: "lucide:route",       color: "#10b981", label: (l) => i18n.t("logs.eventLabels.portForwardUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
-  "port_forward.deleted":{ icon: "lucide:route-off",   color: "#ef4444", label: (l) => i18n.t("logs.eventLabels.portForwardDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
-  "secret.viewed":       { icon: "lucide:eye",         color: "#f59e0b", label: (l) => i18n.t("logs.eventLabels.secretViewed", { name: l.target_name ?? l.target_id ?? "" }) },
-  "session.started":     { icon: "lucide:monitor",     color: "#06b6d4", label: () => i18n.t("logs.eventLabels.sessionStarted") },
-  "session.ended":       { icon: "lucide:monitor",     color: "#6b7280", label: () => i18n.t("logs.eventLabels.sessionEnded") },
-  "session.joined":      { icon: "lucide:monitor",     color: "#06b6d4", label: () => i18n.t("logs.eventLabels.sessionJoined") },
-  "session.left":        { icon: "lucide:monitor",     color: "#6b7280", label: () => i18n.t("logs.eventLabels.sessionLeft") },
-  "team.lock_policy_set":     { icon: "lucide:shield-check", color: "#f59e0b", label: (l) => {
+  "member.role_changed":         { icon: "lucide:user-cog",                color: TONE.change, label: (l) => i18n.t("logs.eventLabels.memberRoleChanged", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
+  "member.permissions_changed":  { icon: "lucide:sliders-horizontal",      color: TONE.change, label: (l) => i18n.t("logs.eventLabels.memberPermissionsChanged", { name: l.target_name ?? l.target_id ?? fallbackMember() }) },
+  "vault.created":       { icon: "lucide:database",    color: TONE.secret, label: (l) => i18n.t("logs.eventLabels.vaultCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "vault.deleted":       { icon: "lucide:database",    color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.vaultDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "vault.renamed":       { icon: "lucide:database",    color: TONE.secret, label: (l) => i18n.t("logs.eventLabels.vaultRenamed", { name: l.target_name ?? l.target_id ?? "" }) },
+  "vault.key_rotated":   { icon: "lucide:key",         color: TONE.secret, label: (l) => i18n.t("logs.eventLabels.vaultKeyRotated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "role.created":        { icon: "lucide:shield",      color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.roleCreated", { name: l.target_name ?? "" }) },
+  "role.updated":        { icon: "lucide:shield",      color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.roleUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "role.deleted":        { icon: "lucide:shield-off",  color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.roleDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "permission.granted":  { icon: "lucide:shield-check",color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.permissionGranted", { name: l.target_name ?? l.target_id ?? fallbackResource() }) },
+  "permission.revoked":  { icon: "lucide:shield-x",    color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.permissionRevoked", { name: l.target_name ?? l.target_id ?? fallbackResource() }) },
+  "connection.created":  { icon: "lucide:server",      color: TONE.change, label: (l) => i18n.t("logs.eventLabels.connectionCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "connection.updated":  { icon: "lucide:server-cog",  color: TONE.change, label: (l) => i18n.t("logs.eventLabels.connectionUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "connection.deleted":  { icon: "lucide:server-off",  color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.connectionDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "connection.started":  { icon: "lucide:terminal",    color: TONE.live, label: (l) => i18n.t("logs.eventLabels.connectionStarted", { name: l.target_name ?? l.target_id ?? fallbackHost() }) },
+  "connection.ended":    { icon: "lucide:terminal",    color: TONE.ended, label: (l) => i18n.t("logs.eventLabels.connectionEnded", { name: l.target_name ?? l.target_id ?? fallbackHost() }) },
+  "identity.created":    { icon: "lucide:id-card",     color: TONE.change, label: (l) => i18n.t("logs.eventLabels.identityCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "identity.updated":    { icon: "lucide:id-card",     color: TONE.change, label: (l) => i18n.t("logs.eventLabels.identityUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "identity.deleted":    { icon: "lucide:id-card",     color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.identityDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "key.created":         { icon: "lucide:key-round",   color: TONE.secret, label: (l) => i18n.t("logs.eventLabels.keyCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "key.updated":         { icon: "lucide:key-round",   color: TONE.secret, label: (l) => i18n.t("logs.eventLabels.keyUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "key.deleted":         { icon: "lucide:key-round",   color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.keyDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "snippet.created":     { icon: "lucide:braces",      color: TONE.change, label: (l) => i18n.t("logs.eventLabels.snippetCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "snippet.updated":     { icon: "lucide:braces",      color: TONE.change, label: (l) => i18n.t("logs.eventLabels.snippetUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "snippet.deleted":     { icon: "lucide:braces",      color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.snippetDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "folder.created":      { icon: "lucide:folder-plus", color: TONE.folder, label: (l) => i18n.t("logs.eventLabels.folderCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "folder.updated":      { icon: "lucide:folder-cog",  color: TONE.folder, label: (l) => i18n.t("logs.eventLabels.folderUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "folder.deleted":      { icon: "lucide:folder-x",    color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.folderDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "port_forward.created":{ icon: "lucide:route",       color: TONE.live, label: (l) => i18n.t("logs.eventLabels.portForwardCreated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "port_forward.updated":{ icon: "lucide:route",       color: TONE.live, label: (l) => i18n.t("logs.eventLabels.portForwardUpdated", { name: l.target_name ?? l.target_id ?? "" }) },
+  "port_forward.deleted":{ icon: "lucide:route-off",   color: TONE.danger, label: (l) => i18n.t("logs.eventLabels.portForwardDeleted", { name: l.target_name ?? l.target_id ?? "" }) },
+  "secret.viewed":       { icon: "lucide:eye",         color: TONE.sensitive, label: (l) => i18n.t("logs.eventLabels.secretViewed", { name: l.target_name ?? l.target_id ?? "" }) },
+  "session.started":     { icon: "lucide:monitor",     color: TONE.change, label: () => i18n.t("logs.eventLabels.sessionStarted") },
+  "session.ended":       { icon: "lucide:monitor",     color: TONE.ended, label: () => i18n.t("logs.eventLabels.sessionEnded") },
+  "session.joined":      { icon: "lucide:monitor",     color: TONE.change, label: () => i18n.t("logs.eventLabels.sessionJoined") },
+  "session.left":        { icon: "lucide:monitor",     color: TONE.ended, label: () => i18n.t("logs.eventLabels.sessionLeft") },
+  "team.lock_policy_set":     { icon: "lucide:shield-check", color: TONE.sensitive, label: (l) => {
     const timeout = sessionTimeoutLabel((k) => i18n.t(k), sessionTimeoutValue((l.metadata?.max_minutes as number | undefined) ?? null));
     return i18n.t(l.metadata?.force_vault ? "logs.eventLabels.lockPolicySetVault" : "logs.eventLabels.lockPolicySet", { timeout });
   } },
-  "team.lock_policy_removed": { icon: "lucide:shield-off",   color: "#f59e0b", label: () => i18n.t("logs.eventLabels.lockPolicyRemoved") },
+  "team.lock_policy_removed": { icon: "lucide:shield-off",   color: TONE.sensitive, label: () => i18n.t("logs.eventLabels.lockPolicyRemoved") },
 };
 
 export const FALLBACK_META: ActionMeta = {
@@ -97,7 +113,7 @@ export const FALLBACK_META: ActionMeta = {
 function AuditBadge({ accent, title, children }: { accent?: boolean; title?: string; children: React.ReactNode }) {
   return (
     <span
-      className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+      className="text-2xs px-1.5 py-0.5 rounded-full font-medium"
       title={title}
       style={
         accent
@@ -120,6 +136,7 @@ export function actionName(action: string): string {
 }
 
 export function ActorAvatar({ log, className = "" }: { log: AuditLog; className?: string }) {
+  // White initials on the identity palette (avatarColor), same as AvatarStack — not a theme surface.
   return (
     <div
       className={`shrink-0 rounded-full flex items-center justify-center text-white font-bold select-none ${className}`}
@@ -134,7 +151,7 @@ export function ActorAvatar({ log, className = "" }: { log: AuditLog; className?
 export function ActionDot({ log, className = "" }: { log: AuditLog; className?: string }) {
   const { icon, color } = ACTION_META[log.action] ?? FALLBACK_META;
   return (
-    <div className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${className}`} style={{ background: `${color}22`, color }}>
+    <div className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${className}`} style={actionTint(color)}>
       <Icon icon={icon} width={11} />
     </div>
   );

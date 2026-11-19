@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Icon, BottomSheet, useT, useSessionById, MobileScreenHeader, StatusDot } from "@voltius/ui";
+import { Icon, BottomSheet, useT, useSessionById, MobileScreenHeader, MobileButton, MobileEmptyState, SheetActionRow, StatusDot } from "@voltius/ui";
 import type { FC } from "react";
 import type { PluginAPI, MobileScreenProps } from "@/plugins/api";
 import { createMobileDockerListService } from "../services";
@@ -64,29 +64,30 @@ export function createMobileDockerScreen(api: PluginAPI): FC<MobileScreenProps> 
       try {
         await act(c.id, action);
       } catch (e) {
-        console.error("[docker] action failed:", e);
+        api.notifications.toast(t("actionFailed", { error: String(e) }), { severity: "error" });
       }
     };
 
     let body: React.ReactNode;
     if (!session || session.type !== "ssh") {
-      body = <Empty icon="custom:docker" title={t("needsSshTitle")} sub={t("needsSshSub")} />;
+      body = <MobileEmptyState icon="custom:docker" title={t("needsSshTitle")} sub={t("needsSshSub")} />;
     } else if (session.status !== "connected") {
-      body = <Empty icon="custom:docker" title={t("sessionNotConnected")} sub={t("sessionNotConnectedSub")} />;
+      body = <MobileEmptyState icon="custom:docker" title={t("sessionNotConnected")} sub={t("sessionNotConnectedSub")} />;
     } else if (dockerUnreachable) {
       body = (
-        <Empty
-          icon="custom:docker"
-          title={t("unreachableTitle")}
-          sub={t("unreachableSub")}
-          action={{ label: t("refresh"), onClick: () => void refresh() }}
-        />
+        <MobileEmptyState icon="custom:docker" title={t("unreachableTitle")} sub={t("unreachableSub")}>
+          <MobileButton variant="secondary" onClick={() => void refresh()}>{t("refresh")}</MobileButton>
+        </MobileEmptyState>
       );
     } else if (error) {
-      body = <div className="px-4 py-4 text-xs text-(--t-text-dim) break-all">{error}</div>;
+      body = (
+        <MobileEmptyState icon="lucide:triangle-alert" title={t("loadFailed")} sub={error}>
+          <MobileButton variant="secondary" onClick={() => void refresh()}>{t("refresh")}</MobileButton>
+        </MobileEmptyState>
+      );
     } else if (visible.length === 0) {
       body = (
-        <Empty
+        <MobileEmptyState
           icon="lucide:box"
           title={containers.length === 0 ? t("noContainers") : t("noRunningContainers")}
           sub={containers.length === 0 ? undefined : t("tapRunningToShowAll")}
@@ -122,7 +123,7 @@ export function createMobileDockerScreen(api: PluginAPI): FC<MobileScreenProps> 
                   <span className="text-xs text-(--t-text-dim) truncate">{c.image}</span>
                   <PortChips ports={c.ports} sessionId={sessionId} isRemote size="md" />
                 </span>
-                <span className="shrink-0 text-[11px] text-(--t-text-dim) truncate max-w-[40%]">{c.status}</span>
+                <span className="shrink-0 text-2xs text-(--t-text-dim) truncate max-w-[40%]">{c.status}</span>
               </div>
             );
           })}
@@ -144,7 +145,7 @@ export function createMobileDockerScreen(api: PluginAPI): FC<MobileScreenProps> 
             >
               {showAll ? t("filterAll") : t("filterRunning")}
             </button>
-            <button onClick={() => void refresh()} disabled={loading} className="p-2 text-(--t-text-dim) disabled:opacity-40">
+            <button onClick={() => void refresh()} disabled={loading} aria-label={t("refresh")} className="vt-icon-btn text-(--t-text-dim) disabled:opacity-(--disabled-opacity)">
               <Icon icon="lucide:refresh-cw" width={18} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
@@ -192,28 +193,24 @@ export function createMobileDockerScreen(api: PluginAPI): FC<MobileScreenProps> 
         {confirmRemove && (
           <BottomSheet title={t("removeConfirmTitle")} onClose={() => setConfirmRemove(null)}>
             <div className="flex flex-col gap-3 px-2 py-1">
-              <p className="text-xs text-(--t-text-dim)">
+              <p className="text-sm text-(--t-text-secondary)">
                 {t("removeConfirmBody", { name: containerName(confirmRemove) })}
               </p>
-              <button
+              <MobileButton
+                block
+                variant="danger"
                 data-mobile-docker-remove-confirm
                 onClick={() => {
                   const c = confirmRemove;
                   setConfirmRemove(null);
                   void runAction(c, "remove");
                 }}
-                className="w-full rounded-xl py-3 text-sm font-medium"
-                style={{ background: "var(--t-status-error)", color: "#fff" }}
               >
                 {t("remove")}
-              </button>
-              <button
-                onClick={() => setConfirmRemove(null)}
-                className="w-full rounded-xl py-3 text-sm text-(--t-text-primary)"
-                style={{ background: "var(--t-bg-card)" }}
-              >
+              </MobileButton>
+              <MobileButton block variant="secondary" onClick={() => setConfirmRemove(null)}>
                 {t("cancel")}
-              </button>
+              </MobileButton>
             </div>
           </BottomSheet>
         )}
@@ -223,30 +220,5 @@ export function createMobileDockerScreen(api: PluginAPI): FC<MobileScreenProps> 
 }
 
 function SheetRow({ icon, label, onClick, danger }: { icon: string; label: string; onClick: () => void; danger?: boolean }) {
-  return (
-    <button
-      data-mobile-docker-action={label}
-      onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-3 text-left active:bg-(--t-bg-card)"
-      style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-primary)" }}
-    >
-      <Icon icon={icon} width={18} />
-      <span className="text-sm">{label}</span>
-    </button>
-  );
-}
-
-function Empty({ icon, title, sub, action }: { icon: string; title: string; sub?: string; action?: { label: string; onClick: () => void } }) {
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center px-8 text-center gap-2 text-(--t-text-dim)">
-      <Icon icon={icon} width={32} />
-      <span className="text-sm text-(--t-text-primary)">{title}</span>
-      {sub && <span className="text-xs">{sub}</span>}
-      {action && (
-        <button onClick={action.onClick} className="mt-2 text-xs px-3 py-1.5 rounded-lg" style={{ background: "var(--t-bg-card)", color: "var(--t-text-primary)" }}>
-          {action.label}
-        </button>
-      )}
-    </div>
-  );
+  return <SheetActionRow attr="mobile-docker-action" it={{ icon, label, slug: label, danger, onTap: onClick }} />;
 }

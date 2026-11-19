@@ -40,9 +40,9 @@ export function ProgressToast({ toast, onDismiss, pluginUnloaded, leaving }: Pro
       {(toast.thumbnail || toast.detail) && (
         <div className="flex items-center gap-2.5 min-w-0 pl-7 pr-2 pb-1">
           {toast.thumbnail && (
-            <img src={toast.thumbnail} alt="" className="h-7 w-11 rounded-[4px] object-cover shrink-0" style={{ boxShadow: "var(--t-ring)" }} />
+            <img src={toast.thumbnail} alt="" className="h-7 w-11 rounded-sm object-cover shrink-0" style={{ boxShadow: "var(--t-ring)" }} />
           )}
-          {toast.detail && <span className="text-[11.5px] truncate min-w-0 text-(--t-text-muted)">{toast.detail}</span>}
+          {toast.detail && <span className="text-2xs truncate min-w-0 text-(--t-text-muted)">{toast.detail}</span>}
         </div>
       )}
     </ToastStrip>

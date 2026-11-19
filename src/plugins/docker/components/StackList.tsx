@@ -96,12 +96,12 @@ export function StackList({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-3 py-1 border-b border-(--t-border) shrink-0">
-        <span className="text-[11px] text-(--t-text-muted)">{t("stacksCount", { count: stacks.length })}</span>
+        <span className="text-2xs text-(--t-text-muted)">{t("stacksCount", { count: stacks.length })}</span>
         <button
           onClick={checkAll}
           disabled={isChecking || services.length === 0}
           title={t("checkStackUpdates")}
-          className="flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-hover) hover:text-(--t-text) disabled:opacity-40"
+          className="flex items-center gap-1 text-2xs px-1.5 py-0.5 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
         >
           <Icon icon="lucide:circle-arrow-up" width={10} className={isChecking ? "animate-pulse" : ""} />
           {isChecking ? t("checking") : t("updates")}
@@ -109,8 +109,8 @@ export function StackList({
       </div>
 
       {stacks.length === 0 ? (
-        <div className="flex items-center justify-center h-20 opacity-40">
-          <p className="text-[12px] text-(--t-text-muted)">{t("noStacks")}</p>
+        <div className="flex items-center justify-center h-20">
+          <p className="text-xs text-(--t-text-dim)">{t("noStacks")}</p>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -129,12 +129,12 @@ export function StackList({
                     size="sm"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-(--t-text) truncate font-medium">{stack.name}</p>
-                    <p className="text-[11px] text-(--t-text-muted) truncate">
+                    <p className="text-xs text-(--t-text-primary) truncate font-medium">{stack.name}</p>
+                    <p className="text-2xs text-(--t-text-muted) truncate">
                       {stack.status || t("stackRunning", { running: stack.running, total: stack.total })}
                     </p>
                   </div>
-                  <span className="text-[11px] text-(--t-text-muted) font-mono shrink-0">
+                  <span className="text-2xs text-(--t-text-muted) font-mono shrink-0">
                     {stack.running}/{stack.total}
                   </span>
                   <Icon
@@ -199,12 +199,12 @@ export function StackList({
                 {expanded && (
                   <div className="px-3 pb-2 space-y-1">
                     {stack.config_files.length > 0 && (
-                      <p className="text-[11px] text-(--t-text-muted) truncate font-mono">
+                      <p className="text-2xs text-(--t-text-muted) truncate font-mono">
                         {stack.config_files.join(", ")}
                       </p>
                     )}
                     {stackServices.length === 0 ? (
-                      <p className="text-[11px] text-(--t-text-muted) opacity-60">{t("noServices")}</p>
+                      <p className="text-2xs text-(--t-text-muted) opacity-60">{t("noServices")}</p>
                     ) : (
                       <div className="rounded-md border border-(--t-border) overflow-hidden">
                         {stackServices.map((service) => {
@@ -281,10 +281,10 @@ function ServiceRow({
     <div className="flex items-center gap-2 px-2 py-1.5 border-b border-(--t-border) last:border-0 hover:bg-(--t-bg-card-hover) group">
       <StatusDot tone={containerStateTone(state)} size="sm" />
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] text-(--t-text) truncate">{service.service || service.name}</p>
-        <p className="text-[11px] text-(--t-text-muted) truncate">{service.status || state}</p>
+        <p className="text-xs text-(--t-text-primary) truncate">{service.service || service.name}</p>
+        <p className="text-2xs text-(--t-text-muted) truncate">{service.status || state}</p>
         <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-[11px] text-(--t-text-muted) truncate font-mono">{service.image}</p>
+          <p className="text-2xs text-(--t-text-muted) truncate font-mono">{service.image}</p>
           <UpdateBadge status={status} checking={checking} />
         </div>
         <PortChips ports={service.ports} sessionId={sessionId} isRemote={isRemote} limit={2} />
@@ -307,7 +307,7 @@ function ServiceRow({
           disabled={!service.id}
           onClick={() => onLogs(service.id, service.name || service.service)}
           title={t("logs")}
-          className="p-1 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-card-hover) hover:text-(--t-text) disabled:opacity-30"
+          className="p-1 rounded-sm text-(--t-text-muted) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)"
         >
           <Icon icon="lucide:scroll-text" width={12} />
         </button>
@@ -316,7 +316,7 @@ function ServiceRow({
             disabled={!service.id}
             onClick={() => onTerminal(service.id, service.name || service.service)}
             title={t("openTerminal")}
-            className="p-1 rounded-sm text-(--t-accent) opacity-80 hover:opacity-100 hover:bg-(--t-bg-card-hover) disabled:opacity-30"
+            className="p-1 rounded-sm text-(--t-accent) opacity-80 hover:opacity-100 hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity)"
           >
             <Icon icon="lucide:terminal" width={12} />
           </button>
@@ -340,7 +340,7 @@ function Btn({
   disabled,
   busy,
   onClick,
-  color = "text-(--t-text-muted) hover:text-(--t-text)",
+  color = "text-(--t-text-muted) hover:text-(--t-text-primary)",
 }: {
   icon: string;
   title: string;
@@ -354,7 +354,7 @@ function Btn({
       disabled={disabled}
       onClick={onClick}
       title={title}
-      className={`p-1 rounded-sm hover:bg-(--t-bg-card-hover) disabled:opacity-40 ${color}`}
+      className={`p-1 rounded-sm hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity) ${color}`}
     >
       <Icon icon={busy ? "lucide:loader-circle" : icon} width={12} className={busy ? "animate-spin" : ""} />
     </button>

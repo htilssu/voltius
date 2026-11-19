@@ -177,8 +177,7 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull, initialTab = 
       {variant === "popover" && tab !== "invite" && (
         <button
           onClick={() => setTab("invite")}
-          className="btn flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold py-2"
-          style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+          className="btn btn-primary flex items-center justify-center gap-1.5 rounded-lg text-xs font-semibold py-2"
         >
           <Icon icon="lucide:plus" width={14} />
           {t("members.share.inviteSomeone")}
@@ -230,7 +229,7 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull, initialTab = 
             onCopyInviteLink={handleCopyInviteLink}
           />
           {copiedInvite && (
-            <p className="text-[11px] text-(--t-text-secondary)">{t("members.people.inviteLinkCopied")}</p>
+            <p className="text-2xs text-(--t-text-secondary)">{t("members.people.inviteLinkCopied")}</p>
           )}
         </>
       )}
@@ -252,7 +251,7 @@ export function VaultShareSheet({ vaultId, variant, onRequestFull, initialTab = 
       {variant === "popover" && (
         <button
           onClick={onRequestFull}
-          className="btn btn-ghost self-start pt-2 pb-1 px-1 -mx-1 rounded text-[11px] font-medium border-t border-(--t-border) w-full text-left"
+          className="btn btn-ghost self-start pt-2 pb-1 px-1 -mx-1 rounded text-2xs font-medium border-t border-(--t-border) w-full text-left"
           style={{ color: "var(--t-accent)" }}
         >
           {t("members.share.manage")}

@@ -29,10 +29,12 @@ import { SnippetForm } from "@/components/snippets/SnippetForm";
 import { useSyncedFormKey } from "@/hooks/useSyncedFormKey";
 import { useCloseWhenGone } from "@/hooks/useCloseWhenGone";
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
+import { Modal, ModalCard } from "@/components/shared/Modal";
 import { itemsInFolderSubtree } from "@/utils/folderTree";
 import { copyingRulesOf } from "@/services/ruleSetIntent";
 import type { Snippet, Folder, SnippetFormData, FolderFormData } from "@/types";
 import type { Connection } from "@/types";
+import { toastActionError } from "@/components/shared/actionError";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -65,45 +67,34 @@ function FolderModal({
     if (!name.trim()) return;
     setSaving(true);
     try { await onSave({ name: name.trim(), object_type: "snippet" }); }
+    catch (e) { toastActionError(e, t); }
     finally { setSaving(false); }
   }
 
-  const inputStyle = { background: "var(--t-bg-input)", borderColor: "var(--t-border)", color: "var(--t-text-primary)" };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}>
-      <div className="w-80 rounded-xl shadow-2xl border flex flex-col overflow-hidden"
-        style={{ background: "var(--t-bg-modal)", borderColor: "var(--t-border)" }}>
-        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: "var(--t-border)" }}>
-          <h2 className="text-sm font-semibold" style={{ color: "var(--t-text-primary)" }}>
+    <Modal onClose={onClose}>
+      <ModalCard solid className="w-[min(20rem,calc(100vw-2rem))] flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-(--t-border) shrink-0">
+          <h2 className="text-sm font-semibold text-(--t-text-primary)">
             {folder ? t("terminal.snippets.renameFolder") : t("terminal.snippets.newFolder")}
           </h2>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg"
-            style={{ color: "var(--t-text-muted)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}>
+          <button onClick={onClose} aria-label={t("common.action.cancel")} className="btn btn-ghost w-7 h-7 p-0 flex items-center justify-center">
             <Icon icon="lucide:x" width={14} />
           </button>
         </div>
         <div className="p-4">
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSave()}
-            placeholder={t("terminal.snippets.folderNamePlaceholder")} className="w-full px-2.5 py-1.5 text-xs rounded-sm border outline-hidden"
-            style={inputStyle} />
+            placeholder={t("terminal.snippets.folderNamePlaceholder")} className="form-input w-full px-2.5 py-1.5 text-xs" />
         </div>
-        <div className="flex justify-end gap-2 px-4 py-3 border-t shrink-0" style={{ borderColor: "var(--t-border)" }}>
-          <button onClick={onClose} className="px-3 py-1.5 text-xs rounded-lg border"
-            style={{ borderColor: "var(--t-border)", color: "var(--t-text-muted)", background: "transparent" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>{t("common.action.cancel")}</button>
-          <button onClick={handleSave} disabled={saving || !name.trim()} className="px-3 py-1.5 text-xs rounded-lg disabled:opacity-50"
-            style={{ background: "var(--t-accent)", color: "var(--t-tab-active-text)" }}>
+        <div className="flex justify-end gap-2 px-4 py-3 border-t border-(--t-border) shrink-0">
+          <button onClick={onClose} className="btn btn-secondary px-3 py-1.5 text-xs">{t("common.action.cancel")}</button>
+          <button onClick={handleSave} disabled={saving || !name.trim()} className="btn btn-primary px-3 py-1.5 text-xs">
             {saving ? t("common.state.saving") : t("common.action.save")}
           </button>
         </div>
-      </div>
-    </div>
+      </ModalCard>
+    </Modal>
   );
 }
 
@@ -151,10 +142,8 @@ function SnippetRow({
 
   return (
     <div
-      className="group px-3 py-2 border-b transition-colors"
-      style={{ borderColor: "var(--t-border)", opacity: dimmed ? 0.45 : 1 }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+      className="group px-3 py-2 border-b border-(--t-border) transition-colors hover:bg-(--t-bg-elevated)"
+      style={{ opacity: dimmed ? 0.45 : 1 }}
       title={dimmed ? t("terminal.snippets.notRelevantForConnection") : undefined}
     >
       <div className="flex items-start justify-between gap-1">
@@ -167,13 +156,13 @@ function SnippetRow({
               <Icon icon="lucide:pin" width={10} style={{ color: "var(--t-accent)", flexShrink: 0 }} />
             )}
           </div>
-          <p className="text-[11px] font-mono truncate mt-0.5 leading-tight" style={{ color: "var(--t-text-muted)" }}>
+          <p className="text-2xs font-mono truncate mt-0.5 leading-tight" style={{ color: "var(--t-text-muted)" }}>
             <SnippetPreview snippet={snippet} />
           </p>
           {snippet.tags.length > 0 && (
             <div className="flex gap-1 mt-1 flex-wrap">
               {snippet.tags.map((tag) => (
-                <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-sm"
+                <span key={tag} className="text-2xs px-1.5 py-0.5 rounded-sm"
                   style={{ background: "var(--t-bg-input)", color: "var(--t-text-muted)" }}>
                   {tag}
                 </span>
@@ -184,25 +173,16 @@ function SnippetRow({
 
         <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
           <button onClick={onToggleFavorite} title={snippet.favorite ? t("terminal.snippets.removeFromFavorites") : t("terminal.snippets.addToFavorites")}
-            className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors"
-            style={{ color: snippet.favorite ? "var(--t-accent)" : "var(--t-text-muted)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-accent)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = snippet.favorite ? "var(--t-accent)" : "var(--t-text-muted)")}>
+            className={`w-6 h-6 flex items-center justify-center rounded-sm transition-colors hover:text-(--t-accent) ${snippet.favorite ? "text-(--t-accent)" : "text-(--t-text-muted)"}`}>
             <Icon icon="lucide:pin" width={12} />
           </button>
 
           <button onClick={onInsert} disabled={!canInject} title={canInject ? t("terminal.shared.insert") : t("terminal.shared.noActiveSession")}
-            className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors disabled:opacity-30"
-            style={{ color: "var(--t-text-muted)" }}
-            onMouseEnter={(e) => { if (canInject) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; }}
-            onMouseLeave={(e) => (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"}>
+            className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-text-muted) enabled:hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity)">
             <Icon icon="lucide:arrow-down-to-line" width={13} />
           </button>
           <button onClick={onExecute} disabled={!canInject} title={canInject ? t("terminal.shared.insertAndExecute") : t("terminal.shared.noActiveSession")}
-            className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors disabled:opacity-30"
-            style={{ color: "var(--t-text-muted)" }}
-            onMouseEnter={(e) => { if (canInject) (e.currentTarget as HTMLButtonElement).style.color = "var(--t-accent)"; }}
-            onMouseLeave={(e) => (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-muted)"}>
+            className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-text-muted) enabled:hover:text-(--t-accent) disabled:opacity-(--disabled-opacity)">
             <Icon icon="lucide:play" width={13} />
           </button>
 
@@ -210,10 +190,7 @@ function SnippetRow({
             <button
               ref={menuButtonRef}
               onClick={() => setMenuOpen((o) => !o)}
-              className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors"
-              style={{ color: "var(--t-text-muted)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}>
+              className="w-6 h-6 flex items-center justify-center rounded-sm transition-colors text-(--t-text-muted) hover:text-(--t-text-primary)">
               <Icon icon="lucide:ellipsis" width={13} />
             </button>
             <PickerSurface
@@ -342,7 +319,7 @@ export function SnippetsPanel() {
   async function inject(text: string, execute: boolean) {
     if (!activeSession || activeSession.type === "multiplayer") return;
     try { await broadcastSnippetInject([activeSession], text, execute); }
-    catch (e) { console.error("snippet inject failed:", e); }
+    catch (e) { toastActionError(e, t); }
   }
 
   async function handleTrigger(snippet: Snippet, execute: boolean) {
@@ -356,7 +333,7 @@ export function SnippetsPanel() {
         useSnippetStore.getState().enqueuePendingSequence,
       ).then((r) => {
         if (r !== "prompting") reportSequenceResult(r);
-      }).catch((e) => console.error(e));
+      }).catch((e: unknown) => toastActionError(e, t));
       return;
     }
 
@@ -511,10 +488,7 @@ export function SnippetsPanel() {
             style={{ background: "var(--t-bg-input)", borderColor: "var(--t-border)", color: "var(--t-text-primary)" }} />
         </div>
         <button onClick={() => openSnippetEditor("new")} title={t("terminal.snippets.newSnippetTitle")}
-          className="w-7 h-7 flex items-center justify-center rounded-lg shrink-0"
-          style={{ color: "var(--t-text-muted)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}>
+          className="w-7 h-7 flex items-center justify-center rounded-lg shrink-0 text-(--t-text-muted) hover:text-(--t-text-primary) transition-colors">
           <Icon icon="lucide:plus" width={15} />
         </button>
       </div>
@@ -563,34 +537,26 @@ export function SnippetsPanel() {
           const isCollapsed = collapsedFolders.has(folder.id);
           return (
             <div key={folder.id}>
-              <div className="flex items-center justify-between"
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--t-bg-elevated)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+              <div className="flex items-center justify-between hover:bg-(--t-bg-elevated)">
                 <button className="flex-1 flex items-center gap-2 px-3 py-1.5 text-left"
                   onClick={() => toggleFolderCollapse(folder.id)}>
                   <Icon icon={isCollapsed ? "lucide:chevron-right" : "lucide:chevron-down"}
                     width={11} style={{ color: "var(--t-text-muted)" }} />
                   <FolderGlyph folder={folder} width={13} />
-                  <span className="text-[11px] font-medium" style={{ color: "var(--t-text-primary)" }}>
+                  <span className="text-2xs font-medium" style={{ color: "var(--t-text-primary)" }}>
                     {folder.name}
                   </span>
-                  <span className="text-[10px]" style={{ color: "var(--t-text-muted)" }}>
+                  <span className="text-2xs" style={{ color: "var(--t-text-muted)" }}>
                     {folderSnippets.length}
                   </span>
                 </button>
                 <div className="flex items-center pr-2 gap-0.5">
                   <button onClick={() => setEditingFolder(folder)}
-                    className="w-6 h-6 flex items-center justify-center rounded-sm"
-                    style={{ color: "var(--t-text-muted)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}>
+                    className="w-6 h-6 flex items-center justify-center rounded-sm text-(--t-text-muted) hover:text-(--t-text-primary) transition-colors">
                     <Icon icon="lucide:pencil" width={11} />
                   </button>
                   <button onClick={() => setConfirmDeleteFolder(folder)}
-                    className="w-6 h-6 flex items-center justify-center rounded-sm"
-                    style={{ color: "var(--t-text-muted)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-status-error)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-muted)")}>
+                    className="w-6 h-6 flex items-center justify-center rounded-sm text-(--t-text-muted) hover:text-(--t-status-error) transition-colors">
                     <Icon icon="lucide:trash-2" width={11} />
                   </button>
                 </div>

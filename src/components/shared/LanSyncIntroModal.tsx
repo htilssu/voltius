@@ -10,7 +10,7 @@ export function LanSyncIntroModal() {
   if (!open) return null;
   return (
     <Modal onClose={noop} onEnter={confirmLanSyncIntro}>
-      <ModalCard className="p-6 flex flex-col gap-4 w-[min(26.667rem,calc(100vw-2rem))]">
+      <ModalCard className="p-6 flex flex-col gap-4 w-[min(26.5rem,calc(100vw-2rem))]">
         <p className="text-sm text-(--t-text-secondary)">{t("layout.sync.local.intro")}</p>
         <div className="flex justify-end">
           <button

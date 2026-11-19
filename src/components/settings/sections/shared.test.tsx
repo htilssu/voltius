@@ -50,9 +50,9 @@ describe("SettingRow syncKey", () => {
     fireEvent.click(btn(c)!);
     expect(useSyncPrefsStore.getState().settingSyncOverrides["appSettings.keepalivePreset"]).toBeUndefined();
 
-    const domainOffColor = btn(c)!.style.color;
+    const domainOffColor = btn(c)!.className;
     useSyncPrefsStore.setState({ syncSettingDomains: {}, settingSyncOverrides: { "appSettings.keepalivePreset": false } });
-    const heldBackColor = btn(row("appSettings.keepalivePreset"))!.style.color;
+    const heldBackColor = btn(row("appSettings.keepalivePreset"))!.className;
     expect(domainOffColor).not.toBe(heldBackColor);
   });
 

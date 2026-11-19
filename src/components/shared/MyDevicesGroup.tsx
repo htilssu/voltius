@@ -87,7 +87,7 @@ export function MyDevicesGroup({ density, onPick, selectedDeviceId, query = "" }
                 base={ready ? DEVICE_TILE_BASE : null}
                 icon={deviceIcon(d.platform)}
                 iconSize={14}
-                className={`w-[1.867rem] h-[1.867rem] rounded-lg ${ready ? "text-(--t-text-bright)" : "text-(--t-text-dim)"}`}
+                className={`w-7 h-7 rounded-lg ${ready ? "text-(--t-text-bright)" : "text-(--t-text-dim)"}`}
               />
             }
             name={d.name}

@@ -22,7 +22,7 @@ function VaultCard({ name, hosts, totalHosts, onConnect, onOpen }: VaultCardProp
   const { t } = useTranslation();
   const hidden = totalHosts - hosts.length;
   return (
-    <div className="surface-glass flex flex-col rounded-2xl p-4 gap-3">
+    <div className="surface-glass flex flex-col rounded-[var(--r-lg)] p-4 gap-3">
       <button onClick={onOpen} className="group flex items-center gap-2 text-left">
         <Icon icon="lucide:vault" width={13} style={{ color: "var(--t-text-dim)" }} />
         <span className="text-sm font-semibold text-(--t-text-primary) group-hover:underline">
@@ -54,7 +54,7 @@ function VaultCard({ name, hosts, totalHosts, onConnect, onOpen }: VaultCardProp
               <Icon
                 icon="lucide:terminal"
                 width={12}
-                className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity shrink-0"
+                className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity shrink-0"
                 style={{ color: "var(--t-text-dim)" }}
               />
             </button>

@@ -42,6 +42,7 @@ import { ScriptEditor } from "@/components/snippets/ScriptEditor";
 import { searchMatcher } from "@/utils/search";
 import { PermissionsSection } from "@/components/permissions/PermissionsSection";
 import { ReadOnlyFields, withEditAccess, type EditAccessProps } from "@/components/shared/editAccess";
+import { toastActionError } from "@/components/shared/actionError";
 
 interface Props {
   initial?: Snippet;
@@ -172,17 +173,16 @@ function SnippetFormEditor({ initial, draft, onSubmit, onClose, onDuplicate, onD
             {draftUnsaved && !readOnly && (
               <button
                 onClick={() => void saveNow()}
-                className="h-7 px-2.5 text-xs font-semibold rounded-lg"
-                style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+                className="btn btn-primary h-7 px-2.5 text-xs font-semibold rounded-lg"
               >
                 {t("common.action.save")}
               </button>
             )}
             {!isNew && <PinButton pinned={isPinned} onToggle={() => {
               if (!isTeamVault) {
-                pinSnippet(initial!.id, !isPinned).catch(() => {});
+                pinSnippet(initial!.id, !isPinned).catch((e: unknown) => toastActionError(e, t));
               } else {
-                pinSnippet(initial!.id, nextPersonalPinValue(pinSource)).catch(() => {});
+                pinSnippet(initial!.id, nextPersonalPinValue(pinSource)).catch((e: unknown) => toastActionError(e, t));
               }
             }} />}
             {panelItems.length > 0 && <PanelActionsMenu items={panelItems} />}
@@ -248,7 +248,7 @@ function SnippetFormEditor({ initial, draft, onSubmit, onClose, onDuplicate, onD
                     className="inline-flex items-center gap-1 text-xs font-mono px-1.5 py-0.5 rounded-sm"
                     style={{
                       background: v.dynamic ? "color-mix(in srgb, var(--t-accent) 15%, transparent)" : "var(--t-bg-elevated)",
-                      color: v.dynamic ? "var(--t-accent)" : "var(--t-text)",
+                      color: v.dynamic ? "var(--t-accent)" : "var(--t-text-primary)",
                       border: "1px solid var(--t-border)",
                     }}
                   >
@@ -266,7 +266,7 @@ function SnippetFormEditor({ initial, draft, onSubmit, onClose, onDuplicate, onD
                 <Trans
                   i18nKey="snippets.form.syntaxHint"
                   values={{ open: "{{", prompt: "{{name:type}}", choice: "choice:a,b" }}
-                  components={{ code: <code className="font-mono bg-(--t-bg-elevated) px-1 rounded-sm" style={{ color: "var(--t-text)" }} /> }}
+                  components={{ code: <code className="font-mono bg-(--t-bg-elevated) px-1 rounded-sm" style={{ color: "var(--t-text-primary)" }} /> }}
                 />
               </p>
             )}
@@ -445,8 +445,8 @@ function AutocompleteTagInput({
       />
       {fade.mounted && (
         <div
-          className={`absolute z-50 w-full mt-1 rounded-lg shadow-lg overflow-hidden ${fade.className}`}
-          style={{ ...fade.style, background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}
+          className={`absolute z-50 w-full mt-1 rounded-lg overflow-hidden ${fade.className}`}
+          style={{ ...fade.style, background: "var(--t-bg-card)", border: "1px solid var(--t-border)", boxShadow: "var(--t-elev-2)" }}
         >
           {filtered.map((s) => (
             <button

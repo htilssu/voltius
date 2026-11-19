@@ -35,22 +35,13 @@ export function DropdownMenuItem({ icon, label, onClick, checked, iconSize = 20,
       onPointerDown={createRipple}
       title={title}
       {...dataAttrs}
-      className="w-full shrink-0 flex items-center gap-2.5 p-3 rounded-lg text-md font-medium-bold transition-colors whitespace-nowrap text-(--t-text-secondary) bg-transparent relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-      onMouseEnter={(e) => {
-        if (disabled) return;
-        (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-        (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)";
-      }}
+      className="w-full shrink-0 flex items-center gap-2.5 p-3 rounded-lg text-md font-medium-bold transition-colors whitespace-nowrap text-(--t-text-secondary) bg-transparent enabled:hover:bg-(--t-bg-card-hover) enabled:hover:text-(--t-text-primary) relative overflow-hidden disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
     >
       {rippleEls}
       {icon && <Icon icon={icon} width={iconSize} className="shrink-0" />}
       <span className="flex-1 min-w-0 text-left">
         <span className="block truncate text-(--t-text-primary)">{label}</span>
-        {sublabel && <span className="block truncate text-[10px] text-(--t-text-dim)">{sublabel}</span>}
+        {sublabel && <span className="block truncate text-2xs text-(--t-text-dim)">{sublabel}</span>}
       </span>
       {checked && (
         <span className="[&_path]:stroke-[2.5]">

@@ -1,4 +1,3 @@
-import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import { openBillingCheckout } from "@/services/billingCheckout";
 import { startTrialOrCheckout } from "@/services/promos";
@@ -7,14 +6,13 @@ import { TEAMS_TRIAL_DAYS } from "@/services/billingTrial";
 import { CAN_OPEN_CHECKOUT } from "@/services/distribution";
 import { AvailableWithPlan } from "@/components/shared/AvailableWithPlan";
 import { usePlanDisplay } from "@/services/planDisplay";
+import { StateTile } from "@/components/team/StateTile";
 
 export function SignInToCloudCTA({ onSignIn }: { onSignIn: () => void }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[320px] gap-5">
-      <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
-        <Icon icon="lucide:cloud" width={28} style={{ color: "var(--t-accent)" }} />
-      </div>
+      <StateTile icon="lucide:cloud" accent />
       <div className="text-center">
         <p className="text-sm font-medium mb-1 text-(--t-text-primary)">{t("members.cta.signInTitle")}</p>
         <p className="text-xs max-w-[240px] text-(--t-text-dim)">
@@ -23,8 +21,7 @@ export function SignInToCloudCTA({ onSignIn }: { onSignIn: () => void }) {
       </div>
       <button
         onClick={onSignIn}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90"
-        style={{ background: "var(--t-accent)" }}
+        className="btn btn-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
       >
         {t("members.cta.signInBtn")}
       </button>
@@ -41,9 +38,7 @@ export function UpgradeToTeamsCTA({ compact = false }: { compact?: boolean }) {
 
   return (
     <div className={`flex flex-col items-center justify-center ${compact ? "gap-3 py-2" : "h-full min-h-[320px] gap-5"}`}>
-      <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
-        <Icon icon="lucide:users-round" width={28} style={{ color: "var(--t-accent)" }} />
-      </div>
+      <StateTile icon="lucide:users-round" accent />
       <div className="text-center">
         <p className="text-sm font-medium mb-1 text-(--t-text-primary)">
           {t(seat ? "members.cta.ownPlanTitle" : "members.cta.upgradeTitle")}
@@ -55,15 +50,14 @@ export function UpgradeToTeamsCTA({ compact = false }: { compact?: boolean }) {
       {seat ? CAN_OPEN_CHECKOUT && (
       <button
         onClick={whenWritable(() => void openBillingCheckout("teams"))}
-        className="text-xs font-medium text-(--t-accent) hover:opacity-80 transition-opacity"
+        className="text-xs font-medium text-(--t-accent) hover:underline"
       >
         {t("members.cta.ownPlanBtn")}
       </button>
       ) : !CAN_OPEN_CHECKOUT ? <AvailableWithPlan plan="Teams" /> : (<>
       <button
         onClick={() => void openCheckout()}
-        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90"
-        style={{ background: "var(--t-accent)" }}
+        className="btn btn-primary flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
       >
         {teamsTrialOffer ? t("members.cta.upgradeBtn", { days: TEAMS_TRIAL_DAYS }) : t("members.cta.upgradePlainBtn")}
       </button>

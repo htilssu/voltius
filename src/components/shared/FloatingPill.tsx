@@ -20,7 +20,7 @@ export function FloatingPill({ exiting = false, children, testId }: FloatingPill
   return (
     <div
       data-testid={testId}
-      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-2 rounded-xl border text-xs shadow-lg ${exiting ? "clipboard-pill-exit" : "clipboard-pill-enter"}`}
+      className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-2 rounded-[var(--r-md)] border text-xs shadow-(--t-elev-2) ${exiting ? "clipboard-pill-exit" : "clipboard-pill-enter"}`}
       style={{ background: "var(--t-bg-elevated)", borderColor: "var(--t-border)", color: "var(--t-text-primary)" }}
     >
       {children}

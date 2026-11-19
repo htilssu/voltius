@@ -74,7 +74,7 @@ export function attachTerminalClipboard(
       background: "var(--t-bg-card)",
       border: "1px solid var(--t-border)",
       color: "var(--t-text-primary)",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+      boxShadow: "var(--t-elev-2)",
       pointerEvents: "none",
       opacity: "0",
       transform: "translateY(4px)",

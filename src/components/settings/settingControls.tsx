@@ -9,7 +9,7 @@ import { SETTINGS_ROW_BUTTON } from "@/components/settings/sections/shared";
 import { useRangeText } from "@/components/shared/ManagedNote";
 import type { SettingState } from "./registry/useSettingState";
 
-const STEP_BUTTON = "w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-(--t-bg-input) text-(--t-text-muted) border border-(--t-border) disabled:opacity-40";
+const STEP_BUTTON = "w-8 h-8 rounded-lg flex items-center justify-center transition-colors bg-(--t-bg-input) text-(--t-text-muted) border border-(--t-border) disabled:opacity-(--disabled-opacity)";
 const clamp = (v: number, min: number, max = Infinity) => Math.min(max, Math.max(min, v));
 
 function SelectControl({ state, label }: { state: SettingState; label: string }) {

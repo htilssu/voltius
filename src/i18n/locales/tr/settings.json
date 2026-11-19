@@ -834,7 +834,8 @@
         "builtinBadge": "Yerleşik",
         "dragToReorder": "Yeniden sıralamak için sürükleyin",
         "deleteRoleTitle": "Rolü sil",
-        "clickToConfirm": "Onaylamak için yeniden tıklayın",
+        "deleteRoleConfirm": "“{{name}}” silinsin mi? Bu role sahip üye sayısı: {{count}}. Bu rolün izinlerini kaybederler; diğer rolleri kalır.",
+        "loadFailed": "Roller yüklenemedi.",
         "failedToDelete": "Silinemedi",
         "editRole": "Rolü düzenle",
         "newRole": "Yeni özel rol",
@@ -1397,6 +1398,9 @@
         "update": "Güncelle",
         "updating": "Güncelleniyor…",
         "updateTitle": "v{{version}} sürümüne güncelle",
+        "confirmUninstall": {
+          "message": "{{name}} ayarlarıyla birlikte bu cihazdan kaldırılacak."
+        },
         "confirmUninstallSeeded": {
           "title": "{{name}} kaldırılsın mı?",
           "message": "{{name}} yerleşik bir eklentidir. Kaldırırsanız listenizden çıkarılır; Göz at sekmesinden istediğiniz zaman yeniden kurabilirsiniz.",

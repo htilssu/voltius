@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import BottomSheet from "./BottomSheet";
+import { MobileButton } from "../MobileButton";
 import MobileFilterBar from "../MobileFilterBar";
 import { useMobileNavStore } from "@/stores/mobileNavStore";
 import { useSnippetStore } from "@/stores/snippetStore";
@@ -41,7 +42,7 @@ export default function MobileSnippetTargetSheet(
     const sel = p.selectedConnectionIds.has(c.id);
     return (
       <button key={c.id} data-snippet-target-host={c.id}
-        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left active:bg-(--t-bg-card)"
+        className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left active:bg-(--t-bg-card)"
         onClick={() => p.toggleConnection(c.id)}>
         {sel
           ? <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--t-accent)" }}><Icon icon="lucide:check" width={15} className="text-(--t-on-accent)" /></span>
@@ -93,7 +94,7 @@ export default function MobileSnippetTargetSheet(
             const sel = p.selectedSessionIds.has(s.id);
             return (
               <button key={s.id} data-snippet-target-session={s.id}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left active:bg-(--t-bg-card)"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left active:bg-(--t-bg-card)"
                 onClick={() => p.toggleSession(s.id)}>
                 <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                   style={{ background: sel ? "var(--t-accent)" : "var(--t-bg-elevated)", color: sel ? "var(--t-on-accent)" : "var(--t-text-dim)" }}>
@@ -118,12 +119,10 @@ export default function MobileSnippetTargetSheet(
 
       {p.totalSelected > 0 && (
         <div className="sticky bottom-0 px-3 pt-2 pb-(--vt-safe-bottom)" style={{ background: "var(--t-bg-modal)" }}>
-          <button data-snippet-target-confirm onClick={() => void go()}
-            className="w-full h-11 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}>
+          <MobileButton block data-snippet-target-confirm onClick={() => void go()}>
             <Icon icon={execute ? "lucide:play" : "lucide:arrow-down-to-line"} width={16} />
             {confirmLabel}
-          </button>
+          </MobileButton>
         </div>
       )}
     </BottomSheet>
@@ -131,5 +130,5 @@ export default function MobileSnippetTargetSheet(
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="px-4 py-1 text-[10px] font-bold uppercase tracking-widest text-(--t-text-dim)">{children}</p>;
+  return <p className="px-4 py-1 text-2xs font-bold uppercase tracking-widest text-(--t-text-dim)">{children}</p>;
 }

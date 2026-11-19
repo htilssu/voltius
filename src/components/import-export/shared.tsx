@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Icon } from "@iconify/react";
 import { useVaultStore } from "@/stores/vaultStore";
 import { useTeamStore } from "@/stores/teamStore";
 import { getMyUserId } from "@/services/teamService";
 import { canEditConnectionsIn } from "@/services/permissions";
+import { statusSurface } from "@/components/shared/statusSurface";
 
 export function Radio({ checked, onChange, label, sub }: { checked: boolean; onChange: () => void; label: string; sub?: string }) {
   return (
@@ -12,7 +13,7 @@ export function Radio({ checked, onChange, label, sub }: { checked: boolean; onC
         data-checked={checked || undefined}
         className="radio-box flex items-center justify-center w-4 h-4 rounded-full mt-0.5 shrink-0 transition-colors"
       >
-        {checked && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+        {checked && <span className="w-1.5 h-1.5 rounded-full bg-(--t-on-accent)" />}
       </span>
       <div>
         <span className="text-sm text-(--t-text-primary)">{label}</span>
@@ -22,23 +23,25 @@ export function Radio({ checked, onChange, label, sub }: { checked: boolean; onC
   );
 }
 
+/** Inline import outcome / failure line, tinted from the status tokens. */
+export function StatusNote({ error, children }: { error: boolean; children: ReactNode }) {
+  return (
+    <div role={error ? "alert" : "status"} className="flex items-start gap-2 px-3 py-2 rounded-lg text-sm" style={statusSurface(error ? "error" : "connected")}>
+      <Icon icon={error ? "lucide:circle-alert" : "lucide:circle-check-big"} width={14} className="mt-0.5 shrink-0" />
+      <span className="min-w-0">{children}</span>
+    </div>
+  );
+}
+
 export function ActionBtn({ icon, label, onClick, primary, disabled }: {
   icon: string; label: string; onClick: () => void; primary?: boolean; disabled?: boolean;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-      style={{
-        background: primary ? "var(--t-accent)" : "var(--t-bg-elevated)",
-        color: primary ? "#fff" : "var(--t-text-primary)",
-        border: primary ? "none" : "1px solid var(--t-border-hover)",
-        opacity: disabled ? 0.4 : 1,
-        cursor: disabled ? "not-allowed" : "pointer",
-      }}
-      onMouseEnter={(e) => { if (!disabled) e.currentTarget.style.opacity = "0.85"; }}
-      onMouseLeave={(e) => { if (!disabled) e.currentTarget.style.opacity = "1"; }}
+      className={`btn ${primary ? "btn-primary" : "btn-secondary"} flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium`}
     >
       <Icon icon={icon} width={15} />
       {label}

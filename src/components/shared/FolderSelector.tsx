@@ -99,19 +99,14 @@ export default function FolderSelector({ value, folders, onChange, onCreateFolde
               type="button"
               onClick={() => void handleCreate()}
               disabled={!newName.trim() || saving}
-              className="shrink-0 p-1 rounded-sm transition-colors disabled:opacity-40"
-              style={{ color: "var(--t-accent)" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+              className="shrink-0 p-1 rounded-sm transition-colors text-(--t-accent) enabled:hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity)"
             >
               <Icon icon={saving ? "lucide:loader-circle" : "lucide:check"} width={13} className={saving ? "animate-spin" : undefined} />
             </button>
             <button
               type="button"
               onClick={() => setCreating(false)}
-              className="shrink-0 p-1 rounded-sm transition-colors text-(--t-text-dim)"
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+              className="shrink-0 p-1 rounded-sm transition-colors text-(--t-text-dim) hover:bg-(--t-bg-card-hover)"
             >
               <Icon icon="lucide:x" width={13} />
             </button>

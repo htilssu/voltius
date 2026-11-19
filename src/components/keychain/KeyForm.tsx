@@ -322,7 +322,7 @@ function KeyFormEditor({ initial, initialMode, onSubmit, onClose, onExport, onDe
 
         {initial && onExport && (
           <div
-            className="rounded-xl overflow-hidden bg-(--t-bg-card) border border-(--t-bg-card-hover)"
+            className="rounded-[var(--r-lg)] overflow-hidden bg-(--t-bg-card) border border-(--t-bg-card-hover)"
           >
             <div
               className="px-4 py-2 flex items-center gap-2 border-b border-b-(--t-bg-card-hover)"

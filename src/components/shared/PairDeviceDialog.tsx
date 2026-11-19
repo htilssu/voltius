@@ -13,7 +13,7 @@ export function PairDeviceDialog() {
   if (isMobile) return <PairDeviceSheet onClose={closePairDeviceDialog} />;
   return (
     <Modal onClose={closePairDeviceDialog}>
-      <ModalCard className="p-6 flex flex-col gap-4 w-[min(26.667rem,calc(100vw-2rem))]">
+      <ModalCard className="p-6 flex flex-col gap-4 w-[min(26.5rem,calc(100vw-2rem))]">
         <h2 className="text-base font-semibold text-(--t-text-primary)">{t("layout.sync.local.pair.title")}</h2>
         <PairDeviceBody onClose={closePairDeviceDialog} />
       </ModalCard>

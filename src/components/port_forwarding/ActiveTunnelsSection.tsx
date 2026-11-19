@@ -12,20 +12,35 @@ import { cardGridProps } from "@/components/shared/cardGrid";
 import { SectionHeader, StatusPill } from "@/components/shared/SectionHeader";
 import { StatusDot } from "@/components/shared/StatusDot";
 import { TunnelStatusDot } from "@/components/shared/TunnelStatusDot";
-import type { ActiveTunnel } from "@/types";
+import { TunnelOriginBadge, TunnelTypeBadge } from "./TunnelBadges";
 
-export function TunnelTypeBadge({ tunnelType }: { tunnelType: ActiveTunnel["tunnel_type"] }) {
-  const { t } = useTranslation();
-  if ((tunnelType ?? "local") === "local") {
-    return <span className="text-[10px] px-1 py-0.5 rounded-sm font-medium shrink-0 leading-none bg-blue-500/15 text-blue-400">{t("portForwarding.activeTunnels.local")}</span>;
-  }
-  if (tunnelType === "remote") {
-    return <span className="text-[10px] px-1 py-0.5 rounded-sm font-medium shrink-0 leading-none bg-amber-500/15 text-amber-400">{t("portForwarding.activeTunnels.remote")}</span>;
-  }
-  if (tunnelType === "dynamic") {
-    return <span className="text-[10px] px-1 py-0.5 rounded-sm font-medium shrink-0 leading-none bg-purple-500/20 text-purple-400">{t("portForwarding.activeTunnels.socks5")}</span>;
-  }
-  return null;
+export { TunnelTypeBadge, TunnelOriginBadge } from "./TunnelBadges";
+
+const ROW = "flex items-center gap-2 rounded-lg border border-transparent bg-(--t-bg-elevated) px-2.5 py-2 transition-colors hover:border-(--t-border-hover)";
+
+type RowTone = "warning" | "error" | "accent" | "connected";
+const ROW_ACTION_TONE: Record<RowTone, string> = {
+  warning: "hover:text-(--t-status-warning)",
+  error: "hover:text-(--t-status-error)",
+  accent: "hover:text-(--t-accent)",
+  connected: "hover:text-(--t-status-connected)",
+};
+
+function RowAction({ icon, title, tone, busy = false, onClick }: {
+  icon: string; title: string; tone: RowTone; busy?: boolean; onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      disabled={busy}
+      title={title}
+      aria-label={title}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-(--t-text-muted) transition-colors hover:bg-(--t-bg-card-hover) ${ROW_ACTION_TONE[tone]} disabled:opacity-(--disabled-opacity)`}
+    >
+      <Icon icon={busy ? "lucide:loader-circle" : icon} width={13} className={busy ? "animate-spin" : undefined} />
+    </button>
+  );
 }
 
 export function ActiveTunnelsSection() {
@@ -61,17 +76,14 @@ export function ActiveTunnelsSection() {
           return (
             <div
               key={session.id}
-              className="group overflow-hidden rounded-[1.35rem] border border-(--t-border) bg-(--t-bg-card) transition-all duration-150 hover:border-(--t-border-hover) hover:bg-(--t-bg-card-hover)"
+              className="group overflow-hidden rounded-[var(--r-lg)] border border-(--t-border) bg-(--t-bg-card) transition-colors duration-150 hover:border-(--t-border-hover)"
               data-card="true"
             >
-              <div
-                className="relative flex items-center gap-3 px-4 py-4"
-                style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${distroColor} 24%, transparent), transparent 62%)` }}
-              >
-                <AvatarTile base={distroColor} icon={distroIcon ?? "lucide:server"} iconSize={30} className="h-14 w-14 rounded-2xl text-white" />
+              <div className="flex items-center gap-3 px-3 py-3">
+                <AvatarTile base={distroColor} icon={distroIcon ?? "lucide:server"} iconSize={18} className="h-8 w-8 rounded-lg text-white" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    <p className="truncate text-base font-bold text-(--t-text-bright)">{sessionLabel(session)}</p>
+                    <p className="truncate text-sm font-semibold text-(--t-text-bright)">{sessionLabel(session)}</p>
                     <StatusDot tone="connected" label={t("portForwarding.activeTunnels.connected")} />
                   </div>
                   <p className="truncate text-xs text-(--t-text-dim)">
@@ -79,13 +91,13 @@ export function ActiveTunnelsSection() {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-col items-end gap-1">
-                  <span className="rounded-md bg-(--t-bg-input) text-(--t-text-dim) border border-(--t-border) px-2 py-1 text-[10px] font-semibold uppercase tracking-wider">
+                  <span className="rounded-sm border border-(--t-border) bg-(--t-bg-input) px-1.5 py-0.5 text-2xs font-medium text-(--t-text-dim)">
                     {t("portForwarding.activeTunnels.forwardCount", { count: totalForwards })}
                   </span>
                   {errorCount > 0 ? (
-                    <span className="text-[10px] font-medium text-(--t-status-error)">{t("portForwarding.activeTunnels.errorCount", { count: errorCount })}</span>
+                    <span className="text-2xs font-medium text-(--t-status-error)">{t("portForwarding.activeTunnels.errorCount", { count: errorCount })}</span>
                   ) : (
-                    <span className="text-[10px] font-medium text-(--t-status-connected)">{t("portForwarding.activeTunnels.activeCountLabel", { count: activeCount })}</span>
+                    <span className="text-2xs font-medium text-(--t-status-connected)">{t("portForwarding.activeTunnels.activeCountLabel", { count: activeCount })}</span>
                   )}
                 </div>
               </div>
@@ -94,8 +106,6 @@ export function ActiveTunnelsSection() {
                 {tunnels.map((tunnel) => {
                   const key = `${session.id}-${tunnel.id}`;
                   const deleteKey = `del-${session.id}-${tunnel.id}`;
-                  const isBusy = isKeyBusy(key);
-                  const isDeleting = isKeyBusy(deleteKey);
                   const isAuto = tunnel.origin.type === "auto";
                   const isError = typeof tunnel.state === "object" && "error" in tunnel.state;
                   const errorMsg = isError ? (tunnel.state as { error: string }).error : null;
@@ -103,10 +113,7 @@ export function ActiveTunnelsSection() {
                   const webUrl = !isError ? getLocalTunnelHttpUrl(tunnel.tunnel_type ?? "local", tunnel.remote_port, tunnel.local_port, tunnel.bind_host) : null;
 
                   return (
-                    <div
-                      key={key}
-                      className="flex items-center gap-2 rounded-xl border border-transparent bg-(--t-bg-elevated)/70 px-2.5 py-2 transition-colors hover:border-(--t-border-hover)"
-                    >
+                    <div key={key} className={ROW}>
                       <TunnelStatusDot
                         status={isError ? "error" : "active"}
                         remoteListening={tunnel.remote_listening}
@@ -118,87 +125,35 @@ export function ActiveTunnelsSection() {
                               ? t("portForwarding.activeTunnels.socksPortLabel", { port: tunnel.local_port })
                               : t("portForwarding.activeTunnels.portLabel", { port: tunnel.remote_port })}
                           </p>
-                          <span className={`text-[10px] px-1 py-0.5 rounded-sm font-medium shrink-0 leading-none ${isAuto ? "bg-purple-500/20 text-purple-400" : "bg-(--t-bg-subtle) text-(--t-text-muted)"}`}>
-                            {isAuto ? t("portForwarding.activeTunnels.auto") : t("portForwarding.activeTunnels.adHoc")}
-                          </span>
+                          <TunnelOriginBadge auto={isAuto} />
                           <TunnelTypeBadge tunnelType={tunnel.tunnel_type} />
                         </div>
                         <p className={`truncate text-xs font-mono ${isError ? "text-(--t-status-error)" : "text-(--t-text-secondary)"}`}>
                           {isError ? errorMsg : portLabel}
                         </p>
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); void pause(session.id, tunnel.id); }}
-                        disabled={isBusy}
-                        title={t("portForwarding.activeTunnels.pauseForwarding")}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--t-text-muted) transition-all hover:bg-amber-500/10 hover:text-amber-400 disabled:opacity-60"
-                      >
-                        {isBusy
-                          ? <Icon icon="lucide:loader-circle" width={13} className="animate-spin" />
-                          : <Icon icon="lucide:pause" width={13} />
-                        }
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); void deleteActive(session.id, tunnel); }}
-                        disabled={isDeleting}
-                        title={t("common.action.delete")}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--t-text-muted) transition-all hover:bg-red-500/10 hover:text-red-400 disabled:opacity-60"
-                      >
-                        {isDeleting
-                          ? <Icon icon="lucide:loader-circle" width={13} className="animate-spin" />
-                          : <Icon icon="lucide:trash-2" width={13} />
-                        }
-                      </button>
+                      <RowAction icon="lucide:pause" tone="warning" busy={isKeyBusy(key)} title={t("portForwarding.activeTunnels.pauseForwarding")} onClick={() => void pause(session.id, tunnel.id)} />
+                      <RowAction icon="lucide:trash-2" tone="error" busy={isKeyBusy(deleteKey)} title={t("common.action.delete")} onClick={() => void deleteActive(session.id, tunnel)} />
                       {webUrl && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); void openUrl(webUrl); }}
-                          title={t("portForwarding.activeTunnels.openUrl", { url: webUrl })}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--t-text-muted) transition-all hover:bg-blue-500/10 hover:text-blue-400"
-                        >
-                          <Icon icon="lucide:globe" width={13} />
-                        </button>
+                        <RowAction icon="lucide:globe" tone="accent" title={t("portForwarding.activeTunnels.openUrl", { url: webUrl })} onClick={() => void openUrl(webUrl)} />
                       )}
                     </div>
                   );
                 })}
-                {suppressedPorts.map((port) => {
-                  const key = `${session.id}-${port}`;
-                  const isBusy = isKeyBusy(key);
-
-                  return (
-                    <div
-                      key={`suppressed-${session.id}-${port}`}
-                      className="flex items-center gap-2 rounded-xl border border-transparent bg-(--t-bg-elevated)/70 px-2.5 py-2 transition-colors hover:border-(--t-border-hover)"
-                    >
-                      <TunnelStatusDot status="idle" />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className="truncate text-sm font-semibold text-(--t-text-bright)">{t("portForwarding.activeTunnels.portLabel", { port })}</p>
-                          <span className="text-[10px] px-1 py-0.5 rounded-sm font-medium shrink-0 leading-none bg-purple-500/20 text-purple-400">{t("portForwarding.activeTunnels.auto")}</span>
-                        </div>
-                        <p className="truncate text-xs font-mono text-(--t-text-secondary)">{port} → 127.0.0.1:{port}</p>
+                {suppressedPorts.map((port) => (
+                  <div key={`suppressed-${session.id}-${port}`} className={ROW}>
+                    <TunnelStatusDot status="idle" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p className="truncate text-sm font-semibold text-(--t-text-bright)">{t("portForwarding.activeTunnels.portLabel", { port })}</p>
+                        <TunnelOriginBadge auto />
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); void resume(session.id, port); }}
-                        disabled={isBusy}
-                        title={t("portForwarding.activeTunnels.resumeForwarding")}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--t-text-muted) transition-all hover:bg-green-500/10 hover:text-green-400 disabled:opacity-60"
-                      >
-                        {isBusy
-                          ? <Icon icon="lucide:loader-circle" width={13} className="animate-spin" />
-                          : <Icon icon="lucide:play" width={13} />
-                        }
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deletePaused(session.id, port); }}
-                        title={t("common.action.delete")}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-(--t-text-muted) transition-all hover:bg-red-500/10 hover:text-red-400"
-                      >
-                        <Icon icon="lucide:trash-2" width={13} />
-                      </button>
+                      <p className="truncate text-xs font-mono text-(--t-text-secondary)">{port} → 127.0.0.1:{port}</p>
                     </div>
-                  );
-                })}
+                    <RowAction icon="lucide:play" tone="connected" busy={isKeyBusy(`${session.id}-${port}`)} title={t("portForwarding.activeTunnels.resumeForwarding")} onClick={() => void resume(session.id, port)} />
+                    <RowAction icon="lucide:trash-2" tone="error" title={t("common.action.delete")} onClick={() => deletePaused(session.id, port)} />
+                  </div>
+                ))}
               </div>
             </div>
           );

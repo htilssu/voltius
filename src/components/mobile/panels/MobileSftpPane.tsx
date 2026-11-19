@@ -38,6 +38,7 @@ import MobileSelectionBar from "../MobileSelectionBar";
 import { allSelected, pruneSelection, toggleAll, toggleItem } from "./sftpSelectionCore";
 import { canShareFiles as canShareStagedFiles, shareFiles, shareStageId, shareTotalBytes, shareableFiles, SHARE_CONFIRM_BYTES } from "@/services/share";
 import { SFTP_ICON } from "@/lib/conceptIcons";
+import { MobileButton } from "../MobileButton";
 
 // Coded errors arrive translated, so only an uncoded one is matched by its English text.
 function isPermissionDenied(msg: string, code: BackendErrorCode | null): boolean {
@@ -214,10 +215,9 @@ export default function MobileSftpPane({
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3 px-6 text-center">
         <Icon icon={SFTP_ICON} width={28} className="text-(--t-text-dim)" />
-        <button data-sftp-pick-host onClick={onPickHost}
-          className="px-4 py-2 rounded-xl text-sm font-medium" style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}>
+        <MobileButton data-sftp-pick-host onClick={onPickHost}>
           {t("mobile.sftp.chooseHost")}
-        </button>
+        </MobileButton>
       </div>
     );
   }
@@ -254,7 +254,7 @@ export default function MobileSftpPane({
         <div className="flex-1" />
         <button data-sftp-hidden onClick={() => setShowHidden((v) => !v)} className="h-12 px-3 text-xs rounded-full"
           style={{ color: showHidden ? "var(--t-accent)" : "var(--t-text-dim)" }}>{showHidden ? t("mobile.sftp.hidden") : t("mobile.sftp.visible")}</button>
-        <button data-sftp-create onClick={() => setCreating(true)} disabled={readOnly} className="w-12 h-12 flex items-center justify-center rounded-full text-(--t-text-dim) disabled:opacity-35"
+        <button data-sftp-create onClick={() => setCreating(true)} disabled={readOnly} className="w-12 h-12 flex items-center justify-center rounded-full text-(--t-text-dim) disabled:opacity-(--disabled-opacity)"
           aria-label={readOnlyTip ?? t("common.action.create")} title={readOnlyTip}>
           <Icon icon="lucide:plus" width={20} />
         </button>
@@ -282,8 +282,7 @@ export default function MobileSftpPane({
               <Icon icon="lucide:wifi-off" width={26} className="text-(--t-status-error)" />
               <span className="text-sm text-(--t-status-error)">{phase.message}</span>
               {retrying && <span className="text-xs text-(--t-text-dim)">{t("mobile.sftp.reconnecting")}</span>}
-              <button data-sftp-reconnect onClick={reconnect} className="vt-hit text-sm px-4 py-2 rounded-xl"
-                style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}>{t("mobile.sftp.reconnectNow")}</button>
+              <MobileButton variant="secondary" data-sftp-reconnect onClick={reconnect}>{t("mobile.sftp.reconnectNow")}</MobileButton>
             </div>
           )}
           {phase.tag === "connected" && listError && (
@@ -291,8 +290,8 @@ export default function MobileSftpPane({
               <Icon icon={isPermissionDenied(listError, listErrorCode) ? "lucide:lock" : "lucide:triangle-alert"} width={26} />
               <span className="text-sm">{isPermissionDenied(listError, listErrorCode) ? t("mobile.sftp.permissionDenied") : listError}</span>
               <div className="flex gap-2">
-                <button data-sftp-list-retry onClick={refresh} className="vt-hit text-sm px-4 py-2 rounded-xl" style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}>{t("common.action.retry")}</button>
-                <button onClick={goUp} className="vt-hit text-sm px-4 py-2 rounded-xl" style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }}>{t("mobile.sftp.goUp")}</button>
+                <MobileButton variant="secondary" data-sftp-list-retry onClick={refresh}>{t("common.action.retry")}</MobileButton>
+                <MobileButton variant="secondary" onClick={goUp}>{t("mobile.sftp.goUp")}</MobileButton>
               </div>
             </div>
           )}
@@ -354,19 +353,19 @@ export default function MobileSftpPane({
       {renaming && (
         <BottomSheet title={t("mobile.sftp.renameTitle", { name: renaming.name })} onClose={() => setRenaming(null)}>
           <input autoFocus value={renameVal} onChange={(e) => setRenameVal(e.target.value)}
-            className="w-full rounded-xl px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
+            className="w-full rounded-lg px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
             style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }} />
-          <button data-sftp-rename-go className="w-full px-3 py-3 rounded-xl text-sm font-medium" style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-            onClick={async () => { const f = renaming; const v = renameVal.trim(); setRenaming(null); if (v && v !== f.name) await attempt(() => rename(f, v)); }}>{t("common.action.rename")}</button>
+          <MobileButton block data-sftp-rename-go
+            onClick={async () => { const f = renaming; const v = renameVal.trim(); setRenaming(null); if (v && v !== f.name) await attempt(() => rename(f, v)); }}>{t("common.action.rename")}</MobileButton>
         </BottomSheet>
       )}
       {confirmDelete && (
         <BottomSheet title={t("mobile.sftp.deleteConfirmTitle", { name: confirmDelete.name })} onClose={() => setConfirmDelete(null)}>
-          <button data-sftp-delete-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl" style={{ color: "var(--t-status-error)" }}
+          <button data-sftp-delete-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg" style={{ color: "var(--t-status-error)" }}
             onClick={async () => { const f = confirmDelete; setConfirmDelete(null); haptic("confirm"); await attempt(() => remove(f)); }}>
             <Icon icon="lucide:trash-2" width={18} /><span className="text-sm font-medium">{t("common.action.delete")}</span>
           </button>
-          <button className="w-full px-3 py-3.5 rounded-xl text-sm text-(--t-text-dim)" onClick={() => setConfirmDelete(null)}>{t("common.action.cancel")}</button>
+          <button className="w-full px-3 py-3.5 rounded-lg text-sm text-(--t-text-dim)" onClick={() => setConfirmDelete(null)}>{t("common.action.cancel")}</button>
         </BottomSheet>
       )}
       {permissionsFor && sftpId && (
@@ -392,20 +391,20 @@ export default function MobileSftpPane({
       {confirmShare && (
         <BottomSheet title={t("mobile.share.largeTitle", { size: formatSize(shareTotalBytes(confirmShare)) })} onClose={() => setConfirmShare(null)}>
           <div className="px-3 pt-1 pb-2 text-sm text-(--t-text-dim)">{t("mobile.share.largeBody")}</div>
-          <button data-sftp-share-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-(--t-text-primary)"
+          <button data-sftp-share-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-(--t-text-primary)"
             onClick={() => { const items = confirmShare; setConfirmShare(null); void share(items, true); }}>
             <Icon icon="lucide:share-2" width={18} /><span className="text-sm font-medium">{t("mobile.share.action")}</span>
           </button>
-          <button className="w-full px-3 py-3.5 rounded-xl text-sm text-(--t-text-dim)" onClick={() => setConfirmShare(null)}>{t("common.action.cancel")}</button>
+          <button className="w-full px-3 py-3.5 rounded-lg text-sm text-(--t-text-dim)" onClick={() => setConfirmShare(null)}>{t("common.action.cancel")}</button>
         </BottomSheet>
       )}
       {confirmBatchDelete && (
         <BottomSheet title={t("mobile.sftp.batchDeleteTitle", { count: selected.length })} onClose={() => setConfirmBatchDelete(false)}>
-          <button data-sftp-batch-delete-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl" style={{ color: "var(--t-status-error)" }}
+          <button data-sftp-batch-delete-go className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg" style={{ color: "var(--t-status-error)" }}
             onClick={() => void deleteSelected()}>
             <Icon icon="lucide:trash-2" width={18} /><span className="text-sm font-medium">{t("common.action.delete")}</span>
           </button>
-          <button className="w-full px-3 py-3.5 rounded-xl text-sm text-(--t-text-dim)" onClick={() => setConfirmBatchDelete(false)}>{t("common.action.cancel")}</button>
+          <button className="w-full px-3 py-3.5 rounded-lg text-sm text-(--t-text-dim)" onClick={() => setConfirmBatchDelete(false)}>{t("common.action.cancel")}</button>
         </BottomSheet>
       )}
       {creating && (
@@ -421,19 +420,19 @@ export default function MobileSftpPane({
       {newFolder && (
         <BottomSheet title={t("mobile.snippets.newFolderTitle")} onClose={() => setNewFolder(false)}>
           <input autoFocus value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} placeholder={t("mobile.sftp.folderNamePlaceholder")}
-            className="w-full rounded-xl px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
+            className="w-full rounded-lg px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
             style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }} />
-          <button data-sftp-mkdir-go className="w-full px-3 py-3 rounded-xl text-sm font-medium" style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-            onClick={async () => { const n = newFolderName.trim(); setNewFolder(false); setNewFolderName(""); if (n) await attempt(() => mkdir(n)); }}>{t("common.action.create")}</button>
+          <MobileButton block data-sftp-mkdir-go
+            onClick={async () => { const n = newFolderName.trim(); setNewFolder(false); setNewFolderName(""); if (n) await attempt(() => mkdir(n)); }}>{t("common.action.create")}</MobileButton>
         </BottomSheet>
       )}
       {newFile && (
         <BottomSheet title={t("mobile.sftp.newFileOption")} onClose={() => setNewFile(false)}>
           <input autoFocus value={newFileName} onChange={(e) => setNewFileName(e.target.value)} placeholder={t("mobile.sftp.fileNamePlaceholder")}
-            className="w-full rounded-xl px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
+            className="w-full rounded-lg px-3 h-11 text-sm outline-none text-(--t-text-primary) mb-2"
             style={{ background: "var(--t-bg-card)", border: "1px solid var(--t-border)" }} />
-          <button data-sftp-touch-go className="w-full px-3 py-3 rounded-xl text-sm font-medium" style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
-            onClick={async () => { const n = newFileName.trim(); setNewFile(false); setNewFileName(""); if (n) await attempt(() => touch(n)); }}>{t("common.action.create")}</button>
+          <MobileButton block data-sftp-touch-go
+            onClick={async () => { const n = newFileName.trim(); setNewFile(false); setNewFileName(""); if (n) await attempt(() => touch(n)); }}>{t("common.action.create")}</MobileButton>
         </BottomSheet>
       )}
     </div>
@@ -462,7 +461,7 @@ function FileRow({ file, checked, selecting, moreLabel, onTap, onLong, onToggle,
       </span>
       <span className="flex flex-col min-w-0 flex-1 py-2 pl-1">
         <span className="text-sm text-(--t-text-primary) truncate">{file.name}</span>
-        {!file.isDir && <span className="text-[11px] text-(--t-text-dim)">{formatSize(file.size)}</span>}
+        {!file.isDir && <span className="text-2xs text-(--t-text-dim)">{formatSize(file.size)}</span>}
       </span>
       {!selecting && (
         <button data-sftp-row-actions={file.path} aria-label={moreLabel} onClick={(e) => { e.stopPropagation(); onMore(); }}
@@ -486,7 +485,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function SheetItem({ icon, label, onTap, danger, attr, disabledReason }: { icon: string; label: string; onTap: () => void; danger?: boolean; attr?: string; disabledReason?: string }) {
   return (
     <button data-sftp-action={attr ?? label.toLowerCase().replace(/\s+/g, "-")} disabled={!!disabledReason} title={disabledReason}
-      className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-left active:bg-(--t-bg-card) disabled:opacity-35"
+      className="w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-left active:bg-(--t-bg-card) disabled:opacity-(--disabled-opacity)"
       style={{ color: danger ? "var(--t-status-error)" : "var(--t-text-primary)" }} onClick={onTap}>
       <Icon icon={icon} width={18} /><span className="text-sm font-medium">{label}</span>
     </button>

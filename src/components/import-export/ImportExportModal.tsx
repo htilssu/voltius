@@ -117,10 +117,10 @@ function ImportExportBody({ phone, state, close, activeSection, setActiveSection
           ))}
         </div>
         <div className="flex justify-end">
-          <button onClick={close}
-            className="flex items-center justify-center w-7 h-7 rounded-lg transition-colors text-(--t-text-muted)"
-            onMouseEnter={e => { e.currentTarget.style.background = "var(--t-bg-card-hover)"; e.currentTarget.style.color = "var(--t-text-primary)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--t-text-muted)"; }}
+          <button type="button" onClick={close}
+            aria-label={t("common.action.close")}
+            title={t("common.action.close")}
+            className="flex items-center justify-center w-8 h-8 rounded-lg transition-colors text-(--t-text-muted) hover:bg-(--t-bg-card-hover) hover:text-(--t-text-primary)"
           >
             <Icon icon="lucide:x" width={16} />
           </button>

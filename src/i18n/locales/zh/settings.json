@@ -762,7 +762,8 @@
         "builtinBadge": "内置",
         "dragToReorder": "拖拽排序",
         "deleteRoleTitle": "删除角色",
-        "clickToConfirm": "再次点击确认",
+        "deleteRoleConfirm": "删除“{{name}}”？拥有该角色的成员：{{count}}。他们将失去该角色的权限，其他角色保留。",
+        "loadFailed": "无法加载角色。",
         "failedToDelete": "删除失败",
         "editRole": "编辑角色",
         "newRole": "新建自定义角色",
@@ -811,6 +812,9 @@
         "update": "更新",
         "updating": "正在更新…",
         "updateTitle": "更新到 v{{version}}",
+        "confirmUninstall": {
+          "message": "{{name}} 及其设置将从此设备中移除。"
+        },
         "confirmUninstallSeeded": {
           "title": "卸载 {{name}}？",
           "message": "{{name}} 是内置插件。卸载后会将其从列表中移除——您可以随时在“浏览”标签页中重新安装。",

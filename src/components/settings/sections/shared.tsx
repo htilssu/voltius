@@ -7,6 +7,12 @@ import { setKeySync } from "@/services/user-data/syncChoice";
 import { useIsMobile } from "@/utils/platform";
 import { ListRowContext } from "@/components/shared/listRowContext";
 import { Toggle } from "@/components/shared/Toggle";
+import { Modal, ModalCard } from "@/components/shared/Modal";
+import { appToast } from "@/services/appToast";
+import { userFacingReason } from "@/services/errorReason";
+
+/** Reports a failed user-initiated settings action as an error toast. */
+export const toastError = (e: unknown) => { appToast("error", userFacingReason(e)); };
 import { Managed, ManagedNote } from "@/components/shared/ManagedNote";
 import { inPolicyRange, isEnforcedLock, usePolicyLock, usePolicyRange, usePolicyRefresh } from "@/stores/policyStore";
 import { builtIn } from "@/services/policy/adminDefaults";
@@ -17,7 +23,9 @@ import { useLongPress } from "@/components/mobile/useLongPress";
 import { ROW_ATTR, ROW_CONTROL_ATTR } from "@/components/settings/settingsMobileCore";
 
 export const SETTINGS_SURFACE = "rounded-lg bg-(--t-bg-elevated) border border-(--t-border)";
-export const SETTINGS_ROW_BUTTON = "shrink-0 text-xs px-2.5 py-1.5 rounded-lg font-medium bg-(--t-bg-input) text-(--t-text-primary) transition-opacity hover:opacity-75 disabled:opacity-50";
+/** Hover-revealed row control that also shows on keyboard focus and on touch screens (no hover). */
+const REVEAL = "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
+export const SETTINGS_ROW_BUTTON = "shrink-0 text-xs px-2.5 py-1.5 rounded-lg font-medium bg-(--t-bg-input) text-(--t-text-primary) transition-opacity hover:opacity-75 disabled:opacity-(--disabled-opacity)";
 
 /** Android: rows inside a SettingsGroup already sit in a full-bleed list. */
 const InSettingsGroup = createContext(false);
@@ -156,7 +164,7 @@ export function ActionItem({ icon, label, sub, danger, disabled, onClick }: {
         onClick={disabled ? undefined : onClick}
         disabled={disabled}
         data-settings-action
-        className="-mx-4 w-[calc(100%+2rem)] flex items-center gap-4 px-4 py-3 min-h-14 text-left disabled:opacity-50"
+        className="-mx-4 w-[calc(100%+2rem)] flex items-center gap-4 px-4 py-3 min-h-14 text-left disabled:opacity-(--disabled-opacity)"
       >
         <Icon icon={icon} width={22} className="shrink-0" style={{ color: danger ? "var(--t-status-error)" : "var(--t-accent)" }} />
         <span className="flex-1 min-w-0">
@@ -171,20 +179,7 @@ export function ActionItem({ icon, label, sub, danger, disabled, onClick }: {
     <button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
-      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${SETTINGS_SURFACE} hover:bg-(--t-bg-card-hover)`}
-      style={{
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.5 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled && danger) {
-          (e.currentTarget as HTMLButtonElement).style.borderColor =
-            "color-mix(in srgb, var(--t-status-error) 55%, transparent)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "";
-      }}
+      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${SETTINGS_SURFACE} enabled:cursor-pointer enabled:hover:bg-(--t-bg-card-hover) disabled:opacity-(--disabled-opacity) disabled:cursor-default${danger ? " enabled:hover:border-(--t-status-error)/55" : ""}`}
     >
       <Icon
         icon={icon}
@@ -253,9 +248,7 @@ export function ResetButton({ onReset, alwaysVisible }: { onReset: () => void; a
   return (
     <button
       onClick={onReset}
-      className={`p-1 rounded-sm transition-opacity ${alwaysVisible ? "" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100 "}text-(--t-text-muted)`}
-      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--t-text-bright)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--t-text-muted)"; }}
+      className={`p-1 rounded-sm transition-opacity ${alwaysVisible ? "" : `${REVEAL} `}text-(--t-text-muted) hover:text-(--t-text-bright)`}
       title={t("settings.shared.resetToDefault")}
     >
       <Icon icon="lucide:rotate-ccw" width={11} />
@@ -307,11 +300,8 @@ function SyncKeyButtonInner({ path }: { path: string }) {
       aria-label={title}
       className={isMobile
         // Touch: always visible, with a 40 dp target.
-        ? "p-2.5 -m-1.5 rounded-full text-(--t-text-muted)"
-        : `p-1 rounded-sm transition-opacity text-(--t-text-muted)${synced ? " opacity-0 group-hover:opacity-100 focus-visible:opacity-100" : ""}`}
-      style={{ color: accented ? "var(--t-accent)" : undefined }}
-      onMouseEnter={(e) => { if (domainSynced) e.currentTarget.style.color = "var(--t-text-bright)"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = accented ? "var(--t-accent)" : ""; }}
+        ? `p-2.5 -m-1.5 rounded-full ${accented ? "text-(--t-accent)" : "text-(--t-text-muted)"}`
+        : `p-1 rounded-sm transition-opacity ${accented ? "text-(--t-accent)" : "text-(--t-text-muted)"} enabled:hover:text-(--t-text-bright)${synced ? ` ${REVEAL}` : ""}`}
     >
       <Icon icon={synced ? "lucide:cloud" : "lucide:cloud-off"} width={isMobile ? 16 : 11} />
     </button>
@@ -438,7 +428,7 @@ function SyncSheetRowInner({ path }: { path: string }) {
         ? t("settings.shared.sync.deviceDefault")
         : t("settings.shared.sync.off");
   return (
-    <div {...{ [ROW_ATTR]: "" }} data-ripple data-setting-sync={path} className="relative flex w-full items-center gap-3 px-3 py-3 rounded-xl">
+    <div {...{ [ROW_ATTR]: "" }} data-ripple data-setting-sync={path} className="relative flex w-full items-center gap-3 px-3 py-3 rounded-lg">
       <Icon icon={synced ? "lucide:cloud" : "lucide:cloud-off"} width={18} className="shrink-0 text-(--t-text-primary)" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-(--t-text-primary)">{t("settings.shared.sync.label")}</p>
@@ -468,8 +458,8 @@ export function FormButtons({ onCancel, submitLabel, submitting }: {
       <button
         type="submit"
         disabled={submitting}
+        aria-busy={submitting || undefined}
         className="btn btn-primary flex-1 py-1.5 rounded-lg text-sm font-medium"
-        style={submitting === undefined ? undefined : { opacity: submitting ? 0.7 : 1 }}
       >
         {submitLabel}
       </button>
@@ -486,26 +476,22 @@ export function SettingsDialog({ title, onClose, children }: {
   onClose: () => void;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs"
-      onClick={onClose}
-    >
-      <div
-        className="w-80 rounded-xl p-5 shadow-2xl bg-(--t-bg-terminal) border border-(--t-border)"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose}>
+      <ModalCard solid className="w-[min(20rem,calc(100vw-2rem))] p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-(--t-text-primary)">{title}</h2>
           <button
             onClick={onClose}
+            aria-label={t("common.action.close")}
             className="text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
           >
             <Icon icon="lucide:x" width={14} />
           </button>
         </div>
         {children}
-      </div>
-    </div>
+      </ModalCard>
+    </Modal>
   );
 }

@@ -30,6 +30,9 @@
 
   --font-weight-medium-bold: 530;
 
+  /* Caption / meta / badge size — the ONLY size below text-xs. Never use text-[Npx]. */
+  --text-2xs: 0.733rem;
+  --text-2xs--line-height: 1.067rem;
   --text-xs: 0.867rem;
   --text-xs--line-height: 1.333rem;
   --text-sm: 1rem;
@@ -237,6 +240,23 @@
   --r-lg: 1.125rem;
 
   /*
+    Semantic tokens. Plain values / var() references only (WebKitGTK-safe).
+    - scrim: the one modal/sheet backdrop color
+    - on-status: text on a solid status fill (error/warning/connected)
+    - disabled-opacity: the one disabled dim level
+    - role-*: member role colors, derived from the theme so chips follow it
+    - file-folder: folder glyph color in file browsers
+  */
+  --t-scrim: rgba(0, 0, 0, 0.5);
+  --t-on-status: #ffffff;
+  --disabled-opacity: 0.45;
+  --t-role-owner: var(--t-mcp);
+  --t-role-admin: var(--t-accent);
+  --t-role-member: var(--t-status-connected);
+  --t-role-viewer: var(--t-status-warning);
+  --t-file-folder: var(--t-status-warning);
+
+  /*
     Chrome layering — the recessed window frame (titlebar + sidebar) and the
     raised content slab that floats on it (macOS-style). Plain box-shadow
     values only, so they are safe to store on WebKitGTK; the gradient fills
@@ -262,6 +282,10 @@
   NOTE: first-pass values, tuned live via per-theme screenshots.
 */
 :root[data-appearance="light"] {
+  --t-scrim: rgba(15, 23, 42, 0.35);
+  --t-bg-chrome-field: var(--t-bg-input);
+  --t-bg-chrome-field-hover: var(--t-bg-input-hover);
+  --t-chrome-field-border: var(--t-border);
   --t-chrome-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
   --t-chrome-shadow: 0 10px 24px -18px rgba(15, 23, 42, 0.15);
   --t-card-shadow: 0 6px 16px -10px rgba(15, 23, 42, 0.22);
@@ -409,32 +433,22 @@
     more opaque and lifts higher so it reads above the blurred backdrop.
   */
   .surface-glass {
-    background:
-      linear-gradient(140deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 45%, transparent 100%),
-      color-mix(in srgb, var(--t-bg-card) 68%, transparent);
-    backdrop-filter: blur(12px) saturate(1.5);
-    -webkit-backdrop-filter: blur(12px) saturate(1.5);
-    box-shadow: var(--t-ring), var(--t-elev-1), var(--t-highlight);
+    background: var(--t-bg-card);
+    box-shadow: var(--t-ring);
   }
 
   /* Mirrors BaseCard's GLASS_*_HOVER inline styles so plain buttons get the hover without JS. */
   .surface-glass-interactive {
-    transition: background 150ms, box-shadow 150ms;
+    transition: background-color 150ms, box-shadow 150ms;
   }
   .surface-glass-interactive:hover:not(:disabled) {
-    background:
-      linear-gradient(140deg, rgba(255, 255, 255, 0.11) 0%, rgba(255, 255, 255, 0.03) 45%, transparent 100%),
-      color-mix(in srgb, var(--t-bg-card) 80%, transparent);
-    box-shadow: var(--t-ring-strong), var(--t-elev-1-hover), var(--t-highlight-strong);
+    background: var(--t-bg-card-hover);
+    box-shadow: var(--t-ring-strong);
   }
 
   .surface-glass-modal {
-    background:
-      linear-gradient(150deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.025) 40%, transparent 100%),
-      color-mix(in srgb, var(--t-bg-card) 90%, transparent);
-    backdrop-filter: blur(24px) saturate(1.6);
-    -webkit-backdrop-filter: blur(24px) saturate(1.6);
-    box-shadow: var(--t-ring-strong), var(--t-elev-3), var(--t-highlight);
+    background: var(--t-bg-card);
+    box-shadow: var(--t-ring-strong), var(--t-elev-3);
   }
 
   /*
@@ -445,10 +459,8 @@
     WebKitGTK and WebView2 (where backdrop-filter would otherwise diverge).
   */
   .surface-glass-solid {
-    background:
-      linear-gradient(150deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.025) 40%, transparent 100%),
-      var(--t-bg-card);
-    box-shadow: var(--t-ring-strong), var(--t-elev-3), var(--t-highlight);
+    background: var(--t-bg-card);
+    box-shadow: var(--t-ring-strong), var(--t-elev-2);
   }
 
   /*
@@ -511,9 +523,7 @@
   }
 
   .chrome-canvas {
-    background:
-      radial-gradient(130% 90% at 50% -12%, color-mix(in srgb, var(--t-bg-base) 92%, #ffffff 8%) 0%, transparent 55%),
-      var(--t-bg-base);
+    background: var(--t-bg-base);
   }
 }
 
@@ -545,12 +555,12 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--color-border) 30%, transparent);
+    background: transparent;
     border-radius: 0.5rem;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border-hover);
+    background: var(--t-border-hover, var(--color-border-hover));
     border-radius: 0.5rem;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -561,7 +571,7 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--color-border-hover) 160%, white);
+    background: var(--t-text-dim, var(--color-border-hover));
   }
 
   .scrollbar-none {
@@ -574,7 +584,7 @@
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background: color-mix(in srgb, var(--t-accent, var(--color-accent)) 30%, transparent);
   }
 
   ::placeholder {
@@ -615,10 +625,6 @@
 
 .terminal-connect-btn:hover .cursor-blink-char {
   animation-play-state: running;
-}
-
-.terminal-connect-btn:hover {
-  box-shadow: inset 1.5px 0 0 rgba(255, 255, 255, 0.18), inset 0 1.5px 0 rgba(255, 255, 255, 0.18);
 }
 
 /* The app scales #root; cancel that transform around xterm so its font size
@@ -704,7 +710,7 @@ button svg *,
   transform: translateY(0.5px);
 }
 .btn:disabled {
-  opacity: 0.45;
+  opacity: var(--disabled-opacity);
   cursor: not-allowed;
 }
 .btn:focus-visible,
@@ -744,11 +750,11 @@ button svg *,
 }
 .btn-ghost:hover:not(:disabled) {
   color: var(--t-text-primary);
-  background: color-mix(in srgb, #ffffff 6%, transparent);
+  background: color-mix(in srgb, var(--t-text-primary) 8%, transparent);
 }
 
 .btn-danger {
-  color: #fff;
+  color: var(--t-on-status);
   background: var(--t-status-error);
   box-shadow: var(--t-ring);
 }
@@ -759,8 +765,17 @@ button svg *,
   filter: brightness(0.97);
 }
 
+/* Low-emphasis destructive action: red text, tinted on hover. */
+.btn-danger-ghost {
+  color: var(--t-status-error);
+  background: transparent;
+}
+.btn-danger-ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--t-status-error) 12%, transparent);
+}
+
 .btn-warning {
-  color: #fff;
+  color: var(--t-on-status);
   background: var(--t-status-warning);
   box-shadow: var(--t-ring);
 }
@@ -848,6 +863,8 @@ fieldset:disabled :is(input, textarea, button) { cursor: default; }
    on purpose so it wins over Tailwind's layers. Desktop never gets the attribute. */
 html[data-android] {
   --vt-fs: var(--vt-font-scale, 1);
+  --text-2xs: calc(0.733rem * var(--vt-fs));
+  --text-2xs--line-height: calc(1.067rem * var(--vt-fs));
   --text-xs: calc(0.867rem * var(--vt-fs));
   --text-xs--line-height: calc(1.333rem * var(--vt-fs));
   --text-sm: calc(1rem * var(--vt-fs));

@@ -27,7 +27,7 @@ export function AvailableSyncProviderRow({ plugin, appVersion, busy, onInstall, 
         </p>
       </div>
       {blocked ? (
-        <span className="text-[10px] shrink-0 text-(--t-text-dim)">
+        <span className="text-2xs shrink-0 text-(--t-text-dim)">
           {t("settings.plugins.browse.requiresVersion", { version: plugin.minAppVersion })}
         </span>
       ) : (

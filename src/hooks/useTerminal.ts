@@ -819,7 +819,7 @@ export function useTerminal({ sessionId, sessionType, onClosed, inputGate, encod
             borderRadius: "6px",
             background: "var(--t-bg-card)",
             border: "1px solid var(--t-border)",
-            color: "var(--t-text)",
+            color: "var(--t-text-primary)",
             fontFamily: terminalFontStack(activeTheme.terminalFontFamily),
             fontSize: "12px",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.28)",

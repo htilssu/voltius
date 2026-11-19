@@ -128,7 +128,7 @@ function SessionChip({ session, active, onActivate, onLongPress }: {
       className="shrink-0 flex items-center gap-1.5 rounded-full pl-2.5 pr-1 h-8 text-xs font-medium whitespace-nowrap"
       style={{
         background: active ? "var(--t-accent)" : "var(--t-bg-card)",
-        color: active ? "#fff" : "var(--t-text-primary)",
+        color: active ? "var(--t-on-accent)" : "var(--t-text-primary)",
         border: "1px solid var(--t-border)",
       }}
     >

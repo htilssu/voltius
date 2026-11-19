@@ -42,13 +42,12 @@ export function CopySecretField({ value, mono = false, ariaLabel, extra }: Props
         value={value}
         aria-label={ariaLabel}
         onFocus={(e) => e.currentTarget.select()}
-        className={`flex-1 min-w-0 px-2 py-1 rounded-md bg-(--t-bg-elevated) border border-(--t-border) text-[10px] text-(--t-text-secondary) outline-none${mono ? " font-mono" : ""}`}
+        className={`flex-1 min-w-0 px-2 py-1 rounded-md bg-(--t-bg-elevated) border border-(--t-border) text-2xs text-(--t-text-secondary) outline-none${mono ? " font-mono" : ""}`}
       />
       <CopyButton
         value={value}
         label={t("members.joinLinks.copy")}
-        className="px-2.5 py-1 rounded-lg text-[11px] font-medium shrink-0"
-        style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+        className="btn btn-primary px-2.5 py-1 rounded-lg text-2xs font-medium shrink-0"
       />
       {extra}
     </div>

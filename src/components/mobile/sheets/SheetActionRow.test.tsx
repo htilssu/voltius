@@ -54,7 +54,7 @@ describe("SheetActionRow", () => {
     const { container: plain } = render(
       <SheetActionRow attr="a" it={{ icon: "i", label: "Rename", onTap: () => {} }} />,
     );
-    expect(danger.querySelector("button")!.style.color).toContain("--t-danger");
+    expect(danger.querySelector("button")!.style.color).toContain("--t-status-error");
     expect(plain.querySelector("button")!.style.color).toContain("--t-text-primary");
   });
 
@@ -97,7 +97,7 @@ describe("sheets using the shared row", () => {
     expect(document.querySelector("[data-folder-action='rename']")).not.toBeNull();
     const del = document.querySelector<HTMLButtonElement>("[data-folder-action='delete']");
     expect(del).not.toBeNull();
-    expect(del!.style.color).toContain("--t-danger");
+    expect(del!.style.color).toContain("--t-status-error");
   });
 
   test("FolderActionsSheet edit shows the folder's Permissions section with its access type", () => {

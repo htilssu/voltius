@@ -166,7 +166,7 @@ export function InvitePanel({ teamId, existingIds, teamRoles, canNameMembers, on
     confirmOwnerInvite(grantsOwner, query, () => void inviteEmail());
   });
 
-  const noticeColor = success?.warn ? "var(--t-status-warning)" : "#34d399";
+  const noticeColor = success?.warn ? "var(--t-status-warning)" : "var(--t-status-connected)";
   const showEmailInviteOption = open && results.length === 0 && !searching && isValidEmail(query);
 
   return (
@@ -257,7 +257,7 @@ export function InvitePanel({ teamId, existingIds, teamRoles, canNameMembers, on
                 placeholder={t("members.invite.namePlaceholder")}
                 onChange={(e) => setMemberName(e.target.value)}
               />
-              <p className="text-[11px] mt-1.5" style={{ color: "var(--t-text-secondary)" }}>{t("members.invite.nameHint")}</p>
+              <p className="text-2xs mt-1.5" style={{ color: "var(--t-text-secondary)" }}>{t("members.invite.nameHint")}</p>
             </FormSection>
           )}
 
@@ -265,7 +265,7 @@ export function InvitePanel({ teamId, existingIds, teamRoles, canNameMembers, on
           {success && (
             <div
               role={success.warn ? "alert" : undefined}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
               style={{ background: `color-mix(in srgb, ${noticeColor} 8%, transparent)`, border: `1px solid color-mix(in srgb, ${noticeColor} 20%, transparent)` }}
             >
               <Icon icon={success.warn ? "lucide:triangle-alert" : "lucide:circle-check"} width={14} className="shrink-0" style={{ color: noticeColor }} />

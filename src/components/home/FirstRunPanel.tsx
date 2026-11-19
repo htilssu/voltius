@@ -16,9 +16,9 @@ function useSshConfigHostCount(): number {
   return count;
 }
 
-function ActionButton({ icon, label, onClick }: { icon: string; label: string; onClick: () => void }) {
+function ActionButton({ icon, label, onClick, disabled }: { icon: string; label: string; onClick: () => void; disabled?: boolean }) {
   return (
-    <button type="button" onClick={onClick} className="btn btn-secondary flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm">
+    <button type="button" onClick={onClick} disabled={disabled} className="btn btn-secondary flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm">
       <Icon icon={icon} width={15} className="text-(--t-text-dim)" />
       {label}
     </button>
@@ -38,6 +38,8 @@ export function FirstRunPanel() {
   const { t } = useTranslation();
   const sshConfigCount = useSshConfigHostCount();
   const openImportExport = useUIStore((s) => s.openImportExport);
+  // The import runs in the import/export modal; block a second launch while it is open.
+  const importing = useUIStore((s) => s.importExportModal.open);
   const newHost = useNewHost();
 
   return (
@@ -56,6 +58,7 @@ export function FirstRunPanel() {
             icon="lucide:file-down"
             label={t("home.firstRun.importSshConfig", { count: sshConfigCount })}
             onClick={importSshConfigHosts}
+            disabled={importing}
           />
         )}
       </div>

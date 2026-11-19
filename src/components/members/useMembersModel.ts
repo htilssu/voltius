@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useVaultStore, type Vault } from "@/stores/vaultStore";
 import { useTeamStore, type TeamMember, type TeamRole } from "@/stores/teamStore";
@@ -29,7 +29,11 @@ export interface MembersModel {
   members: TeamMember[];
   roles: TeamRole[];
   pending: PendingInvitation[];
+  /** The roster's first load is in flight (never derived from an empty list alone). */
   loading: boolean;
+  /** The roster's load failed and there is nothing cached to show. */
+  loadFailed?: boolean;
+  retryLoad?: () => void;
   myUserId: string;
   myMember: TeamMember | undefined;
   canManageMembers: boolean;
@@ -94,11 +98,21 @@ export function useMembersModel(vaultId: string | null): MembersModel {
 
   useEffect(() => { loadTeams().catch(() => {}); }, [loadTeams]);
 
+  const [membersLoad, setMembersLoad] = useState<{ teamId: string | null; status: "loading" | "ready" | "error" }>({ teamId: null, status: "loading" });
+  const [loadAttempt, setLoadAttempt] = useState(0);
   useEffect(() => {
     if (!teamId) return;
-    loadMembers(teamId).catch(() => {});
+    let live = true;
+    setMembersLoad({ teamId, status: "loading" });
+    loadMembers(teamId).then(
+      () => { if (live) setMembersLoad({ teamId, status: "ready" }); },
+      () => { if (live) setMembersLoad({ teamId, status: "error" }); },
+    );
     loadRoles(teamId).catch(() => {});
-  }, [teamId, loadMembers, loadRoles]);
+    return () => { live = false; };
+  }, [teamId, loadMembers, loadRoles, loadAttempt]);
+  const membersStatus = membersLoad.teamId === teamId ? membersLoad.status : "loading";
+  const retryLoad = useCallback(() => setLoadAttempt((n) => n + 1), []);
 
   useEffect(() => {
     if (!teamId || !canManageMembers) return;
@@ -166,7 +180,9 @@ export function useMembersModel(vaultId: string | null): MembersModel {
 
   return {
     teamId, localVault, standaloneTeam, members, roles, pending,
-    loading: !!teamId && members.length === 0,
+    loading: !!teamId && members.length === 0 && membersStatus === "loading",
+    loadFailed: !!teamId && members.length === 0 && membersStatus === "error",
+    retryLoad,
     myUserId, myMember,
     canManageMembers, canManageRoles, canInvite, canManageVault, canNameMembers,
     isOwnerMember, outOfReach, canActOn, canEditMember,

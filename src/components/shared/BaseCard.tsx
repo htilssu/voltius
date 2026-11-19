@@ -26,14 +26,17 @@ interface BaseCardProps {
   "data-selectable-id"?: string;
 }
 
-export const GLASS_BG = "linear-gradient(140deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 45%, transparent 100%), color-mix(in srgb, var(--t-bg-card) 68%, transparent)";
-export const GLASS_BG_HOVER = "linear-gradient(140deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.03) 45%, transparent 100%), color-mix(in srgb, var(--t-bg-card) 80%, transparent)";
-export const GLASS_SHADOW = "var(--t-ring), var(--t-elev-1), var(--t-highlight)";
-export const GLASS_SHADOW_HOVER = "var(--t-ring-strong), var(--t-elev-1-hover), var(--t-highlight-strong)";
+/*
+  Card surface — flat card fill + hairline ring, no gradient sheen or backdrop
+  blur. The GLASS_* names are kept for existing importers (FolderCard, mobile
+  session cards); they now resolve to the same flat recipe.
+*/
+export const GLASS_BG = "var(--t-bg-card)";
+export const GLASS_BG_HOVER = "var(--t-bg-card-hover)";
+export const GLASS_SHADOW = "var(--t-ring)";
+export const GLASS_SHADOW_HOVER = "var(--t-ring-strong), var(--t-elev-1)";
 export const GLASS_CARD_STYLE: React.CSSProperties = {
   background: GLASS_BG,
-  backdropFilter: "blur(12px) saturate(1.5)",
-  WebkitBackdropFilter: "blur(12px) saturate(1.5)",
   boxShadow: GLASS_SHADOW,
   border: "2px solid transparent",
 };
@@ -70,8 +73,11 @@ export const BaseCard = memo(function BaseCard({
   const activeBorderColor = isEditing || isSelected ? "var(--t-accent)" : "transparent";
   const focusBoxShadow = isFocused && !isSelected && !isEditing ? "inset 0 0 0 2px var(--t-accent)" : "none";
   const showOverlay = isEditing || isSelected || isFocused;
-
-  const glassStyle: React.CSSProperties = glass ? GLASS_CARD_STYLE : { border: "2px solid transparent" };
+  const radius = isList ? "rounded-[var(--r-md)]" : "rounded-[var(--r-lg)]";
+  // The hover lift only applies when no selection/focus state already owns the edge.
+  const hoverRing = !isActive && !showOverlay
+    ? "hover:shadow-[var(--t-ring-strong),var(--t-elev-1)]"
+    : "";
 
   return (
     <>
@@ -80,31 +86,21 @@ export const BaseCard = memo(function BaseCard({
         data-host-card={dataHostCard}
         data-connection-id={dataConnectionId}
         data-selectable-id={dataSelectableId}
-        className={`group relative flex items-center px-3 cursor-pointer transition-all duration-150 ${glass ? "" : "bg-(--t-bg-card)"} ${isList ? "gap-2.5 py-2.5 rounded-xl" : "gap-4 py-3 rounded-2xl"} ${className}`}
-        style={{ ...glassStyle, ...style }}
+        className={`group relative flex items-center px-3 cursor-pointer transition-[background-color,box-shadow] duration-150 border-2 border-transparent bg-(--t-bg-card) hover:bg-(--t-bg-card-hover) ${glass ? "shadow-[var(--t-ring)]" : ""} ${hoverRing} ${isList ? "gap-2.5 py-2.5" : "gap-4 py-3"} ${radius} ${className}`}
+        style={style}
         onPointerDown={onPointerDown}
         onClick={onClick ? (e) => { e.stopPropagation(); onClick(e); } : undefined}
         onDoubleClick={onDoubleClick}
         onContextMenu={activeMenuItems?.length ? (e) => { e.stopPropagation(); open(e); if (!isSelected) onClick?.(e); } : undefined}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = glass ? GLASS_BG_HOVER : "var(--t-bg-card-hover)";
-          if (!isActive && !isSelected && !isEditing && !isFocused) {
-            e.currentTarget.style.boxShadow = glass ? GLASS_SHADOW_HOVER : "inset 0 0 0 1px var(--t-card-ring), var(--t-card-shadow)";
-          }
-          onMouseEnter?.();
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = glass ? GLASS_BG : "var(--t-bg-card)";
-          e.currentTarget.style.boxShadow = glass ? GLASS_SHADOW : "none";
-          onMouseLeave?.();
-        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <CardMenuContext.Provider value={activeMenuItems?.length ? openMenuFrom : null}>
           {children}
         </CardMenuContext.Provider>
         {showOverlay && (
           <div
-            className="absolute inset-[-2px] rounded-2xl border-2 pointer-events-none"
+            className={`absolute inset-[-2px] ${radius} border-2 pointer-events-none`}
             style={{ borderColor: activeBorderColor, boxShadow: focusBoxShadow }}
           />
         )}

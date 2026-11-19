@@ -718,7 +718,7 @@ export default function KeychainPage() {
 
             {(pinnedKeys.length > 0 || pinnedIdentities.length > 0) && (
               <div className="mb-4">
-                <p className="text-xs font-bold uppercase tracking-widest mb-3 text-(--t-text-dim)">{t("keychain.page.pinned")}</p>
+                <SectionHeader label={t("keychain.page.pinned")} />
                 {pinnedKeys.length > 0 && (
                   <KeySection
                     keys={pinnedKeys}

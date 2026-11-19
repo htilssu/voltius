@@ -1,10 +1,10 @@
-import { Icon } from "@iconify/react";
 import { useDragStore } from "@/stores/dragStore";
 import { useAllConnections } from "@/hooks/useAllConnections";
 import { useSessionStore } from "@/stores/sessionStore";
 import { getConnectionIcon, getConnectionIconColor } from "@/utils/icons";
 import { sessionLabel } from "@/utils/sessionLabel";
 import { SessionTypeBadge } from "@/components/panes/SessionTypeBadge";
+import { SessionIconTile } from "@/components/panes/SessionIconTile";
 
 export function DragGhost() {
   const isDragging = useDragStore((s) => s.isDragging);
@@ -38,12 +38,7 @@ export function DragGhost() {
           boxShadow: "var(--t-elev-2)",
         }}
       >
-        <span
-          className="size-5 rounded-md flex items-center justify-center shrink-0"
-          style={{ background: iconBg ?? "var(--t-bg-elevated)", color: iconBg ? "#fff" : "var(--t-text-secondary)" }}
-        >
-          <Icon icon={icon} width={13} />
-        </span>
+        <SessionIconTile icon={icon} bg={iconBg} />
         <span className="truncate max-w-48">{sessionLabel(session)}</span>
         <SessionTypeBadge type={session.type} />
       </div>

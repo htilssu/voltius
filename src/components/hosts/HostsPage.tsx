@@ -3,6 +3,7 @@ import { cardGridProps } from "@/components/shared/cardGrid";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { SectionAddButton, SectionHeader } from "@/components/shared/SectionHeader";
 import { useTranslation } from "react-i18next";
+import { Icon } from "@iconify/react";
 import { matchesSearch, compareConnections } from "@/utils/connectionFilter";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { TeamCredentialsNote } from "@/components/shared/VaultUnavailableNote";
@@ -80,6 +81,7 @@ export default function HostsPage() {
   const { loadConnections, updateConnection, deleteConnection, renameTag, deleteTag } =
     useConnectionStore();
   const connections = useAllConnections();
+  const loadingConnections = useConnectionStore((s) => s.loading);
   const { identities } = useIdentityStore();
   const { keys } = useKeyStore();
   const crossVaultPaste = useCrossVaultPasteConfirm();
@@ -672,7 +674,12 @@ export default function HostsPage() {
           }}
         >
           {scopedConnections.length === 0 && scopedFolders.length === 0 && !showForm && !showSerialForm ? (
-            <EmptyState
+            loadingConnections ? (
+              <div role="status" className="h-full min-h-[320px] flex items-center justify-center gap-2 text-xs text-(--t-text-dim)">
+                <Icon icon="lucide:loader-circle" width={14} className="animate-spin" />
+                {t("common.state.loading")}
+              </div>
+            ) : <EmptyState
               icon="lucide:monitor"
               title={t("hosts.page.emptyState.title")}
               body={t("hosts.page.emptyState.subtitle")}
@@ -870,20 +877,20 @@ function DraftHostCard({ layout, serial = false }: { layout: "grid" | "list"; se
   if (layout === "list") {
     return (
       <div
-        className="flex items-center gap-3 px-4 py-2 rounded-xl"
+        className="flex items-center gap-3 px-4 py-2 rounded-[var(--r-md)]"
         style={{ border: "2px dashed var(--t-accent)", opacity: 0.5 }}
       >
-        <AvatarTile icon={icon} iconSize={14} className="rounded-lg w-[1.867rem] h-[1.867rem]" iconClassName="text-(--t-text-dim)" />
+        <AvatarTile icon={icon} iconSize={14} className="rounded-lg w-7 h-7" iconClassName="text-(--t-text-dim)" />
         <p className="text-sm font-medium-bold text-(--t-text-dim)">{label}</p>
       </div>
     );
   }
   return (
     <div
-      className="flex items-center gap-4 px-4 py-4 rounded-2xl"
+      className="flex items-center gap-4 px-4 py-4 rounded-[var(--r-lg)]"
       style={{ border: "2px dashed var(--t-accent)", opacity: 0.5 }}
     >
-      <AvatarTile icon={icon} iconSize={22} className="rounded-lg w-[3.2rem] h-[3.2rem]" iconClassName="text-(--t-text-dim)" />
+      <AvatarTile icon={icon} iconSize={22} className="rounded-lg w-12 h-12" iconClassName="text-(--t-text-dim)" />
       <div>
         <p className="text-base font-medium-bold text-(--t-text-dim)">{label}</p>
         <p className="text-xs mt-0.5 text-(--t-text-dim)">{t("hosts.page.draft.unsaved")}</p>

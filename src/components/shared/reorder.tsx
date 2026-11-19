@@ -18,7 +18,7 @@ export function ReorderHandle({ handleProps, label }: { handleProps: ReturnType<
 
 export function OrderBadge({ n }: { n: number }) {
   return (
-    <span className="w-5 h-5 rounded-full bg-(--t-accent) text-(--t-bg-card) text-[10px] font-bold flex items-center justify-center shrink-0">
+    <span className="w-5 h-5 rounded-full bg-(--t-accent) text-(--t-on-accent) text-2xs font-bold flex items-center justify-center shrink-0">
       {n}
     </span>
   );

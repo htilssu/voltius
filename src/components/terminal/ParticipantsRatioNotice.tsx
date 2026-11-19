@@ -28,7 +28,7 @@ export function ParticipantsRatioNotice({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center gap-2 mb-3 text-xs" style={{ color: atCap ? "#f59e0b" : "var(--t-text-secondary)" }}>
+    <div className="flex items-center gap-2 mb-3 text-xs" style={{ color: atCap ? "var(--t-status-warning)" : "var(--t-text-secondary)" }}>
       <Icon icon="lucide:users" width={13} />
       <span>
         {t(countsInvites ? "terminal.share.guestsRatio" : "terminal.share.participantsRatio", {
@@ -39,8 +39,8 @@ export function ParticipantsRatioNotice({
       </span>
       {atCap && onUpgrade && (
         <button
-          className="text-[10px] underline ml-auto"
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#f59e0b" }}
+          className="text-2xs underline ml-auto"
+          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--t-status-warning)" }}
           onClick={onUpgrade}
         >
           {tier === "pro" ? t("terminal.share.upgradeToTeams") : t("terminal.share.upgradeToBusiness")}

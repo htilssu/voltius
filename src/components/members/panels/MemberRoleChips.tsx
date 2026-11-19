@@ -3,7 +3,9 @@ import { Icon } from "@iconify/react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { TeamRole } from "@/stores/teamStore";
-import { ROLE_META, RoleBlurb, roleLabel } from "@/components/members/roleChips";
+import { RoleBlurb, roleChipColors, roleLabel, roleTint } from "@/components/members/roleChips";
+
+const FLASH = "var(--t-status-connected)";
 import { useBusinessLock } from "@/hooks/useBusinessLock";
 import { isOwnerRole } from "@/components/vault-share/vaultShareModel";
 
@@ -44,9 +46,7 @@ export function MemberRoleChips({
       {visibleMemberRoles(roles, showOwner).map((role) => {
           const hasRole = roleIds.includes(role.id);
           const blockReason = roleChipBlockReason(t, role, { hasRole, locked, readOnlyReason, ownerReason });
-          const meta = ROLE_META[role.name];
-          const color = role.color ?? meta?.color ?? "var(--t-accent)";
-          const bg = meta?.bg ?? `${color}1a`;
+          const { color, bg, border } = roleChipColors(role.name, role.color);
           const flashed = flashRoleId === role.id;
           const busy = busyRoleId === role.id;
           return (
@@ -55,12 +55,11 @@ export function MemberRoleChips({
                 onClick={() => onToggle(role)}
                 disabled={busy || blockReason !== null}
                 title={blockReason ?? undefined}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all${touch ? " min-h-12" : ""}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:cursor-not-allowed ${busy ? "" : "disabled:opacity-(--disabled-opacity)"}${touch ? " min-h-12" : ""}`}
                 style={{
-                  background: flashed ? "rgba(52,211,153,0.15)" : hasRole ? bg : "var(--t-bg-elevated)",
-                  color: flashed ? "#34d399" : hasRole ? color : "var(--t-text-dim)",
-                  border: `1px solid ${flashed ? "#34d39944" : hasRole ? `${color}44` : "var(--t-border)"}`,
-                  opacity: busy ? 0.6 : 1,
+                  background: flashed ? roleTint(FLASH, 15) : hasRole ? bg : "var(--t-bg-elevated)",
+                  color: flashed ? FLASH : hasRole ? color : "var(--t-text-dim)",
+                  border: `1px solid ${flashed ? roleTint(FLASH, 27) : hasRole ? border : "var(--t-border)"}`,
                   transition: "background 0.3s, color 0.3s, border-color 0.3s",
                 }}
               >
@@ -74,8 +73,8 @@ export function MemberRoleChips({
                 }
                 {roleLabel(t, role.name)}
                 {role.is_builtin
-                  ? <Icon icon="lucide:lock" width={9} style={{ color: "var(--t-text-dim)", opacity: 0.6 }} />
-                  : <Icon icon="lucide:sparkles" width={9} style={{ color: "var(--t-text-dim)", opacity: 0.7 }} />
+                  ? <Icon icon="lucide:lock" width={9} className="opacity-70" style={{ color: "var(--t-text-dim)" }} />
+                  : <Icon icon="lucide:sparkles" width={9} className="opacity-70" style={{ color: "var(--t-text-dim)" }} />
                 }
               </button>
               {hasRole && !touch && <RoleBlurb name={role.name} />}

@@ -204,7 +204,7 @@ function HostSessionRowItem({
           </p>
         )}
       </div>
-      <span className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 inline-flex items-center gap-1 transition-opacity">
+      <span className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 inline-flex items-center gap-1 transition-opacity">
         {canOpenInSplit && (
           <button
             type="button"

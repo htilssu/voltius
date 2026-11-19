@@ -71,6 +71,7 @@ import { FolderEjectZone } from "@/components/folders/FolderEjectZone";
 import { copyingRulesOf } from "@/services/ruleSetIntent";
 import { compareStrings, formatRelative } from "@/utils/localeFormat";
 import { refuseWhilePreviewing, snippetTarget, whenWritable } from "@/services/previewGuard";
+import { SkeletonList } from "@/components/placeholder/SkeletonList";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,7 +122,7 @@ function RecentCard({ entry, snippet, layout, onReplay, onRemove }: RecentCardPr
 
   const modeBadge = (
     <span
-      className="text-[10px] px-1.5 py-0.5 rounded-md font-medium shrink-0"
+      className="text-2xs px-1.5 py-0.5 rounded-md font-medium shrink-0"
       style={{
         background: entry.execute
           ? "color-mix(in srgb, var(--t-accent) 12%, transparent)"
@@ -137,9 +138,8 @@ function RecentCard({ entry, snippet, layout, onReplay, onRemove }: RecentCardPr
     <button
       title={t("common.action.remove")}
       onClick={(e) => { e.stopPropagation(); onRemove(); }}
-      className="p-1.5 rounded-lg transition-colors text-(--t-text-dim)"
-      onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-primary)")}
-      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-dim)")}
+      aria-label={t("common.action.remove")}
+      className="p-1.5 rounded-lg transition-colors text-(--t-text-dim) hover:text-(--t-text-primary)"
     >
       <Icon icon="lucide:x" width={13} />
     </button>
@@ -150,9 +150,8 @@ function RecentCard({ entry, snippet, layout, onReplay, onRemove }: RecentCardPr
       title={t("snippets.page.recent.replay")}
       disabled={isDeleted}
       onClick={(e) => { e.stopPropagation(); onReplay(); }}
-      className="p-1.5 rounded-lg transition-colors text-(--t-text-secondary) disabled:opacity-30 disabled:cursor-not-allowed"
-      onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t-text-bright)")}
-      onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t-text-secondary)")}
+      aria-label={t("snippets.page.recent.replay")}
+      className="p-1.5 rounded-lg transition-colors text-(--t-text-secondary) enabled:hover:text-(--t-text-bright) disabled:opacity-(--disabled-opacity) disabled:cursor-not-allowed"
     >
       <Icon icon="lucide:rotate-ccw" width={14} />
     </button>
@@ -221,24 +220,6 @@ function RecentCard({ entry, snippet, layout, onReplay, onRemove }: RecentCardPr
         {replayButton}
       </div>
     </BaseCard>
-  );
-}
-
-// ─── Loading skeleton ─────────────────────────────────────────────────────────
-
-function SkeletonList() {
-  return (
-    <div className="flex flex-col gap-1.5 animate-pulse">
-      {[...Array(6)].map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-2xl bg-(--t-bg-card)">
-          <div className="w-8 h-8 rounded-lg shrink-0 bg-(--t-bg-card-avatar)" />
-          <div className="flex-1 min-w-0 space-y-1.5">
-            <div className="h-3 rounded-md bg-(--t-bg-elevated)" style={{ width: `${45 + (i * 17) % 40}%` }} />
-            <div className="h-2.5 rounded-md bg-(--t-bg-elevated)" style={{ width: `${55 + (i * 13) % 30}%` }} />
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -851,24 +832,20 @@ export function SnippetsPage() {
 
               {/* ── Recent executions (root only) ── */}
               {!hasSearch && !activeFolderId && scopedRecentEntries.length > 0 && (
-                <div
-                  className="rounded-2xl p-3"
-                  style={{ border: "1px solid var(--t-border)" }}
-                >
-                  <div className="flex items-center justify-between mb-2.5 px-1">
-                    <div className="flex items-center gap-1.5">
-                      <Icon icon="lucide:history" width={12} className="text-(--t-text-dim)" />
-                      <p className="text-xs font-bold uppercase tracking-widest text-(--t-text-dim)">
-                        {t("snippets.page.recent.title")}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => { useSnippetRecentStore.getState().clear(); setShowAllRecent(false); }}
-                      className="text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
-                    >
-                      {t("snippets.page.recent.clear")}
-                    </button>
-                  </div>
+                <div>
+                  <SectionHeader
+                    label={t("snippets.page.recent.title")}
+                    count={scopedRecentEntries.length}
+                    aside={
+                      <button
+                        type="button"
+                        onClick={() => { useSnippetRecentStore.getState().clear(); setShowAllRecent(false); }}
+                        className="text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
+                      >
+                        {t("snippets.page.recent.clear")}
+                      </button>
+                    }
+                  />
                   <div
                     {...cardGridProps(layoutMode, "card")}
                   >
@@ -886,8 +863,8 @@ export function SnippetsPage() {
                   {scopedRecentEntries.length > RECENT_PREVIEW_COUNT && (
                     <button
                       onClick={() => setShowAllRecent((v) => !v)}
-                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs text-(--t-text-dim) hover:text-(--t-text-primary) transition-colors"
-                      style={{ background: "var(--t-bg-elevated)" }}
+                      type="button"
+                      className="mt-2 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-(--t-text-dim) hover:text-(--t-text-primary) bg-(--t-bg-elevated) transition-colors"
                     >
                       <Icon icon={showAllRecent ? "lucide:chevron-up" : "lucide:chevron-down"} width={12} />
                       {showAllRecent ? t("snippets.page.recent.showLess") : t("snippets.page.recent.showMore", { count: scopedRecentEntries.length - RECENT_PREVIEW_COUNT })}

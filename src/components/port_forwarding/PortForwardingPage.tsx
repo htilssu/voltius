@@ -55,6 +55,7 @@ import { useSearchMatcher } from "@/utils/search";
 import { PORT_FORWARDING_ICON } from "@/lib/conceptIcons";
 import { folderTarget, refuseWhilePreviewing, ruleTarget, whenWritable } from "@/services/previewGuard";
 import { usePreviewActive } from "@/hooks/previewScope";
+import { SkeletonList } from "@/components/placeholder/SkeletonList";
 
 function sortRules(rules: PortForwardingRule[], mode: SortMode): PortForwardingRule[] {
   return [...rules].sort((a, b) => {
@@ -73,6 +74,7 @@ export function PortForwardingPage() {
   const { loadRules, createRule, updateRule, deleteRule, duplicateRule, moveRuleFolder } =
     usePortForwardingStore();
   const rules = useAllPortForwardingRules();
+  const rulesLoading = usePortForwardingStore((s) => s.loading);
   const { runningRuleCount, statusFor, startRule, stopRule } = useRuleTunnels();
   const { loadFolders, saveFolder, updateFolder, deleteFolder, moveFolder } = useFolderStore();
   const folders = useAllFolders();
@@ -525,7 +527,9 @@ export function PortForwardingPage() {
 
             {/* ── Rules section ── */}
             {filtered.length === 0 && visibleFolders.length === 0 ? (
-              activeFolderId && !q ? (
+              rulesLoading && rules.length === 0 ? (
+                <SkeletonList />
+              ) : activeFolderId && !q ? (
                 <FolderEmptyState actions={[{ label: t("portForwarding.page.addRule"), onClick: () => openNew() }]} />
               ) : (
                 <EmptyState

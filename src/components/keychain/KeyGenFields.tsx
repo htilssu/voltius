@@ -8,6 +8,7 @@ import { InfoTooltip } from "@/components/shared/InfoTooltip";
 import { Toggle } from "@/components/shared/Toggle";
 import { useRipple } from "@/hooks/useRipple";
 import { RevealToggle } from "@/components/shared/vaultObjectForm";
+import { statusSurface } from "@/components/shared/statusSurface";
 
 // ─────────────────────────────────────────────────────────────────
 // Generate-mode config
@@ -152,7 +153,7 @@ export function KeyGenFields({
       </FormSection>
 
       {genError && (
-        <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs bg-[#2D1515] border border-[#5C2020] text-[#F87171]">
+        <div role="alert" className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs" style={statusSurface("error")}>
           <Icon icon="lucide:circle-alert" width={13} />
           <span className="flex-1">{genError}</span>
         </div>

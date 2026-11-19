@@ -138,7 +138,7 @@ export function WhyPanel() {
     <div data-testid="why-panel" className="p-4 space-y-3">
       <div>
         <p className="text-sm font-semibold text-(--t-text-primary)">{itemName}</p>
-        <p className="text-[11px] text-(--t-text-dim)">
+        <p className="text-2xs text-(--t-text-dim)">
           {t("members.viewAs.why.as", { name })}{item?.detail && ` · ${item.detail}`}
         </p>
       </div>
@@ -151,14 +151,14 @@ export function WhyPanel() {
                 <Icon icon={allowed ? "lucide:check" : "lucide:x"} width={11} />
                 {permissionLabel(t, permission)}
               </p>
-              <p className="pl-[17px] text-[11px] text-(--t-text-dim)">{t(sentence.key, sentence.params)}</p>
+              <p className="pl-[17px] text-2xs text-(--t-text-dim)">{t(sentence.key, sentence.params)}</p>
             </div>
           ))}
         </div>
       </FormSection>
 
       <FormSection label={t("members.viewAs.why.addsUp")}>
-        <ol data-testid="why-steps" className="space-y-1 text-[11px] text-(--t-text-secondary)">
+        <ol data-testid="why-steps" className="space-y-1 text-2xs text-(--t-text-secondary)">
           {lines.map(([id, { sentence, permissions }]) => (
             <li key={id}>
               <span>{t(sentence.key, sentence.params)}</span>
@@ -166,7 +166,7 @@ export function WhyPanel() {
             </li>
           ))}
         </ol>
-        <p className="text-[10px] text-(--t-text-dim)">{t("members.viewAs.why.order", { name })}</p>
+        <p className="text-xs text-(--t-text-secondary)">{t("members.viewAs.why.order", { name })}</p>
       </FormSection>
 
       <div className="flex flex-col gap-1.5">
@@ -179,7 +179,7 @@ export function WhyPanel() {
         >
           {t("members.viewAs.why.editRules", { folder })}
         </button>
-        {lockedReason && <p className="text-[10px] text-(--t-text-dim)">{lockedReason}</p>}
+        {lockedReason && <p className="text-xs text-(--t-text-secondary)">{lockedReason}</p>}
         <button
           type="button"
           onClick={() => usePreviewStore.getState().showAccess()}

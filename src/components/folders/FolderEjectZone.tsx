@@ -12,7 +12,7 @@ export function FolderEjectZone({ label, isDragging, dragOver, dropProps }: {
 }) {
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-150"
+      className="flex items-center gap-3 px-4 py-3 rounded-[var(--r-lg)] transition-all duration-150"
       style={{
         border: dragOver ? "2px solid var(--t-accent)" : "2px dashed var(--t-border-hover)",
         background: dragOver ? "color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-card))" : "transparent",

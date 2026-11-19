@@ -30,7 +30,7 @@ export function VaultErrorPanel({
   return (
     <DecisionPanel
       tone="warning"
-      icon={<Icon icon={locked ? "lucide:lock" : "lucide:shield-alert"} width={14} className="text-yellow-400" />}
+      icon={<Icon icon={locked ? "lucide:lock" : "lucide:shield-alert"} width={14} className="text-(--t-status-warning)" />}
       title={t(locked ? "terminal.overlay.vaultError.lockedTitle" : "terminal.overlay.vaultError.unreadableTitle")}
       description={t(locked ? "terminal.overlay.vaultError.lockedBody" : "terminal.overlay.vaultError.unreadableBody")}
       actions={actions}

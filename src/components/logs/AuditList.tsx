@@ -18,7 +18,7 @@ function AuditTableRow({ log }: { log: AuditLog }) {
       title={auditDetail(log) || undefined}
     >
       <span className="flex items-center gap-2 min-w-0">
-        <ActorAvatar log={log} className="w-6 h-6 text-[11px]" />
+        <ActorAvatar log={log} className="w-6 h-6 text-2xs" />
         <span className="truncate font-medium text-(--t-text-primary)">{actorName(log)}</span>
         <AuditBadges log={log} />
       </span>
@@ -48,7 +48,7 @@ export function AuditList({ logs }: Props) {
   return (
     <div className="flex flex-col divide-y divide-(--t-border)">
       <div
-        className="grid gap-3 px-4 py-2 text-xs font-medium text-(--t-text-dim) uppercase tracking-wide"
+        className="grid gap-3 px-4 py-2 text-2xs font-semibold text-(--t-text-dim) uppercase tracking-wider"
         style={COLUMNS}
       >
         <span>{t("logs.list.columns.actor")}</span>

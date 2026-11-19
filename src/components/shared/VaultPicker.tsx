@@ -102,23 +102,15 @@ export function VaultPicker({
                   type="button"
                   onClick={() => select(v.id)}
                   disabled={blocked}
-                  className="w-full flex items-center gap-2.5 p-3 rounded-lg text-sm font-medium-bold transition-colors"
-                  style={{ color: "var(--t-text-secondary)", cursor: blocked ? "default" : "pointer", opacity: !writable ? 0.45 : 1 }}
-                  onMouseEnter={(e) => { if (!blocked) { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-primary)"; } }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-secondary)"; }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-lg text-sm font-medium-bold transition-colors text-(--t-text-secondary) enabled:hover:bg-(--t-bg-card-hover) enabled:hover:text-(--t-text-primary) disabled:opacity-(--disabled-opacity) disabled:cursor-default"
                 >
                   <Icon icon="lucide:vault" width={14} className="shrink-0" style={{ color: "var(--t-text-muted)" }} />
                   <span className="flex-1 text-left text-(--t-text-primary) truncate">
                     {v.name}
                   </span>
-                  {!writable && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0" style={{ color: "var(--t-text-dim)", background: "var(--t-bg-elevated)" }}>
-                      {t("shared.vaultPicker.memberBadge")}
-                    </span>
-                  )}
-                  {writable && role && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0" style={{ color: "var(--t-text-dim)", background: "var(--t-bg-elevated)" }}>
-                      {role}
+                  {(!writable || role) && (
+                    <span className="text-2xs px-1.5 py-0.5 rounded-full shrink-0 text-(--t-text-dim) bg-(--t-bg-elevated)">
+                      {writable ? role : t("shared.vaultPicker.memberBadge")}
                     </span>
                   )}
                   {selected && (

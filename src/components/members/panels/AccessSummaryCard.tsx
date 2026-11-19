@@ -39,7 +39,7 @@ export function AccessSummaryCard({ teamId, member }: { teamId: string; member: 
         type="button"
         data-testid="access-summary-card"
         {...entry.button}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-[var(--r-md)] text-left bg-(--t-bg-card) disabled:opacity-60 ${touchHeight()}`}
+        className={`w-full flex items-center gap-3 px-4 py-3 rounded-[var(--r-md)] text-left bg-(--t-bg-card) disabled:opacity-(--disabled-opacity) ${touchHeight()}`}
         style={{ boxShadow: "var(--t-ring)" }}
       >
         <Icon icon="lucide:scan-eye" width={16} className="shrink-0 text-(--t-accent)" />
@@ -48,12 +48,12 @@ export function AccessSummaryCard({ teamId, member }: { teamId: string; member: 
             {t("members.viewAs.summary.title", { name: memberLabel(member) })}
           </span>
           {counts && (
-            <span className="block text-[11px] text-(--t-text-dim)">{t("members.viewAs.summary.counts", { ...counts })}</span>
+            <span className="block text-2xs text-(--t-text-dim)">{t("members.viewAs.summary.counts", { ...counts })}</span>
           )}
         </span>
         <Icon icon="lucide:chevron-right" width={13} className="shrink-0 text-(--t-text-dim)" />
       </button>
-      {entry.reasonText && <p className="text-[11px] px-1 text-(--t-text-dim)">{entry.reasonText}</p>}
+      {entry.reasonText && <p className="text-2xs px-1 text-(--t-text-dim)">{entry.reasonText}</p>}
       {entry.reason === "needsBusiness" && <UpgradeAction teamId={teamId} look="link" className={touchHeight()} />}
     </div>
   );

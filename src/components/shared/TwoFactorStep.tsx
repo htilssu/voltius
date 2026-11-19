@@ -192,7 +192,7 @@ export function TwoFactorStep({ challenge, onCancel, inputClassName, buttonClass
         type="submit"
         hidden={waiting}
         disabled={loading || !entry.value.trim()}
-        className={`btn btn-primary w-full rounded-lg text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-60 ${buttonClassName}`}
+        className={`btn btn-primary w-full rounded-lg text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-(--disabled-opacity) ${buttonClassName}`}
       >
         {loading && <Icon icon="lucide:loader-circle" width={14} className="animate-spin" />}
         {t("layout.twoFactor.verify")}

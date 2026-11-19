@@ -12,7 +12,7 @@ import type { Dupes } from "@/services/import-export/context";
 import { loadPublicKeys } from "@/services/publicKeyStore";
 import { IMPORTERS, parseImport } from "@/services/import-export/importers";
 import { useImportStores, useReloadFns, useStoreSlices, useDeleteStores } from "./useStores";
-import { ActionBtn, VaultChipSelect, useVaultList } from "./shared";
+import { ActionBtn, VaultChipSelect, useVaultList, StatusNote } from "./shared";
 import { CheckboxBox } from "@/components/shared/Checkbox";
 import { FileInputArea } from "./FileInputArea";
 import { searchMatcher } from "@/utils/search";
@@ -616,8 +616,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t("importExport.import.filterItemsPlaceholder")}
-            className="w-full pl-8 pr-3 py-1.5 rounded-lg text-sm outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
-            style={{ fontSize: 13 }}
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
           />
           {search && (
             <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70">
@@ -666,16 +665,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
         </div>
 
         {importResult && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-            style={{
-              background: importResult.isError ? "rgba(239,68,68,0.12)" : "rgba(34,197,94,0.1)",
-              color: importResult.isError ? "var(--t-status-error)" : "var(--t-status-connected)",
-              border: `1px solid ${importResult.isError ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.2)"}`,
-            }}
-          >
-            <Icon icon={importResult.isError ? "lucide:circle-alert" : "lucide:circle-check-big"} width={14} />
-            {importResult.text}
-          </div>
+          <StatusNote error={importResult.isError}>{importResult.text}</StatusNote>
         )}
 
         <div className="flex flex-col gap-2 pt-3 border-t border-(--t-border)">
@@ -683,8 +673,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
             <label className="flex items-center gap-2">
               <span className="text-xs text-(--t-text-dim)">{t("importExport.import.tagLabel")}</span>
               <input value={addTag} onChange={e => setAddTag(e.target.value)} placeholder={t("importExport.import.tagPlaceholder")}
-                className="px-2 py-0.5 rounded-sm text-xs outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
-                style={{ width: 100 }}
+                className="w-28 px-2 py-0.5 rounded-sm text-xs outline-hidden bg-(--t-bg-input) border border-(--t-border-hover) text-(--t-text-primary)"
               />
             </label>
           )}
@@ -769,7 +758,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
 
       {source.autoExtract && !isMobile && !text.trim() && status.type !== "ready" && (
         <div
-          className="flex flex-col gap-3 p-4 rounded-xl"
+          className="flex flex-col gap-3 p-4 rounded-[var(--r-lg)]"
           style={{ background: "color-mix(in srgb, var(--t-accent) 8%, var(--t-bg-elevated))", border: "1px solid color-mix(in srgb, var(--t-accent) 30%, transparent)" }}
         >
           <div className="flex items-start gap-3">
@@ -791,8 +780,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
           <button
             onClick={handleAutoExtract}
             disabled={extracting}
-            className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
-            style={{ background: "var(--t-accent)", color: "var(--t-on-accent)" }}
+            className="btn btn-primary flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-semibold"
           >
             <Icon icon={extracting ? "lucide:loader-circle" : "lucide:download"} width={14} className={extracting ? "animate-spin" : ""} />
             {extracting ? t("importExport.import.extracting") : t("importExport.import.extractFrom", { label: source.label })}
@@ -831,10 +819,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
       )}
 
       {status.type === "error" && (
-        <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg text-sm" style={{ background: "rgba(239,68,68,0.12)", color: "var(--t-status-error)", border: "1px solid rgba(239,68,68,0.25)" }}>
-          <Icon icon="lucide:circle-alert" width={15} className="mt-0.5 shrink-0" />
-          {status.message}
-        </div>
+        <StatusNote error>{status.message}</StatusNote>
       )}
 
       {status.type === "needs-password" && (
@@ -869,16 +854,7 @@ export function ImportTab({ defaultSource, autoTrigger }: { defaultSource?: stri
       )}
 
       {importResult && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-          style={{
-            background: importResult.isError ? "rgba(239,68,68,0.12)" : "rgba(34,197,94,0.1)",
-            color: importResult.isError ? "var(--t-status-error)" : "var(--t-status-connected)",
-            border: `1px solid ${importResult.isError ? "rgba(239,68,68,0.25)" : "rgba(34,197,94,0.2)"}`,
-          }}
-        >
-          <Icon icon={importResult.isError ? "lucide:circle-alert" : "lucide:circle-check-big"} width={14} />
-          {importResult.text}
-        </div>
+        <StatusNote error={importResult.isError}>{importResult.text}</StatusNote>
       )}
 
       {status.type === "ready" && (

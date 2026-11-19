@@ -158,6 +158,8 @@
       "pageOf": "Página {{page}} / {{totalPages}}"
     },
     "emptyState": "Nenhum evento corresponde aos seus filtros.",
+
+    "searchNoResults": "Nenhum evento nesta página corresponde a “{{search}}”. A pesquisa abrange apenas a página carregada.",
     "error": {
       "retry": "Tentar novamente"
     }

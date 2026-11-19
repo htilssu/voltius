@@ -45,7 +45,7 @@ export function KnownHostCard({
 }: KnownHostCardProps) {
   const { t } = useTranslation();
   const tlsBadge = isTlsPin(host.fingerprint) && (
-    <span className="ml-1.5 px-1 py-px rounded text-[10px] font-semibold bg-(--t-bg-elevated) text-(--t-text-dim)" data-tls-badge>
+    <span className="ml-1.5 px-1 py-px rounded-sm text-2xs font-semibold bg-(--t-bg-elevated) text-(--t-text-dim)" data-tls-badge>
       {t("knownHosts.tlsBadge")}
     </span>
   );
@@ -76,12 +76,12 @@ export function KnownHostCard({
       bulkContextMenuItems={bulkContextMenuItems}
       data-selectable-id={host.id}
     >
-      <AvatarTile icon="lucide:fingerprint-pattern" iconSize={isList ? 14 : 18} className={`rounded-xl ${isList ? "w-7 h-7" : "w-10 h-10"}`} />
+      <AvatarTile icon="lucide:fingerprint-pattern" iconSize={isList ? 14 : 18} className={`rounded-lg ${isList ? "w-7 h-7" : "w-8 h-8"}`} />
 
       <div className="min-w-0 flex-1">
         {isList ? (
           <div className="flex items-center gap-4">
-            <p className="text-sm font-medium text-(--t-text-primary) truncate w-52 shrink-0">
+            <p className="text-sm font-medium-bold text-(--t-text-bright) truncate basis-52 shrink min-w-0">
               {title}
               {tlsBadge}
             </p>
@@ -90,7 +90,7 @@ export function KnownHostCard({
           </div>
         ) : (
           <>
-            <p className="text-sm font-medium text-(--t-text-primary) truncate">
+            <p className="text-sm font-bold text-(--t-text-bright) truncate">
               {title}
               {tlsBadge}
             </p>

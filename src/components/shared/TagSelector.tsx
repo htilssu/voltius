@@ -81,9 +81,7 @@ export default function TagSelector({ value, onChange, vaultId }: Props) {
           <button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); addTag(input.trim()); }}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors"
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors hover:bg-(--t-bg-card-hover)"
           >
             <span
               className="w-4 h-4 rounded-sm flex items-center justify-center shrink-0"
@@ -93,7 +91,7 @@ export default function TagSelector({ value, onChange, vaultId }: Props) {
             </span>
             <span className="text-(--t-text-dim)">{t("common.action.create")}</span>
             <span
-              className="px-1.5 py-0.5 rounded-sm text-[11px] font-medium border"
+              className="px-1.5 py-0.5 rounded-sm text-2xs font-medium border"
               style={getTagColorStyle(input.trim())}
             >
               {input.trim()}
@@ -110,9 +108,7 @@ export default function TagSelector({ value, onChange, vaultId }: Props) {
             key={tag}
             type="button"
             onMouseDown={(e) => { e.preventDefault(); addTag(tag); }}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors"
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-card-hover)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors hover:bg-(--t-bg-card-hover)"
           >
             <span
               className="w-4 h-4 rounded-sm shrink-0 border"

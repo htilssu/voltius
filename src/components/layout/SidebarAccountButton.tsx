@@ -13,6 +13,7 @@ import { getSwitchTargets, saveCurrentAccount, switchToAccount, removeSavedAccou
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { useSignOutConfirm } from "@/hooks/useSignOutConfirm";
 import { DropdownMenuItem } from "@/components/shared/DropdownMenuItem";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 import { useCopyHandle } from "@/hooks/useCopyHandle";
 import { APP_SOURCE, useNotificationStore } from "@/stores/notificationStore";
 import { useSecurityStore } from "@/stores/securityStore";
@@ -153,27 +154,11 @@ export function SidebarAccountButton() {
         onClick={() => void openDropdown()}
         onPointerDown={createRipple}
         title={t("layout.sidebarAccount.accountTitle")}
-        className="flex items-center justify-center relative overflow-hidden transition-all shrink-0"
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: open ? "0.75rem" : "1.375rem",
-          background: open ? "var(--t-bg-elevated)" : "transparent",
-          color: open ? "var(--t-text-bright)" : "var(--t-text-dim)",
-          transition: "border-radius 200ms, background 200ms, color 200ms",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.borderRadius = "0.75rem";
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--t-bg-elevated)";
-          (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-bright)";
-        }}
-        onMouseLeave={(e) => {
-          if (!open) {
-            (e.currentTarget as HTMLButtonElement).style.borderRadius = "1.375rem";
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = "var(--t-text-dim)";
-          }
-        }}
+        className={`flex items-center justify-center relative overflow-hidden shrink-0 transition-[background-color,color,border-radius] duration-200 ease-out ${
+          open ? "bg-(--t-bg-elevated) text-(--t-text-bright)" : "bg-transparent text-(--t-text-dim) hover:bg-(--t-bg-elevated) hover:text-(--t-text-bright)"
+        }`}
+        // Same squircle-when-open shape as the other rail buttons.
+        style={{ width: 44, height: 44, borderRadius: open ? "0.75rem" : "1.375rem" }}
       >
         {rippleEls}
         <Icon icon="lucide:circle-user" width={18} />
@@ -280,11 +265,7 @@ export function SidebarAccountButton() {
             {switchTargets.length > 0 && (
               <>
                 <div className="h-px bg-(--t-bg-input) -mx-1.5 my-0.5" />
-                <div className="px-3 pt-2 pb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--t-text-dim)" }}>
-                    {t("layout.sidebarAccount.switchAccount")}
-                  </span>
-                </div>
+                <SectionHeader compact label={t("layout.sidebarAccount.switchAccount")} className="px-3 pt-2 pb-1" />
                 {switchTargets.map((account) => {
                   const instance = instanceLabel(account.server_url);
                   const blocked = !serverAllowed(account.server_url);
@@ -302,7 +283,7 @@ export function SidebarAccountButton() {
                         <button
                           type="button"
                           title={t("layout.sidebarAccount.removeSavedAccount")}
-                          className="opacity-0 group-hover:opacity-100 p-0.5 rounded-sm transition-opacity text-(--t-text-dim) hover:text-(--t-status-error)"
+                          className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 p-0.5 rounded-sm transition-opacity text-(--t-text-dim) hover:text-(--t-status-error)"
                           onClick={(e) => requestRemove(e, account)}
                         >
                           <Icon icon="lucide:x" width={12} />

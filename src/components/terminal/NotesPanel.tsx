@@ -43,7 +43,7 @@ function NotesPanelBody({ session, connection }: { session: TerminalSession; con
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 px-4 pt-4 pb-2 shrink-0">
         <p className="text-sm font-medium text-(--t-text-bright) truncate flex-1">{connection.name || connection.host}</p>
-        {readOnly && <span className="text-[10px] text-(--t-text-muted)">{t("notes.panel.readOnly")}</span>}
+        {readOnly && <span className="text-2xs text-(--t-text-muted)">{t("notes.panel.readOnly")}</span>}
       </div>
       {notes.conflict && (
         <div className="mx-3 mb-2 px-2.5 py-2 rounded-md border border-(--t-border) bg-(--t-bg-elevated) text-xs flex items-center gap-2">

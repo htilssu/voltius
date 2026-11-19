@@ -105,18 +105,18 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {/* The single most important sentence on this tab. */}
-      <p className="text-[11px] leading-relaxed text-(--t-text-secondary)">
+      <p className="text-2xs leading-relaxed text-(--t-text-secondary)">
         {t("members.joinLinks.explainer")}
       </p>
 
       {error && (
-        <p className="text-[11px]" style={{ color: "var(--t-status-error)" }}>
+        <p className="text-2xs" style={{ color: "var(--t-status-error)" }}>
           {error}
         </p>
       )}
 
       {grants !== null && grants.length === 0 && !error && (
-        <p className="text-[11px] text-(--t-text-dim)">{t("members.joinLinks.empty")}</p>
+        <p className="text-2xs text-(--t-text-dim)">{t("members.joinLinks.empty")}</p>
       )}
 
       <div className="flex flex-col gap-1.5">
@@ -128,7 +128,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
               <div className="flex items-center gap-2">
                 <RoleNamePill name={grant.role} />
                 <span
-                  className="text-[11px] text-(--t-text-secondary) flex-1 min-w-0"
+                  className="text-2xs text-(--t-text-secondary) flex-1 min-w-0"
                   title={formatDateTime(grant.expires_at)}
                 >
                   {t("members.joinLinks.usesLeft", {
@@ -156,7 +156,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
                 <CopySecretField value={url} />
               ) : (
                 // Only the hash is stored, so there is nothing to copy.
-                <span className="text-[10px] text-(--t-text-dim)">{t("members.joinLinks.secretNotRecoverable")}</span>
+                <span className="text-2xs text-(--t-text-dim)">{t("members.joinLinks.secretNotRecoverable")}</span>
               )}
             </div>
           );
@@ -170,8 +170,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
       {canMint && !creating && (
         <button
           onClick={() => setCreating(true)}
-          className="self-start px-3 py-1.5 rounded-lg text-[11px] font-medium"
-          style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+          className="btn btn-primary self-start px-3 py-1.5 rounded-lg text-2xs font-medium"
         >
           {t("members.joinLinks.newLink")}
         </button>
@@ -180,7 +179,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
       {canMint && creating && (
         <div className="flex flex-col gap-3 pt-3 border-t border-(--t-border)">
           <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] uppercase tracking-wider text-(--t-text-secondary)">
+            <span className="text-2xs uppercase tracking-wider text-(--t-text-secondary)">
               {t("members.joinLinks.joinsAs")}
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -198,7 +197,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
           {/* Side by side: two stacked chip rows overflowed the popover. */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] uppercase tracking-wider text-(--t-text-secondary)">
+              <span className="text-2xs uppercase tracking-wider text-(--t-text-secondary)">
                 {t("members.joinLinks.usesLabel")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -209,7 +208,7 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] uppercase tracking-wider text-(--t-text-secondary)">
+              <span className="text-2xs uppercase tracking-wider text-(--t-text-secondary)">
                 {t("members.joinLinks.expiryLabel")}
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -229,19 +228,18 @@ export function JoinLinksTab({ teamId, roles, canMint }: Props) {
             <button
               onClick={() => void mint()}
               disabled={!role || minting}
-              className="px-3 py-1.5 rounded-lg text-[11px] font-medium disabled:opacity-50"
-              style={{ background: "var(--t-accent)", color: "var(--t-on-accent, #fff)" }}
+              className="btn btn-primary px-3 py-1.5 rounded-lg text-2xs font-medium"
             >
               {t("members.joinLinks.create")}
             </button>
             <button
               onClick={() => setCreating(false)}
-              className="px-3 py-1.5 rounded-lg text-[11px] text-(--t-text-secondary)"
+              className="px-3 py-1.5 rounded-lg text-2xs text-(--t-text-secondary)"
             >
               {t("members.joinLinks.cancel")}
             </button>
           </div>
-          <p className="text-[10px] text-(--t-text-dim)">{t("members.joinLinks.shownOnce")}</p>
+          <p className="text-2xs text-(--t-text-dim)">{t("members.joinLinks.shownOnce")}</p>
         </div>
       )}
 

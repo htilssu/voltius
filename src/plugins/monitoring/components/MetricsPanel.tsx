@@ -6,23 +6,13 @@ import { useHostMetrics } from "../useHostMetrics";
 import { MetricCard } from "./MetricCard";
 import { DiskSection } from "./DiskSection";
 import { SystemInfoSection } from "./SystemInfoSection";
+import { metricRows, metricsUnavailableKey } from "./metricRows";
 
 /** Android can't read host metrics (/proc is restricted) — only remote (SSH). No
  *  host platform primitive is exposed to plugins, so this checks the WebView UA
  *  directly; it is UX gating only, same as the host's own useIsAndroid. */
 function isAndroidPlatform(): boolean {
   return typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
-}
-
-function fmtBytes(n: number): string {
-  if (n < 1024) return `${n}B/s`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)}KB/s`;
-  return `${(n / 1024 / 1024).toFixed(1)}MB/s`;
-}
-
-function fmtMem(kb: number): string {
-  if (kb < 1024 * 1024) return `${(kb / 1024).toFixed(0)}MB`;
-  return `${(kb / 1024 / 1024).toFixed(1)}GB`;
 }
 
 export function createMetricsPanel(api: PluginAPI, hub: HostMetricsHub): FC {
@@ -32,26 +22,18 @@ export function createMetricsPanel(api: PluginAPI, hub: HostMetricsHub): FC {
     const isAndroid = isAndroidPlatform();
     const localUnsupported = isAndroid && !!activeSession && activeSession.type !== "ssh";
 
-    const { snap, disks, disksLoading, cpuH, memH, rxH, txH } = useHostMetrics(
+    const metrics = useHostMetrics(
       hub,
       activeSession ?? undefined,
       { localUnsupported },
     );
 
-    if (!activeSession || activeSession.status !== "connected") {
-      return (
-        <div className="flex items-center justify-center h-full opacity-40">
-          <p className="text-sm text-(--t-text-muted)">{t("noActiveSession")}</p>
-        </div>
-      );
-    }
-
-    if (localUnsupported) {
+    const { disks, disksLoading } = metrics;
+    const unavailable = metricsUnavailableKey(activeSession, { localUnsupported });
+    if (unavailable || !activeSession) {
       return (
         <div className="flex h-full items-center justify-center px-6 text-center">
-          <p className="max-w-[240px] text-[11px] leading-4 text-(--t-text-muted)">
-            {t("androidUnavailable")}
-          </p>
+          <p className="max-w-[240px] text-xs text-(--t-text-dim)">{t(unavailable ?? "noActiveSession")}</p>
         </div>
       );
     }
@@ -61,45 +43,20 @@ export function createMetricsPanel(api: PluginAPI, hub: HostMetricsHub): FC {
         {/* Host badge */}
         <div className="flex items-center gap-2 px-4 py-2 border-b border-(--t-border) shrink-0">
           <StatusDot tone="connected" size="sm" />
-          <span className="text-[11px] text-(--t-text-muted) truncate">
+          <span className="text-2xs text-(--t-text-muted) truncate">
             {activeSession.connectionName}
           </span>
         </div>
 
         {activeSession.type === "serial" ? (
-          <div className="px-4 py-3 border-b border-(--t-border) text-[11px] text-(--t-text-dim)">
+          <div className="px-4 py-3 border-b border-(--t-border) text-2xs text-(--t-text-dim)">
             {t("serialUnavailable")}
           </div>
         ) : (
           <>
-            <MetricCard
-              label={t("cpu")}
-              value={snap ? `${snap.cpu_percent.toFixed(1)}%` : "—"}
-              color="#ef4444"
-              history={cpuH}
-            />
-            <MetricCard
-              label={t("memory")}
-              value={
-                snap
-                  ? `${fmtMem(snap.mem_used_kb)} / ${fmtMem(snap.mem_total_kb)}`
-                  : "—"
-              }
-              color="#22c55e"
-              history={memH}
-            />
-            <MetricCard
-              label={t("netRx")}
-              value={fmtBytes(snap?.net_rx_bytes_per_sec ?? 0)}
-              color="#3b82f6"
-              history={rxH}
-            />
-            <MetricCard
-              label={t("netTx")}
-              value={fmtBytes(snap?.net_tx_bytes_per_sec ?? 0)}
-              color="#f59e0b"
-              history={txH}
-            />
+            {metricRows(t, metrics).map((r) => (
+              <MetricCard key={r.key} label={r.label} value={r.value} color={r.color} history={r.history} />
+            ))}
 
             {(disksLoading || disks.length > 0) && (
               <DiskSection disks={disks} loading={disksLoading} t={t} />
