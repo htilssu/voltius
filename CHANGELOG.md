@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.67.2] - 2026-11-25
+
+### Fixed
+
+- RSA private keys in the legacy `BEGIN RSA PRIVATE KEY` format that some tools write with non-minimal DER lengths no longer fail with "Invalid private key: … incorrect length for INTEGER". OpenSSH accepts these keys, and now Voltius does too.
+- The release no longer fails on the iOS and Play Store builds when their signing secrets are not configured; those jobs are skipped instead.
+
 ## [0.67.1] - 2026-11-19
 
 ### Changed
