@@ -457,7 +457,7 @@ async fn authenticate_key<H: client::Handler>(
     passphrase: Option<&str>,
 ) -> Result<AuthResult, AppError> {
     let key_pair = Arc::new(
-        russh::keys::decode_secret_key(key_str, passphrase)
+        crate::ssh::key_decode::decode_secret_key(key_str, passphrase)
             .map_err(|e| format!("Invalid private key: {}", e))?,
     );
     let is_rsa = matches!(key_pair.algorithm(), russh::keys::Algorithm::Rsa { .. });
