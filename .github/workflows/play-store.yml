@@ -2,6 +2,7 @@
 # track. tag-release calls it after the GitHub release is published; run it by
 # hand to republish a tag or to target another track.
 #
+# Skipped with a warning when the Android signing secrets are not set (forks).
 # Needs the PLAY_SERVICE_ACCOUNT_JSON secret (a service account with release
 # rights on the app in Play Console). Without it the bundle is still built and
 # kept as an artifact, and the publish step is skipped with a warning.
@@ -34,7 +35,30 @@ permissions:
   contents: read
 
 jobs:
+  # Skips the channel with a warning, rather than failing, when its credentials
+  # were never set up (forks). Secrets can't be read in a job-level `if`.
+  configured:
+    runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - id: check
+        uses: ./.github/actions/secrets-configured
+        with:
+          channel: Google Play bundle
+          names: ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
   bundle:
+    needs: configured
+    if: needs.configured.outputs.ok == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

@@ -4,6 +4,7 @@ pub mod control_mode;
 #[cfg(test)]
 mod detached_ttl_harness;
 pub mod exec;
+pub mod key_decode;
 pub mod live_cells;
 pub mod session;
 #[cfg(test)]
